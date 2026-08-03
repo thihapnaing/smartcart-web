@@ -141,3 +141,33 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# ==========================================
+# Angular Specific
+# ==========================================
+/out-tsc
+/.angular
+/tmp
+
+# ==========================================
+# IDEs & Editors (Team configs)
+# ==========================================
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
