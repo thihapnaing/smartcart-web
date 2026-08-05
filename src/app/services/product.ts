@@ -1,15 +1,14 @@
-// Author: Htet Nandar (Grace)
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ProductSearchResult } from '../models/product-search-result';
+import { ProductDetailResponse } from '../models/product-detail-response';
 
-/** Talks to Spring Boot's /api/products - backs the home page product grid. */
 @Injectable({
   providedIn: 'root'
 })
-export class Product {
+export class ProductService {
   private readonly apiBase = `${environment.apiUrl}/products`;
 
   constructor(private http: HttpClient) {}
@@ -23,5 +22,14 @@ export class Product {
     if (options?.newestFirst !== undefined) params['newestFirst'] = options.newestFirst;
     if (options?.limit !== undefined) params['limit'] = options.limit;
     return this.http.get<ProductSearchResult[]>(`${this.apiBase}/browse`, { params });
+  }
+  searchProducts(keyword: string): Observable<ProductSearchResult[]> {
+    return this.http.get<ProductSearchResult[]>(`${this.apiBase}/search`, {
+      params: { keyword: keyword }
+    });
+  }
+
+  getProductById(id: number): Observable<ProductDetailResponse> {
+    return this.http.get<ProductDetailResponse>(`${this.apiBase}/${id}`);
   }
 }

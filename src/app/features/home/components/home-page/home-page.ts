@@ -2,7 +2,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Product } from '../../../../services/product';
+import { ProductService } from '../../../../services/product';
 import { ProductSearchResult } from '../../../../models/product-search-result';
 import { ProductMiniCard } from '../../../chat/components/product-mini-card/product-mini-card';
 
@@ -17,7 +17,7 @@ export class HomePage implements OnInit {
   products = signal<ProductSearchResult[]>([]);
   isLoading = signal<boolean>(true);
 
-  constructor(private productService: Product) {}
+  constructor(private productService: ProductService) {}
 
   ngOnInit(): void {
     this.productService.browse({ newestFirst: true, limit: 20 }).subscribe({
