@@ -17,11 +17,19 @@
 
   <div class="nav-collapsible" [class.open]="menuOpen">
     <div class="nav-links">
-      <span class="nav-link placeholder" *ngFor="let label of placeholderLinks">{{ label }}</span>
+      <a class="nav-link" routerLink="/search" [queryParams]="{ gender: 'WOMEN' }" (click)="closeMenu()">Women</a>
+      <a class="nav-link" routerLink="/search" [queryParams]="{ gender: 'MEN' }" (click)="closeMenu()">Men</a>
+      <a class="nav-link" routerLink="/search" (click)="closeMenu()">Categories</a>
     </div>
 
     <div class="nav-search">
-      <input type="text" placeholder="Search products..." />
+      <input
+        type="text"
+        placeholder="Search products..."
+        [(ngModel)]="searchKeyword"
+        name="searchKeyword"
+        (keyup.enter)="onSearch()"
+      />
       <button type="button" title="Search by photo">📷</button>
     </div>
     <div class="nav-icons">

@@ -2,7 +2,7 @@
 
   <!-- Hero: two large promotional banners -->
   <div class="hero">
-    <a class="hero-banner" routerLink="/search" [queryParams]="{ q: 'women' }">
+    <a class="hero-banner" routerLink="/search" [queryParams]="{ gender: 'WOMEN' }">
   <img
     class="hero-banner__bg"
     src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800&h=600&fit=crop"
@@ -14,7 +14,7 @@
     <button class="btn btn--secondary btn--sm" style="width: fit-content;">Shop Now</button>
   </div>
 </a>
-<a class="hero-banner" routerLink="/search" [queryParams]="{ q: 'men' }">
+<a class="hero-banner" routerLink="/search" [queryParams]="{ gender: 'MEN' }">
   <img
     class="hero-banner__bg"
     src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&h=600&fit=crop"
@@ -34,7 +34,7 @@
     </div>
     <div class="cat-grid">
       @for (category of categories; track category) {
-        <a class="cat-tile" routerLink="/search" [queryParams]="{ q: category }">
+        <a class="cat-tile" routerLink="/search" [queryParams]="{ category: category }">
   <div class="cat-tile__overlay"></div>
   <span class="cat-tile__label">{{ category }}</span>
 </a>
