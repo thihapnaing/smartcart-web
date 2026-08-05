@@ -1,0 +1,49 @@
+/* Author: Htet Nandar (Grace) */
+/* The component's host tag (<app-chat-message-list>) is the actual flex item
+   inside .chat-panel, not the .message-list div below it - without sizing
+   the host itself, flex:1 on the inner div never gets a constrained height
+   to work with, so the list grows unbounded and clips instead of scrolling. */
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.message-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message-list .message {
+  max-width: 85%;
+  background: #f4efe6;
+  border-radius: 10px;
+  padding: 8px 12px;
+  align-self: flex-start;
+}
+
+.message-list .message.user {
+  align-self: flex-end;
+  background: #4a3226;
+  color: #fff;
+}
+
+.message-list .message .content {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.message-list .message .products {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  overflow-x: auto;
+}

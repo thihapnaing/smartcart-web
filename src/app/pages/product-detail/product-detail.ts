@@ -89,10 +89,7 @@ export class ProductDetail implements OnInit {
       this.addedMessage.set('Please select a size first.');
       return;
     }
-    this.cartService.addToCart({
-      productVariantId: variant.productVariantId,
-      quantity: this.quantity()
-    }).subscribe({
+    this.cartService.addToCart(variant.productVariantId, this.quantity()).subscribe({
       next: () => {
         this.addedMessage.set('');
         this.justAdded.set(true);
@@ -110,10 +107,7 @@ export class ProductDetail implements OnInit {
       this.addedMessage.set('Please select a size first.');
       return;
     }
-    this.cartService.addToCart({
-      productVariantId: variant.productVariantId,
-      quantity: this.quantity()
-    }).subscribe({
+    this.cartService.addToCart(variant.productVariantId, this.quantity()).subscribe({
       next: () => this.router.navigate(['/checkout']),
       error: () => this.addedMessage.set('Something went wrong. Please try again.')
     });
