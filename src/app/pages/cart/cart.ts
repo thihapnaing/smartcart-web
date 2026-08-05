@@ -1,4 +1,3 @@
-// Author: Htet Nandar (Grace)
 import { Component, computed, inject, OnInit } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
