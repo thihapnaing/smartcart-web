@@ -10,8 +10,8 @@ import { CheckoutResponse } from '../../models/checkout-response';
   styleUrl: './order-confirmation.css',
 })
 export class OrderConfirmationComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private orderService = inject(OrderService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly orderService = inject(OrderService);
 
   order = signal<CheckoutResponse | null>(null);
 
