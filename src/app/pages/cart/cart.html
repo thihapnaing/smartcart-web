@@ -1,6 +1,8 @@
 <div class="page">
     <div class="container" style="padding: 2rem 1rem;">
-        <h1>Cart</h1>
+        <div class="section__header">
+            <h2>Cart <span class="cart-count section__title">({{cart()?.cartItemDetails?.length ?? 0}})</span></h2>
+        </div>
         @if(cart()) {
         @if(cart()!.cartItemDetails.length === 0) {
             <p>Your cart is empty.</p>
@@ -11,21 +13,27 @@
                         <div class="cart-item">
                             <img class="cart-item__image" [src]="item.imageUrl" [alt]="item.productName">
                             <div class="cart-item__body">
+                                <p class="cart-item__meta">{{item.gender}} &middot; {{item.categoryName | uppercase }}</p>
                                 <p class="cart-item__name">{{item.productName}}</p>
                                 <p class="cart-item__meta">Size: {{item.size}}</p>
-                                <p class="cart-item__price">S${{item.subtotal}}</p>
-                                <p class="text-muted">Qty: {{item.quantity}}</p>
-                                <div class="qty-stepper">
-                                    <button class="qty-stepper__btn" disabled>-</button>
-                                    <span class="qty-stepper__val">{{item.quantity}}</span>
-                                    <button class="qty-stepper__btn" disabled>+</button>
+                                <div class="flex justify-between items-center" style="margin-top: 10px">
+                                    <div class="qty-stepper">
+                                        <button class="qty-stepper__btn" disabled>-</button>
+                                        <span class="qty-stepper__val">{{item.quantity}}</span>
+                                        <button class="qty-stepper__btn" disabled>+</button>
+                                    </div>
+                                    <div>
+                                        <p class="cart-item__price">S${{item.subtotal}}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
                 <div class="order-summary" style="flex: 1;">
-                    <h3>Order Summary</h3>
+                    <div class="section__header">
+                        <h3>Order Summary</h3>
+                    </div>
                     <div class="order-summary__row">
                         <span class="order-summary__label">SubTotal</span>
                         <span class="order-summary__value">S${{cart()!.cartTotal}}</span>
@@ -39,7 +47,10 @@
                         <span>Total</span>
                         <span>S${{cart()!.cartTotal}}</span>
                     </div>
-                    <button class="btn btn--primary btn--full" (click)="checkout()">Proceed to Checkout</button>
+                    <div class="flex flex-col gap-2">
+                        <button class="btn btn--primary btn--full" (click)="checkout()">Proceed to checkout</button>
+                        <button class="btn btn--ghost btn--full" (click)="goToHomepage()">Continue shopping</button>
+                    </div>
                 </div>
             </div>
         }
