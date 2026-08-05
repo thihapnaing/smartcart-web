@@ -1,7 +1,7 @@
 /* Loads the two fonts the Figma design uses:
    Playfair Display (serif, for the title and price)
    Plus Jakarta Sans (clean sans-serif, for everything else) */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600&display=swap');
 
 /* ── Page frame ─────────────────────────────────────────── */
 
