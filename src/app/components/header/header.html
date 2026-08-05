@@ -74,14 +74,14 @@
       <path d="M10 21a2 2 0 0 0 4 0"/>
     </svg>
   </button>
-  <a routerLink="/cart" class="header__icon-btn" [attr.aria-label]="cart.count() > 0 ? 'Cart, ' + cart.count() + ' items' : 'Cart'">
+  <a routerLink="/cart" class="header__icon-btn" [attr.aria-label]="cart.itemCount() > 0 ? 'Cart, ' + cart.itemCount() + ' items' : 'Cart'">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
     <line x1="3" y1="6" x2="21" y2="6"/>
     <path d="M16 10a4 4 0 0 1-8 0"/>
   </svg>
-  @if (cart.count() > 0) {
-    <span class="header__badge" aria-hidden="true">{{ cart.count() }}</span>
+  @if (cart.itemCount() > 0) {
+    <span class="header__badge" aria-hidden="true">{{ cart.itemCount() }}</span>
   }
 </a>
   <button type="button" class="header__icon-btn" aria-label="Compare">

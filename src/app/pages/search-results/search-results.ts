@@ -23,7 +23,7 @@ export class SearchResults implements OnInit {
     // changes — for example, because a new word was typed in the header —
     // this block runs and searches again automatically.
     this.route.queryParamMap.subscribe(params => {
-      const keyword = params.get('q');
+      const keyword = params.get('keyword');
       if (keyword) {
         this.runSearch(keyword);
       }

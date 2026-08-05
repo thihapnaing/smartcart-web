@@ -30,7 +30,7 @@ export class Header {
     if (!trimmedKeyword) {
       return;
     }
-    this.router.navigate(['/search'], { queryParams: { q: trimmedKeyword } });
+    this.router.navigate(['/search'], { queryParams: { keyword: trimmedKeyword } });
   }
 
   // Runs when a file is chosen through the hidden file picker triggered

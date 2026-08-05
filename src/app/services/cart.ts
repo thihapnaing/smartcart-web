@@ -11,6 +11,8 @@ import { environment } from '../../environments/environment';
 export class CartService {
   private readonly http = inject(HttpClient);
 
+  itemCount = signal<number>(0);
+
   getCart(): Observable<CartItemsResponse> {
     const url = `${environment.apiUrl}/cart`;
     return this.http.get<CartItemsResponse>(url).pipe(
@@ -25,8 +27,6 @@ export class CartService {
     );
   }
 
-  // Adds up the quantity field across every item in the response and
-  // stores the total in the count signal.
   private updateCountFrom(response: CartItemsResponse): void {
     const totalItems = response.cartItemDetails.reduce(
       (sum, item) => sum + item.quantity,
