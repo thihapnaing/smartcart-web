@@ -5,6 +5,7 @@ import { OrderService } from '../../services/order';
 import { CheckoutRequest } from '../../models/checkout-request';
 import { CartItemsResponse } from '../../models/cart-items-response';
 import { CartService } from '../../services/cart';
+import { UserProfileService } from '../../user-profile';
 
 @Component({
   selector: 'app-checkout',
@@ -17,6 +18,7 @@ export class CheckoutComponent implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly cartService = inject(CartService);
   private readonly router = inject(Router);
+  private readonly userProfileService = inject(UserProfileService);
 
   cart = signal<CartItemsResponse | null>(null);
 
@@ -38,6 +40,20 @@ export class CheckoutComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load cart', err);
+      }
+    });
+
+    this.userProfileService.getProfile().subscribe({
+      next: (profile) => {
+        this.checkoutForm.patchValue({
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          shippingAddress: profile.address,
+          phoneNumber: profile.phoneNumber
+        });
+      },
+      error: (err) => {
+        console.error('Failed to load profile', err);
       }
     });
   }
