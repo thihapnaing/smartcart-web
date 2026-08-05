@@ -52,7 +52,7 @@ export class ProductDetail implements OnInit {
   // Any size not listed in sizeOrder is placed at the end.
   sortedVariants(): ProductVariantDetail[] {
     const p = this.product();
-    if (!p || !p.variants) {
+    if (!p?.variants) {
       return [];
     }
 
