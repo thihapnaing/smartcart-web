@@ -39,6 +39,11 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.4;
+  color: #4a3226;
+}
+
+.message-list .message.user .content {
+  color: #fff;
 }
 
 .message-list .message .products {
