@@ -1,7 +1,7 @@
 // Author: Htet Nandar (Grace)
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { CartItemDetail } from '../models/cart-item-detail';
 import { CartItemsResponse } from '../models/cart-items-response';
@@ -10,29 +10,39 @@ import { UpdateCartItemRequest } from '../models/update-cart-item-request';
 
 /**
  * Talks to Spring Boot's /api/cart. Backs the "+ Add" button and quantity
- * stepper on ProductMiniCard (shared by the chat widget and AI Picks page)
- * and the nav bar's cart icon badge.
+ * stepper on ProductMiniCard (shared by the chat widget and AI Picks page),
+ * the nav bar's cart icon badge, and the standalone Cart/Checkout pages.
  *
  * userId is hardcoded server-side (2L) until JWT auth lands - see CartController.
  */
 @Injectable({
   providedIn: 'root'
 })
-export class Cart {
+export class CartService {
+  private readonly http = inject(HttpClient);
   private readonly apiBase = `${environment.apiUrl}/cart`;
 
   itemCount = signal<number>(0);
   /** Full line-item list - lets ProductMiniCard look up its own quantity/cartItemId reactively. */
   items = signal<CartItemDetail[]>([]);
 
-  constructor(private http: HttpClient) {
+  constructor() {
     this.refresh();
   }
 
-  /** Pulls the current cart from the backend - e.g. on app start. */
+  /**
+   * Fetches the current cart from the backend. Used directly by the Cart/Checkout pages,
+   * and internally by refresh() to keep the nav badge / ProductMiniCard signals in sync.
+   */
+  getCart(): Observable<CartItemsResponse> {
+    return this.http.get<CartItemsResponse>(this.apiBase).pipe(
+      tap((res) => this.applyResponse(res))
+    );
+  }
+
+  /** Pulls the current cart from the backend and updates the signals - e.g. on app start. */
   refresh(): void {
-    this.http.get<CartItemsResponse>(this.apiBase).subscribe({
-      next: (res) => this.applyResponse(res),
+    this.getCart().subscribe({
       error: () => {} // leave state as-is if the backend isn't reachable yet
     });
   }

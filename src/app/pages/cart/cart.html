@@ -1,0 +1,61 @@
+<div class="page">
+    <div class="container" style="padding: 2rem 1rem;">
+        <div class="section__header">
+            <h2>Cart <span class="cart-count section__title">({{cart()?.cartItemDetails?.length ?? 0}})</span></h2>
+        </div>
+        @if(cart()) {
+        @if(cart()!.cartItemDetails.length === 0) {
+            <p>Your cart is empty.</p>
+        } @else {
+            <div class="flex gap-6">
+                <div class="flex flex-col gap-4" style="flex: 2;">
+                    @for(item of cart()!.cartItemDetails; track item.cartItemId) {
+                        <div class="cart-item">
+                            <img class="cart-item__image" [src]="item.imageUrl" [alt]="item.productName">
+                            <div class="cart-item__body">
+                                <p class="cart-item__meta">{{item.gender}} &middot; {{item.categoryName | uppercase }}</p>
+                                <p class="cart-item__name">{{item.productName}}</p>
+                                <p class="cart-item__meta">Size: {{item.size}}</p>
+                                <div class="flex justify-between items-center" style="margin-top: 10px">
+                                    <div class="qty-stepper">
+                                        <button class="qty-stepper__btn" disabled>-</button>
+                                        <span class="qty-stepper__val">{{item.quantity}}</span>
+                                        <button class="qty-stepper__btn" disabled>+</button>
+                                    </div>
+                                    <div>
+                                        <p class="cart-item__price">S${{item.subtotal}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="order-summary" style="flex: 1;">
+                    <div class="section__header">
+                        <h3>Order Summary</h3>
+                    </div>
+                    <div class="order-summary__row">
+                        <span class="order-summary__label">SubTotal</span>
+                        <span class="order-summary__value">S${{cart()!.cartTotal}}</span>
+                    </div>
+                    <div class="order-summary__row">
+                        <span class="order-summary__label">Shipping</span>
+                        <span class="order-summary__value">Free</span>
+                    </div>
+                    <hr class="order-summary__divider">
+                    <div class="order-summary__row order-summary__total">
+                        <span>Total</span>
+                        <span>S${{cart()!.cartTotal}}</span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <button class="btn btn--primary btn--full" (click)="checkout()">Proceed to checkout</button>
+                        <button class="btn btn--ghost btn--full" (click)="goToHomepage()">Continue shopping</button>
+                    </div>
+                </div>
+            </div>
+        }
+    } @else {
+        <p>Loading cart...</p>
+    }
+    </div>
+</div>

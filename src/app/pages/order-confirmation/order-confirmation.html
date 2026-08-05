@@ -1,0 +1,64 @@
+<div class="page">
+    <div class="container" style="margin: 3rem auto;">
+        @if (order()) {
+      <div class="confirmation-card">
+        <div class="confirmation-icon">✓</div>
+        <h1>Order Confirmed!</h1>
+        <p class="text-muted">Thank you for your purchase.</p>
+
+        <hr class="order-summary__divider">
+
+        <div class="order-summary__row">
+          <span class="order-summary__label">Order ID</span>
+          <span class="order-summary__value">#{{ order()!.orderId }}</span>
+        </div>
+        <div class="order-summary__row">
+          <span class="order-summary__label">Status</span>
+          <span class="order-summary__value">{{ order()!.orderStatus }}</span>
+        </div>
+        <div class="order-summary__row">
+          <span class="order-summary__label">Payment Method</span>
+          <span class="order-summary__value">{{ getPaymentMethodLabel(order()!.paymentMethod) }}</span>
+        </div>
+
+        <hr class="order-summary__divider">
+
+        <div style="text-align: left;">
+          <h3>Delivery Details</h3>
+          <p>{{ order()!.deliveryDetails.firstName }} {{ order()!.deliveryDetails.lastName }}</p>
+          <p>{{ order()!.deliveryDetails.shippingAddress }}</p>
+          <p>{{ order()!.deliveryDetails.phoneNumber }}</p>
+        </div>
+
+        <hr class="order-summary__divider">
+
+        <div style="text-align: left;">
+          <h3 class="mb-2">Items</h3>
+          @for (item of order()!.cartItemDetails; track item.cartItemId) {
+            <div class="cart-item" style="margin-bottom: 0.75rem;">
+              <img class="cart-item__image" [src]="item.imageUrl" [alt]="item.productName">
+              <div class="cart-item__body">
+                <p class="cart-item__name">{{ item.productName }}</p>
+                <p class="cart-item__meta">Size: {{ item.size }} &middot; Qty: {{ item.quantity }}</p>
+                <p class="cart-item__price">S${{ item.subtotal }}</p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <hr class="order-summary__divider">
+
+        <div class="order-summary__row order-summary__total">
+          <span>Total</span>
+          <span>S${{ order()!.totalAmount }}</span>
+        </div>
+
+        <a routerLink="/" class="btn btn--primary btn--full" style="margin-top: 1.5rem;">
+          Continue Shopping
+        </a>
+      </div>
+    } @else {
+      <p>Loading order confirmation...</p>
+    }
+    </div>
+</div>

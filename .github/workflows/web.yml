@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required for SonarCloud to analyze git history properly
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -30,3 +32,9 @@ jobs:
     # Note: If team decides to write unit tests later, can uncomment the line below!
     # - name: Run Unit Tests
     #   run: npm run test -- --watch=false --browsers=ChromeHeadless
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v8.1.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
