@@ -10,9 +10,9 @@
     class="menu-toggle"
     (click)="toggleMenu()"
     [attr.aria-expanded]="menuOpen"
-    aria-label="Toggle menu"
   >
-    {{ menuOpen ? '✕' : '☰' }}
+    <span aria-hidden="true">{{ menuOpen ? '✕' : '☰' }}</span>
+    <span class="sr-only">Toggle menu</span>
   </button>
 
   <div class="nav-collapsible" [class.open]="menuOpen">
@@ -23,7 +23,9 @@
     </div>
 
     <div class="nav-search">
+      <label for="nav-search-input" class="sr-only">Search products</label>
       <input
+        id="nav-search-input"
         type="text"
         placeholder="Search products..."
         [(ngModel)]="searchKeyword"

@@ -11,7 +11,7 @@ import { ProductDetailResponse } from '../models/product-detail-response';
 export class ProductService {
   private readonly apiBase = `${environment.apiUrl}/products`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /** All params optional; newestFirst=true sorts by createdAt desc. */
   browse(options?: { keyword?: string; category?: string; gender?: string; newestFirst?: boolean; limit?: number }): Observable<ProductSearchResult[]> {

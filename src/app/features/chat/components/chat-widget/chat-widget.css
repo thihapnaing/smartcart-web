@@ -73,7 +73,8 @@
 
 .chat-panel .chat-input input:disabled {
   background: #f7f4ee;
-  color: #a89d8c;
+  /* #a89d8c only hit ~2.4:1 against this background - WCAG AA needs 4.5:1 for text. */
+  color: #6b5f52;
 }
 
 .chat-panel .chat-input button:disabled {
