@@ -18,9 +18,15 @@
                                 <p class="cart-item__meta">Size: {{item.size}}</p>
                                 <div class="flex justify-between items-center" style="margin-top: 10px">
                                     <div class="qty-stepper">
-                                        <button class="qty-stepper__btn" disabled>-</button>
+                                        <button class="qty-stepper__btn"
+                                                (click)="changeQuantity(item, -1)">
+                                                -
+                                        </button>
                                         <span class="qty-stepper__val">{{item.quantity}}</span>
-                                        <button class="qty-stepper__btn" disabled>+</button>
+                                        <button class="qty-stepper__btn"
+                                                (click)="changeQuantity(item, 1)">
+                                        +
+                                    </button>
                                     </div>
                                     <div>
                                         <p class="cart-item__price">S${{item.subtotal}}</p>

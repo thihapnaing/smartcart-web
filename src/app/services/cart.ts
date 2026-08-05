@@ -34,4 +34,13 @@ export class CartService {
     );
     this.itemCount.set(totalItems);
   }
+
+  updateQuantity(cartItemId: number, quantity: number) {
+    return this.http.patch<CartItemsResponse>(
+      `${environment.apiUrl}/cart/items/${cartItemId}`,
+      {
+        quantity: quantity
+      }
+    );
+  }
 }

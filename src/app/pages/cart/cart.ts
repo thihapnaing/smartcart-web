@@ -3,6 +3,7 @@ import { UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartService } from '../../services/cart';
 import { CartItemsResponse } from '../../models/cart-items-response';
+import { CartItemDetail } from '../../models/cart-item-detail';
 
 @Component({
   selector: 'app-cart',
@@ -34,4 +35,21 @@ export class CartComponent implements OnInit {
   goToHomepage() {
     this.router.navigate([`/`]);
   }
+
+  changeQuantity(item: CartItemDetail, delta: number) {
+
+  const newQuantity = item.quantity + delta;
+
+  this.cartService
+    .updateQuantity(item.cartItemId, newQuantity)
+    .subscribe({
+      next: (updatedCart) => {
+        this.cart.set(updatedCart);
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+
+}
 }
