@@ -24,6 +24,9 @@ export class ProductDetail implements OnInit {
   // Tracks whether a price alert is currently turned on for this product.
   priceAlertSet = signal(false);
 
+  // Defines the order sizes should appear in on screen, smallest first.
+  private readonly sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -36,13 +39,43 @@ export class ProductDetail implements OnInit {
     this.productService.getProductById(id).subscribe(data => {
       this.product.set(data);
 
-      // Pre-selects the first size that still has stock, so the quantity
+      // Pre-selects the smallest size that still has stock, so the quantity
       // box and stock count are visible as soon as the page opens.
-      const firstAvailable = data.variants.find(variant => variant.stock > 0);
+      const firstAvailable = this.sortedVariants().find(variant => variant.stock > 0);
       if (firstAvailable) {
         this.selectedVariant.set(firstAvailable);
       }
     });
+  }
+
+  // Returns the product's sizes arranged smallest to largest.
+  // Any size not listed in sizeOrder is placed at the end.
+  sortedVariants(): ProductVariantDetail[] {
+    const p = this.product();
+    if (!p || !p.variants) {
+      return [];
+    }
+
+    // The [...] makes a copy of the list first, because sort() rearranges
+    // the list it is given, and the original data should stay untouched.
+    return [...p.variants].sort((first, second) => {
+      const positionOfFirst = this.sizeOrder.indexOf(first.size);
+      const positionOfSecond = this.sizeOrder.indexOf(second.size);
+
+      // indexOf returns -1 when a size is not found in sizeOrder.
+      // Replacing -1 with a large number pushes unknown sizes to the end.
+      const rankOfFirst = positionOfFirst === -1 ? 99 : positionOfFirst;
+      const rankOfSecond = positionOfSecond === -1 ? 99 : positionOfSecond;
+
+      return rankOfFirst - rankOfSecond;
+    });
+  }
+
+  // Reports whether this product has any size rows at all.
+  // Used by the template to show a message instead of an empty size row.
+  hasVariants(): boolean {
+    const p = this.product();
+    return !!p && !!p.variants && p.variants.length > 0;
   }
 
   // Turns the raw gender value ('MEN' / 'WOMEN') into display text ('Men' / 'Women').
