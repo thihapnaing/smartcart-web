@@ -1,0 +1,101 @@
+<header class="header">
+  <div class="container header__inner">
+
+    <!-- Logo: clicking it returns to the home page -->
+    <a routerLink="/" class="header__logo">
+      <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+        <rect x="6" y="15" width="28" height="21" rx="4" stroke="#FAF6F1" stroke-width="2"/>
+        <path d="M14 15 C14 9 26 9 26 15" stroke="#C9A47B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <rect x="14" y="22" width="12" height="8" rx="2" fill="#C9A47B"/>
+        <text x="20" y="29" text-anchor="middle" font-size="5.5" font-weight="700" fill="#4A3226" font-family="serif">SC</text>
+      </svg>
+      SmartCartel
+    </a>
+
+    <!-- Main navigation links -->
+    <nav class="header__nav">
+      <a routerLink="/search" [queryParams]="{ gender: 'women' }" class="header__nav-btn">Women</a>
+      <a routerLink="/search" [queryParams]="{ gender: 'men' }" class="header__nav-btn">Men</a>
+      <a routerLink="/search" class="header__nav-btn">
+        Categories
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </a>
+      <a routerLink="/search" [queryParams]="{ ai: 'true' }" class="header__nav-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l1.6 5.2L19 9l-5.4 1.8L12 16l-1.6-5.2L5 9l5.4-1.8L12 2z"/>
+        </svg>
+        AI Picks
+      </a>
+    </nav>
+
+    <!-- Search bar: typing text and pressing Enter goes to the search results page -->
+<form class="header__search" (submit)="$event.preventDefault(); onSearch()">
+  <svg class="header__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.35-4.35"/>
+  </svg>
+  <label for="header-search-input" class="sr-only">Search products</label>
+  <input
+    id="header-search-input"
+    type="text"
+    placeholder="Search products..."
+    [ngModel]="searchKeyword()"
+    (ngModelChange)="searchKeyword.set($event)"
+    name="search"
+  />
+  <label for="header-image-input" class="sr-only">Search by image</label>
+  <input
+    id="header-image-input"
+    type="file"
+    accept="image/*"
+    class="sr-only"
+    (change)="onImageSelected($event)"
+  />
+  <button
+    type="button"
+    class="header__search-camera"
+    aria-label="Search by image"
+    onclick="document.getElementById('header-image-input').click()"
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M4 8h3l2-2h6l2 2h3v11H4z"/>
+      <circle cx="12" cy="14" r="3.5"/>
+    </svg>
+  </button>
+</form>
+
+    <!-- Icons on the right side of the bar -->
+    <div class="header__icons">
+  <button type="button" class="header__icon-btn" aria-label="Notifications">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/>
+      <path d="M10 21a2 2 0 0 0 4 0"/>
+    </svg>
+  </button>
+  <a routerLink="/cart" class="header__icon-btn" [attr.aria-label]="cart.itemCount() > 0 ? 'Cart, ' + cart.itemCount() + ' items' : 'Cart'">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <path d="M16 10a4 4 0 0 1-8 0"/>
+  </svg>
+  @if (cart.itemCount() > 0) {
+    <span class="header__badge" aria-hidden="true">{{ cart.itemCount() }}</span>
+  }
+</a>
+  <button type="button" class="header__icon-btn" aria-label="Compare">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M5 20V10M12 20V4M19 20v-7"/>
+    </svg>
+  </button>
+  <a routerLink="/profile" class="header__icon-btn" aria-label="Profile">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="8" r="3.5"/>
+      <path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>
+    </svg>
+  </a>
+</div>
+
+  </div>
+</header>
