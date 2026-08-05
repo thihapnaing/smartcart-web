@@ -1,8 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { OrderService } from '../../services/order';
 import { CheckoutRequest } from '../../models/checkout-request';
+import { CartItemsResponse } from '../../models/cart-items-response';
+import { CartService } from '../../services/cart';
 
 @Component({
   selector: 'app-checkout',
@@ -10,10 +12,13 @@ import { CheckoutRequest } from '../../models/checkout-request';
   templateUrl: './checkout.html',
   styleUrl: './checkout.css',
 })
-export class CheckoutComponent {
-  private fb = inject(FormBuilder);
-  private orderService = inject(OrderService);
-  private router = inject(Router);
+export class CheckoutComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly orderService = inject(OrderService);
+  private readonly cartService = inject(CartService);
+  private readonly router = inject(Router);
+
+  cart = signal<CartItemsResponse | null>(null);
 
   checkoutForm = this.fb.group({
     firstName: ['', Validators.required],
@@ -25,6 +30,17 @@ export class CheckoutComponent {
     expiry: ['08/28'],
     cvv: ['123']
   });
+
+  ngOnInit(): void {
+    this.cartService.getCart().subscribe({
+      next: (response) => {
+        this.cart.set(response);
+      },
+      error: (err) => {
+        console.error('Failed to load cart', err);
+      }
+    });
+  }
 
   selectPaymentMethod(method: 'CREDIT_CARD' | 'PAY_NOW') {
       this.checkoutForm.patchValue({paymentMethod: method});

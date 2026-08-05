@@ -6,4 +6,6 @@ export interface CartItemDetail {
     unitPrice: number;
     quantity: number;
     subtotal: number;
+    gender: string;
+    categoryName: string;
 }
