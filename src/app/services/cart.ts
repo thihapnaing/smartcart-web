@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class CartService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   getCart(): Observable<CartItemsResponse> {
     const url = `${environment.apiUrl}/cart`;

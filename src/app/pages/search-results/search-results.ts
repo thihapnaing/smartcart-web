@@ -15,7 +15,7 @@ export class SearchResults {
   results = signal<ProductSearchResult[]>([]);
   searched = signal(false);
 
-  constructor(private productService: ProductService) {}
+  constructor(private readonly productService: ProductService) {}
 
   onSearch(): void {
     if (!this.keyword.trim()) return;
