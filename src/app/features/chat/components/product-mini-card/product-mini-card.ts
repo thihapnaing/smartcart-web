@@ -1,14 +1,19 @@
 // Author: Htet Nandar (Grace)
 import { Component, Input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ProductSummary } from '../../models/chat.model';
 import { CartService } from '../../../../services/cart';
 
-/** Shared by the chat widget and the AI Picks page - shows a product with a quick add-to-cart action. */
+/**
+ * add-to-cart action. "+ Add" quick-adds the first/default variant with no size
+ * choice - the photo and name link to the full product page for that (see
+ * product-mini-card.html), since there's no room for a size picker on a card this small.
+ */
 @Component({
   selector: 'app-product-mini-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './product-mini-card.html',
   styleUrl: './product-mini-card.css'
 })

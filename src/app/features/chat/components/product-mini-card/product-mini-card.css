@@ -25,6 +25,14 @@
   border-color: #c9bba4;
 }
 
+/* Wraps the image and name so both link to the full product page (for size
+   selection) - reset back to plain block/text so they look identical to before. */
+.mini-card .mini-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
 .mini-card img {
   display: block;
   width: 130px;

@@ -1,8 +1,20 @@
 // Author: Htet Nandar (Grace)
-import { ProductSearchResult } from '../../../models/product-search-result';
 
-/** Chat/recommendation surfaces reuse ProductSearchResult - same product shape the search endpoint returns. */
-export type ProductSummary = ProductSearchResult;
+/**
+ * Matches Spring Boot's ProductSummaryDto exactly - the trimmed-down product shape chat
+ * replies carry. NOT the same shape as ProductSearchResult (used by /products/search and
+ * /products/browse): this one has productId (not id) and category (not categoryName), and
+ * is missing description/shopName/gender entirely.
+ */
+export interface ProductSummary {
+  productId: number;
+  name: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  /** First variant's id - lets a quick "+ Add" action skip size selection for a single default variant. */
+  defaultVariantId: number | null;
+}
 
 export interface ChatMessage {
   senderRole: 'user' | 'assistant';

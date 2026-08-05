@@ -1,8 +1,12 @@
 <!-- Author: Htet Nandar (Grace) -->
 <div class="mini-card">
-  <img [src]="product.imageUrl" [alt]="product.name" />
+  <a class="mini-card-link" [routerLink]="['/products', product.productId]">
+    <img [src]="product.imageUrl" [alt]="product.name" />
+  </a>
   <div class="mini-card-info">
-    <p class="name">{{ product.name }}</p>
+    <a class="mini-card-link" [routerLink]="['/products', product.productId]">
+      <p class="name">{{ product.name }}</p>
+    </a>
     <p class="price">S${{ product.price.toFixed(2) }}</p>
 
     <button *ngIf="quantity() === 0" class="add-btn" type="button" (click)="addToCart()" [disabled]="product.defaultVariantId == null">
