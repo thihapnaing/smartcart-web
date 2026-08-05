@@ -30,8 +30,8 @@ jobs:
       run: npm run build --configuration=production
       
     # Run Unit Tests and generate the coverage report
-    - name: Run Unit Tests
-      run: npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+    - name: Run Unit Tests and Generate Coverage
+      run: npm run test -- --watch=false --coverage
 
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@v8.1.0
