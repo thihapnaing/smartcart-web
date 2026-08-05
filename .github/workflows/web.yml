@@ -29,9 +29,9 @@ jobs:
     - name: Build Angular Project for Production
       run: npm run build --configuration=production
       
-    # Note: If team decides to write unit tests later, can uncomment the line below!
-    # - name: Run Unit Tests
-    #   run: npm run test -- --watch=false --browsers=ChromeHeadless
+    # Run Unit Tests and generate the coverage report
+    - name: Run Unit Tests
+      run: npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
 
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@v8.1.0
