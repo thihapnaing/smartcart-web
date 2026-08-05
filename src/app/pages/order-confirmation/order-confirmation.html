@@ -1,5 +1,5 @@
 <div class="page">
-    <div class="container" style="max-width: 32rem; margin:3rem auto;">
+    <div class="container" style="margin: 3rem auto;">
         @if (order()) {
       <div class="confirmation-card">
         <div class="confirmation-icon">✓</div>
@@ -18,7 +18,7 @@
         </div>
         <div class="order-summary__row">
           <span class="order-summary__label">Payment Method</span>
-          <span class="order-summary__value">{{ order()!.paymentMethod }}</span>
+          <span class="order-summary__value">{{ getPaymentMethodLabel(order()!.paymentMethod) }}</span>
         </div>
 
         <hr class="order-summary__divider">
@@ -33,7 +33,7 @@
         <hr class="order-summary__divider">
 
         <div style="text-align: left;">
-          <h3>Items</h3>
+          <h3 class="mb-2">Items</h3>
           @for (item of order()!.cartItemDetails; track item.cartItemId) {
             <div class="cart-item" style="margin-bottom: 0.75rem;">
               <img class="cart-item__image" [src]="item.imageUrl" [alt]="item.productName">

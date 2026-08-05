@@ -1,56 +1,115 @@
 <div class="page">
-    <div class="container" style="max-width: 32rem; margin: 2rem auto;">
-        <h1>Checkout</h1>
-        <form class="flex flex-col gap-4" [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
-            <h3>Delivery Details</h3>
-            <div class="form-field">
-                <label for="firstName">First Name</label>
-                <input id="firstName" formControlName="firstName" type="text"/>
+    <div class="container" style="padding: 2rem 1rem;">
+        <div class="checkout-section__header">
+            <h2>Checkout</h2>
+        </div>
+
+        <div class="flex gap-6 checkout-section__body">
+            <div style="flex:2;">
+                <form [formGroup]= "checkoutForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="circle">1</div>
+                            <h4>Delivery Details</h4>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <div class="form-field">
+                                <label for="firstName">First Name</label>
+                                <input id="firstName" formControlName="firstName" type="text" />
+                            </div>
+                            <div class="form-field">
+                                <label for="lastName">Last Name</label>
+                                <input id="lastName" formControlName="lastName" type="text"/>
+                            </div>
+                            <div class="form-field">
+                                <label for="shippingAddress">Delivery Address</label>
+                                <input id="shippingAddress" formControlName="shippingAddress" type="text"/>
+                            </div>
+                            <div class="form-field">
+                                <label for="phoneNumber">Phone Number</label>
+                                <input id="phoneNumber" formControlName="phoneNumber" type="text"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="circle">2</div>
+                            <h4>Payment Method</h4>
+                        </div>
+                        <div class="flex gap-4">
+                            <button type="button"
+                                [class]="checkoutForm.get('paymentMethod')?.value === 'CREDIT_CARD' ? 'btn btn--primary' : 'btn btn--outline'"
+                                (click)="selectPaymentMethod('CREDIT_CARD')">
+                                Credit Card
+                            </button>
+                            <button type="button"
+                                [class]="checkoutForm.get('paymentMethod')?.value === 'PAY_NOW' ? 'btn btn--primary' : 'btn btn--outline'"
+                                (click)="selectPaymentMethod('PAY_NOW')">
+                                PayNow
+                            </button>
+                        </div>
+
+                        @if(checkoutForm.get('paymentMethod')?.value === 'CREDIT_CARD') {
+                        <div class="flex flex-col gap-4" style="margin-top: 1rem;">
+                            <div class="form-field">
+                                <label for="cardNumber">Card Number</label>
+                                <input id="cardNumber" formControlName="cardNumber" type="text"/>
+                            </div>
+                            <div class="form-field">
+                                <label for="expiry">Expiry</label>
+                                <input id="expiry" formControlName="expiry" type="text"/>
+                            </div>
+                            <div class="form-field">
+                                <label for="cvv">CVV</label>
+                                <input id="cvv" formControlName="cvv" type="text"/>
+                            </div>
+                        </div>
+                        }
+                        @if(checkoutForm.get('paymentMethod')?.value === 'PAY_NOW') {
+                        <div class="flex flex-col items-center gap-4" style="margin-top: 1rem; text-align: center;">
+                            <p>Scan with your banking app</p>
+                            <div class="qr-placeholder">
+                                <span>QR Code</span>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full">Place Order</button>
+                </form>
             </div>
-            <div class="form-field">
-                <label for="lastName">Last Name</label>
-                <input id="lastName" formControlName="lastName" type="text"/>
+
+            <div class="order-summary" style="flex: 1; height: fit-content;">
+                <h3>Order({{cart()!.cartItemDetails!.length ?? 0}})</h3>
+                @if (cart()) {
+                    @for (item of cart()!.cartItemDetails; track item.cartItemId) {
+                        <div class="flex gap-4" style="margin-bottom: 1rem;">
+                            <img [src]="item.imageUrl" [alt]="item.productName" style="width: 3.5rem; height: 4rem; object-fit: cover; border-radius: var(--radius);">
+                            <div style="flex: 1;">
+                                <p class="cart-item__name">{{item.productName}}</p>
+                                <p class="text-muted">Qty: {{item.quantity}}</p>
+                            </div>
+                            <p class="cart-item__price">S${{ item.subtotal }}</p>
+                        </div>
+                    }
+
+                    <hr class="order-summary__divider">
+
+                    <div class="order-summary__row">
+                        <span class="order-summary__label">Subtotal</span>
+                        <span class="order-summary__value">S${{ cart()!.cartTotal }}</span>
+                    </div>
+                    <div class="order-summary__row">
+                        <span class="order-summary__label">Shipping</span>
+                        <span class="order-summary__value">Free</span>
+                    </div>
+                    <hr class="order-summary__divider">
+                    <div class="order-summary__row order-summary__total">
+                        <span>Total</span>
+                        <span>S${{ cart()!.cartTotal }}</span>
+                    </div>
+                }
             </div>
-            <div class="form-field">
-                <label for="shippingAddress">Delivery Address</label>
-                <input id="shippingAddress" formControlName="shippingAddress" type="text"/>
-            </div>
-            <div class="form-field">
-                <label for="phoneNumber">Phone Number</label>
-                <input id="phoneNumber" formControlName="phoneNumber" type="text"/>
-            </div>
-            <h3>Payment Method</h3>
-            <div class="flex gap-4">
-                <button type="button"
-                        [class]="checkoutForm.get('paymentMethod')?.value === 'CREDIT_CARD' ? 'btn btn--primary' : 'btn btn--outline'"
-                        (click)="selectPaymentMethod('CREDIT_CARD')">
-                    Credit Card
-                </button>
-                <button type="button"
-                        [class]="checkoutForm.get('paymentMethod')?.value === 'PAY_NOW' ? 'btn btn--primary' : 'btn btn--outline'"
-                        (click)="selectPaymentMethod('PAY_NOW')">
-                    PayNow
-                </button>
-            </div>  
-            @if(checkoutForm.get('paymentMethod')?.value === 'CREDIT_CARD') {
-                <div class="form-field">
-                    <label for="cardNumber">CARD NUMBER</label>
-                    <input id="cardNumber" formControlName="cardNumber" type="text"/>
-                </div>
-                <div class="form-field">
-                    <label for="expiry">EXPIRY</label>
-                    <input id="expiry" formControlName="expiry" type="text"/>
-                </div>
-                <div class="form-field">
-                    <label for="cvv">CVV</label>
-                    <input id="cvv" formControlName="cvv" type="text"/>
-                </div>
-            }
-            @if(checkoutForm.get('paymentMethod')?.value === 'PAY_NOW') {
-                <p>Scan with your banking app</p>
-                <div class="qr-placeholder">QR Code</div>
-            }
-            <button type="submit" class="btn btn--primary btn--full">Place Order</button>
-        </form>
+        </div>
     </div>
 </div>

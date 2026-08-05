@@ -26,4 +26,15 @@ export class OrderConfirmationComponent implements OnInit {
       }
     })
   }
+
+  getPaymentMethodLabel(method: string): string {
+    switch(method) {
+      case 'CREDIT_CARD':
+        return 'Credit Card';
+      case 'PAY_NOW':
+        return 'PayNow';
+      default:
+        return method;
+    }
+  }
 }
