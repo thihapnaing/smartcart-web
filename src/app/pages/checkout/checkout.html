@@ -80,7 +80,7 @@
             </div>
 
             <div class="order-summary" style="flex: 1; height: fit-content;">
-                <h3>Order({{cart()!.cartItemDetails!.length ?? 0}})</h3>
+                <h3>Order({{cart()?.cartItemDetails?.length ?? 0}})</h3>
                 @if (cart()) {
                     @for (item of cart()!.cartItemDetails; track item.cartItemId) {
                         <div class="flex gap-4" style="margin-bottom: 1rem;">
