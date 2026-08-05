@@ -26,7 +26,7 @@
     </div>
     <div class="nav-icons">
       <button type="button" title="Notifications">🔔</button>
-      <button type="button" title="Cart" class="cart-btn">
+      <button type="button" title="Cart" class="cart-btn" routerLink="/cart" (click)="closeMenu()">
         🛒
         <span class="cart-badge" *ngIf="cartService.itemCount() > 0">{{ cartService.itemCount() }}</span>
       </button>

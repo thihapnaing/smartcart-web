@@ -2,7 +2,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Cart } from '../../../services/cart';
+import { CartService } from '../../../services/cart';
 
 /**
  * Top nav bar. Only "Home" and "AI Picks" are real routes so far - the rest
@@ -22,7 +22,7 @@ export class NavBar {
   menuOpen = false;
 
   // public so the template can read cartService.itemCount() directly for the badge.
-  constructor(public cartService: Cart) {}
+  constructor(public cartService: CartService) {}
 
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;

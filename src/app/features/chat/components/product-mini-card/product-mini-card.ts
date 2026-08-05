@@ -2,7 +2,7 @@
 import { Component, Input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductSummary } from '../../models/chat.model';
-import { Cart } from '../../../../services/cart';
+import { CartService } from '../../../../services/cart';
 
 /** Shared by the chat widget and the AI Picks page - shows a product with a quick add-to-cart action. */
 @Component({
@@ -15,7 +15,7 @@ import { Cart } from '../../../../services/cart';
 export class ProductMiniCard {
   @Input({ required: true }) product!: ProductSummary;
 
-  /** Reactively derived from Cart.items - drives "+ Add" vs. the quantity stepper. */
+  /** Reactively derived from CartService.items - drives "+ Add" vs. the quantity stepper. */
   quantity = computed(() => {
     const variantId = this.product.defaultVariantId;
     return variantId == null ? 0 : this.cartService.quantityFor(variantId);
@@ -26,7 +26,7 @@ export class ProductMiniCard {
   });
 
   // public so the template can read cartService state directly if needed.
-  constructor(public cartService: Cart) {}
+  constructor(public cartService: CartService) {}
 
   addToCart(): void {
     const variantId = this.product.defaultVariantId;
