@@ -1,9 +1,9 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartService } from '../../services/cart';
 import { CartItemDetail } from '../../models/cart-item-detail';
-import { CartItemDetail } from '../../models/cart-item-detail';
+import { CartItemsResponse } from '../../models/cart-items-response';
 
 @Component({
   selector: 'app-cart',
@@ -18,6 +18,8 @@ export class CartComponent implements OnInit {
   // product-detail's add-to-cart) shows up here too, instead of only whatever this
   // page happened to fetch into its own local state when it first loaded.
   readonly cartService = inject(CartService);
+
+  cart = signal<CartItemsResponse | null>(null);
 
   cartTotal = computed(() =>
     this.cartService.items().reduce((sum, item) => sum + item.subtotal, 0)
