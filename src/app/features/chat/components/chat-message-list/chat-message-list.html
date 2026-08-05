@@ -1,0 +1,9 @@
+<!-- Author: Htet Nandar (Grace) -->
+<div class="message-list">
+  <div *ngFor="let msg of messages" class="message" [class.user]="msg.senderRole === 'user'">
+    <p class="content">{{ msg.content }}</p>
+    <div class="products" *ngIf="msg.products?.length">
+      <app-product-mini-card *ngFor="let p of msg.products" [product]="p"></app-product-mini-card>
+    </div>
+  </div>
+</div>

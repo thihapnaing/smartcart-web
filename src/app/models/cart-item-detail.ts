@@ -1,5 +1,6 @@
 export interface CartItemDetail {
     cartItemId: number;
+    productVariantId: number; // Author: Htet Nandar (Grace)
     productName: string;
     imageUrl: string;
     size: string;

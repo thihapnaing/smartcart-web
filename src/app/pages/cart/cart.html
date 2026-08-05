@@ -1,15 +1,14 @@
 <div class="page">
     <div class="container" style="padding: 2rem 1rem;">
         <div class="section__header">
-            <h2>Cart <span class="cart-count section__title">({{cart()?.cartItemDetails?.length ?? 0}})</span></h2>
+            <h2>Cart <span class="cart-count section__title">({{cartService.items().length}})</span></h2>
         </div>
-        @if(cart()) {
-        @if(cart()!.cartItemDetails.length === 0) {
+        @if(cartService.items().length === 0) {
             <p>Your cart is empty.</p>
         } @else {
             <div class="flex gap-6">
                 <div class="flex flex-col gap-4" style="flex: 2;">
-                    @for(item of cart()!.cartItemDetails; track item.cartItemId) {
+                    @for(item of cartService.items(); track item.cartItemId) {
                         <div class="cart-item">
                             <img class="cart-item__image" [src]="item.imageUrl" [alt]="item.productName">
                             <div class="cart-item__body">
@@ -42,7 +41,7 @@
                     </div>
                     <div class="order-summary__row">
                         <span class="order-summary__label">SubTotal</span>
-                        <span class="order-summary__value">S${{cart()!.cartTotal}}</span>
+                        <span class="order-summary__value">S${{cartTotal()}}</span>
                     </div>
                     <div class="order-summary__row">
                         <span class="order-summary__label">Shipping</span>
@@ -51,7 +50,7 @@
                     <hr class="order-summary__divider">
                     <div class="order-summary__row order-summary__total">
                         <span>Total</span>
-                        <span>S${{cart()!.cartTotal}}</span>
+                        <span>S${{cartTotal()}}</span>
                     </div>
                     <div class="flex flex-col gap-2">
                         <button class="btn btn--primary btn--full" (click)="checkout()">Proceed to checkout</button>
@@ -60,8 +59,5 @@
                 </div>
             </div>
         }
-    } @else {
-        <p>Loading cart...</p>
-    }
     </div>
 </div>

@@ -1,0 +1,31 @@
+<!-- Author: Htet Nandar (Grace) -->
+<button class="chat-fab" type="button" (click)="toggle()" *ngIf="!isOpen">🤖</button>
+
+<div class="chat-panel" *ngIf="isOpen">
+  <div class="chat-header">
+    <div>
+      <p class="title">SmartCart AI</p>
+      <p class="subtitle">Agentic shopping assistant</p>
+    </div>
+    <button class="close-btn" type="button" (click)="toggle()">✕</button>
+  </div>
+
+  <app-chat-message-list [messages]="chat.messages()"></app-chat-message-list>
+
+  <div *ngIf="chat.isLoading()" class="typing">SmartCart AI is typing…</div>
+
+  <app-suggestion-chips
+    [suggestions]="chat.suggestions()"
+    [disabled]="chat.isLoading()"
+    (chipClicked)="onChipClicked($event)">
+  </app-suggestion-chips>
+
+  <div class="chat-input">
+    <input
+      [(ngModel)]="draft"
+      (keyup.enter)="send()"
+      [disabled]="chat.isLoading()"
+      placeholder="Ask me anything..." />
+    <button type="button" (click)="send()" [disabled]="chat.isLoading()">➤</button>
+  </div>
+</div>
