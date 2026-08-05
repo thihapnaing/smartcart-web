@@ -40,8 +40,8 @@
   align-items: center;
 }
 
-.chat-panel .chat-header .title { margin: 0; font-weight: 600; font-size: 14px; }
-.chat-panel .chat-header .subtitle { margin: 0; font-size: 11px; opacity: 0.8; }
+.chat-panel .chat-header .title { margin: 0; font-weight: 600; font-size: 14px; color: #fff; }
+.chat-panel .chat-header .subtitle { margin: 0; font-size: 11px; opacity: 0.8; color: #fff; }
 .chat-panel .chat-header .close-btn { background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; }
 
 .chat-panel .typing {
