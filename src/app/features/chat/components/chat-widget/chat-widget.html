@@ -21,7 +21,9 @@
   </app-suggestion-chips>
 
   <div class="chat-input">
+    <label for="chat-message-input" class="sr-only">Message SmartCart AI</label>
     <input
+      id="chat-message-input"
       [(ngModel)]="draft"
       (keyup.enter)="send()"
       [disabled]="chat.isLoading()"

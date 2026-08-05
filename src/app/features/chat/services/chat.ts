@@ -17,7 +17,7 @@ export class Chat {
   suggestions = signal<string[]>([]);
   isLoading = signal<boolean>(false);
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   startSession(userId?: number): Observable<ChatResponse> {
     const params: Record<string, number> = {};

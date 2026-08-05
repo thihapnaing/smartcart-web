@@ -21,11 +21,11 @@ export class ProductMiniCard {
   @Input({ required: true }) product!: ProductSummary;
 
   /** Reactively derived from CartService.items - drives "+ Add" vs. the quantity stepper. */
-  quantity = computed(() => {
+  readonly quantity = computed(() => {
     const variantId = this.product.defaultVariantId;
     return variantId == null ? 0 : this.cartService.quantityFor(variantId);
   });
-  private cartItemId = computed(() => {
+  private readonly cartItemId = computed(() => {
     const variantId = this.product.defaultVariantId;
     return variantId == null ? null : this.cartService.cartItemIdFor(variantId);
   });
