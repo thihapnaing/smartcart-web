@@ -1,0 +1,56 @@
+<div class="page">
+    <div class="container" style="max-width: 32rem; margin: 2rem auto;">
+        <h1>Checkout</h1>
+        <form class="flex flex-col gap-4" [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+            <h3>Delivery Details</h3>
+            <div class="form-field">
+                <label for="firstName">First Name</label>
+                <input id="firstName" formControlName="firstName" type="text"/>
+            </div>
+            <div class="form-field">
+                <label for="lastName">Last Name</label>
+                <input id="lastName" formControlName="lastName" type="text"/>
+            </div>
+            <div class="form-field">
+                <label for="shippingAddress">Delivery Address</label>
+                <input id="shippingAddress" formControlName="shippingAddress" type="text"/>
+            </div>
+            <div class="form-field">
+                <label for="phoneNumber">Phone Number</label>
+                <input id="phoneNumber" formControlName="phoneNumber" type="text"/>
+            </div>
+            <h3>Payment Method</h3>
+            <div class="flex gap-4">
+                <button type="button"
+                        [class]="checkoutForm.get('paymentMethod')?.value === 'CREDIT_CARD' ? 'btn btn--primary' : 'btn btn--outline'"
+                        (click)="selectPaymentMethod('CREDIT_CARD')">
+                    Credit Card
+                </button>
+                <button type="button"
+                        [class]="checkoutForm.get('paymentMethod')?.value === 'PAY_NOW' ? 'btn btn--primary' : 'btn btn--outline'"
+                        (click)="selectPaymentMethod('PAY_NOW')">
+                    PayNow
+                </button>
+            </div>  
+            @if(checkoutForm.get('paymentMethod')?.value === 'CREDIT_CARD') {
+                <div class="form-field">
+                    <label for="cardNumber">CARD NUMBER</label>
+                    <input id="cardNumber" formControlName="cardNumber" type="text"/>
+                </div>
+                <div class="form-field">
+                    <label for="expiry">EXPIRY</label>
+                    <input id="expiry" formControlName="expiry" type="text"/>
+                </div>
+                <div class="form-field">
+                    <label for="cvv">CVV</label>
+                    <input id="cvv" formControlName="cvv" type="text"/>
+                </div>
+            }
+            @if(checkoutForm.get('paymentMethod')?.value === 'PAY_NOW') {
+                <p>Scan with your banking app</p>
+                <div class="qr-placeholder">QR Code</div>
+            }
+            <button type="submit" class="btn btn--primary btn--full">Place Order</button>
+        </form>
+    </div>
+</div>
