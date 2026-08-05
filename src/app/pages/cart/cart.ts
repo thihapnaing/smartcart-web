@@ -9,7 +9,6 @@ import { CartItemsResponse } from '../../models/cart-items-response';
   selector: 'app-cart',
   imports: [UpperCasePipe],
   templateUrl: './cart.html',
-  styleUrl: './cart.css',
 })
 export class CartComponent implements OnInit {
   private readonly router = inject(Router);

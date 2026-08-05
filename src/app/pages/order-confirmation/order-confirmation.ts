@@ -7,7 +7,6 @@ import { CheckoutResponse } from '../../models/checkout-response';
   selector: 'app-order-confirmation',
   imports: [RouterLink],
   templateUrl: './order-confirmation.html',
-  styleUrl: './order-confirmation.css',
 })
 export class OrderConfirmationComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
