@@ -25,21 +25,25 @@
         <div class="price">S${{ p.price.toFixed(2) }}</div>
         <p class="desc">{{ p.description }}</p>
 
-        <!-- Size picker built from the product's variants -->
+        <!-- Size picker built from the product's variants, smallest size first -->
         <div class="section">
           <div class="section-label">Size</div>
-          <div class="size-row">
-            @for (variant of p.variants; track variant.productVariantId) {
-              <button
-                class="size-btn"
-                [class.active]="selectedVariant()?.productVariantId === variant.productVariantId"
-                [disabled]="variant.stock === 0"
-                (click)="selectVariant(variant)"
-              >
-                {{ variant.size }}
-              </button>
-            }
-          </div>
+          @if (hasVariants()) {
+            <div class="size-row">
+              @for (variant of sortedVariants(); track variant.productVariantId) {
+                <button
+                  class="size-btn"
+                  [class.active]="selectedVariant()?.productVariantId === variant.productVariantId"
+                  [disabled]="variant.stock === 0"
+                  (click)="selectVariant(variant)"
+                >
+                  {{ variant.size }}
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="stock-note">Currently unavailable</p>
+          }
         </div>
 
         <!-- Quantity stepper, shown once a size is chosen -->
