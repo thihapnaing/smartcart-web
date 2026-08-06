@@ -1,15 +1,16 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { OrderService } from '../../services/order';
 import { CheckoutRequest } from '../../models/checkout-request';
 import { CartItemsResponse } from '../../models/cart-items-response';
 import { CartService } from '../../services/cart';
-import { UserProfileService } from '../../user-profile';
+import { UserProfileService } from '../../services/user-profile';
 
 @Component({
   selector: 'app-checkout',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, DecimalPipe],
   templateUrl: './checkout.html',
   styleUrl: './checkout.css',
 })

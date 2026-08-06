@@ -40,7 +40,7 @@
               <div class="cart-item__body">
                 <p class="cart-item__name">{{ item.productName }}</p>
                 <p class="cart-item__meta">Size: {{ item.size }} &middot; Qty: {{ item.quantity }}</p>
-                <p class="cart-item__price">S${{ item.subtotal }}</p>
+                <p class="cart-item__price">S${{ item.subtotal | number: '1.2-2'}}</p>
               </div>
             </div>
           }
@@ -50,7 +50,7 @@
 
         <div class="order-summary__row order-summary__total">
           <span>Total</span>
-          <span>S${{ order()!.totalAmount }}</span>
+          <span>S${{ order()!.totalAmount | number:'1.2-2' }}</span>
         </div>
 
         <a routerLink="/" class="btn btn--primary btn--full" style="margin-top: 1.5rem;">

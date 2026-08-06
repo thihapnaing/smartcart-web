@@ -28,7 +28,7 @@
                                     </button>
                                     </div>
                                     <div>
-                                        <p class="cart-item__price">S${{item.subtotal}}</p>
+                                        <p class="cart-item__price">S${{item.subtotal | number: '1.2-2'}}</p>
                                     </div>
                                 </div>
                             </div>
@@ -41,7 +41,7 @@
                     </div>
                     <div class="order-summary__row">
                         <span class="order-summary__label">SubTotal</span>
-                        <span class="order-summary__value">S${{cartTotal()}}</span>
+                        <span class="order-summary__value">S${{cartService.cartTotal()| number:'1.2-2' }}</span>
                     </div>
                     <div class="order-summary__row">
                         <span class="order-summary__label">Shipping</span>
@@ -50,7 +50,7 @@
                     <hr class="order-summary__divider">
                     <div class="order-summary__row order-summary__total">
                         <span>Total</span>
-                        <span>S${{cartTotal()}}</span>
+                        <span>S${{cartService.cartTotal()| number:'1.2-2' }}</span>
                     </div>
                     <div class="flex flex-col gap-2">
                         <button class="btn btn--primary btn--full" (click)="checkout()">Proceed to checkout</button>
