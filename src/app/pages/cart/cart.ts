@@ -1,9 +1,8 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component,inject, OnInit} from '@angular/core';
 import { DecimalPipe, UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartService } from '../../services/cart';
 import { CartItemDetail } from '../../models/cart-item-detail';
-import { CartItemsResponse } from '../../models/cart-items-response';
 
 @Component({
   selector: 'app-cart',
@@ -46,6 +45,5 @@ export class CartComponent implements OnInit {
       error: (err) => console.error(err)
     });
   }
-
 
 }

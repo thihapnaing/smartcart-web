@@ -2,7 +2,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink} from '@angular/router';
+import { ActivatedRoute, Router, RouterLink} from '@angular/router';
 import { CartService } from '../../../services/cart';
 
 /**
@@ -13,7 +13,7 @@ import { CartService } from '../../../services/cart';
 @Component({
   selector: 'app-nav-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ActivatedRoute],
   templateUrl: './nav-bar.html',
   styleUrl: './nav-bar.css'
 })
