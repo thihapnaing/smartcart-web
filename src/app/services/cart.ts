@@ -25,6 +25,7 @@ export class CartService {
   itemCount = signal<number>(0);
   /** Full line-item list - lets ProductMiniCard look up its own quantity/cartItemId reactively. */
   items = signal<CartItemDetail[]>([]);
+  cartTotal = signal<number>(0);
 
   constructor() {
     this.refresh();
@@ -75,5 +76,6 @@ export class CartService {
   private applyResponse(res: CartItemsResponse): void {
     this.items.set(res.cartItemDetails);
     this.itemCount.set(res.cartItemDetails.reduce((sum, item) => sum + item.quantity, 0));
+    this.cartTotal.set(res.cartTotal);
   }
 }

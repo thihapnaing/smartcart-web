@@ -89,7 +89,7 @@
                                 <p class="cart-item__name">{{item.productName}}</p>
                                 <p class="text-muted">Qty: {{item.quantity}}</p>
                             </div>
-                            <p class="cart-item__price">S${{ item.subtotal }}</p>
+                            <p class="cart-item__price">S${{ item.subtotal | number:'1.2-2' }}</p>
                         </div>
                     }
 
@@ -97,7 +97,7 @@
 
                     <div class="order-summary__row">
                         <span class="order-summary__label">Subtotal</span>
-                        <span class="order-summary__value">S${{ cart()!.cartTotal }}</span>
+                        <span class="order-summary__value">S${{ cart()!.cartTotal | number:'1.2-2' }}</span>
                     </div>
                     <div class="order-summary__row">
                         <span class="order-summary__label">Shipping</span>
@@ -106,7 +106,7 @@
                     <hr class="order-summary__divider">
                     <div class="order-summary__row order-summary__total">
                         <span>Total</span>
-                        <span>S${{ cart()!.cartTotal }}</span>
+                        <span>S${{ cart()!.cartTotal | number:'1.2-2'}}</span>
                     </div>
                 }
             </div>
