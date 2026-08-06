@@ -1,0 +1,29 @@
+/* Author: Htet Nandar (Grace) */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+.chips .chip {
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid #d8cfc2;
+  border-radius: 999px;
+  background: #faf6ef;
+  cursor: pointer;
+}
+
+.chips .chip:hover {
+  background: #f0e8d8;
+}
+
+.chips .chip:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.chips .chip:disabled:hover {
+  background: #faf6ef;
+}

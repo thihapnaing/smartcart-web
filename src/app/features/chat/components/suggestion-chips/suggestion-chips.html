@@ -1,0 +1,6 @@
+<!-- Author: Htet Nandar (Grace) -->
+<div class="chips" *ngIf="suggestions.length">
+  <button *ngFor="let s of suggestions" class="chip" type="button" [disabled]="disabled" (click)="chipClicked.emit(s)">
+    {{ s }}
+  </button>
+</div>

@@ -1,0 +1,22 @@
+<!-- Author: Htet Nandar (Grace) -->
+<div class="mini-card">
+  <a class="mini-card-link" [routerLink]="['/products', product.productId]">
+    <img [src]="product.imageUrl" [alt]="product.name" />
+  </a>
+  <div class="mini-card-info">
+    <a class="mini-card-link" [routerLink]="['/products', product.productId]">
+      <p class="name">{{ product.name }}</p>
+    </a>
+    <p class="price">S${{ product.price.toFixed(2) }}</p>
+
+    <button *ngIf="quantity() === 0" class="add-btn" type="button" (click)="addToCart()" [disabled]="product.defaultVariantId == null">
+      + Add
+    </button>
+
+    <div *ngIf="quantity() > 0" class="qty-stepper">
+      <button type="button" class="qty-btn" (click)="decrement()" aria-label="Decrease quantity">−</button>
+      <span class="qty-value">{{ quantity() }}</span>
+      <button type="button" class="qty-btn" (click)="increment()" aria-label="Increase quantity">+</button>
+    </div>
+  </div>
+</div>

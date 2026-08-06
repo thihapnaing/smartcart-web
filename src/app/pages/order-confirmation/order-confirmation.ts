@@ -1,13 +1,13 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OrderService } from '../../services/order';
 import { CheckoutResponse } from '../../models/checkout-response';
 
 @Component({
   selector: 'app-order-confirmation',
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './order-confirmation.html',
-  styleUrl: './order-confirmation.css',
 })
 export class OrderConfirmationComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

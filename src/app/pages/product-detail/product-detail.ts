@@ -34,8 +34,29 @@ export class ProductDetail implements OnInit {
     private readonly cartService: CartService
   ) {}
 
+  // Author: Htet Nandar (Grace)
+  // Was reading route.snapshot once, so navigating from one product page straight to
+  // another (e.g. /products/2 -> /products/1 via a routerLink) never re-fetched - Angular
+  // reuses the same component instance for the same route, it doesn't get destroyed and
+  // recreated just because the :id param changed. Subscribing to paramMap instead reacts
+  // to every param change, not just the first one.
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id'));
+      this.loadProduct(id);
+    });
+  }
+
+  private loadProduct(id: number): void {
+    // Reset per-product state so the previous product's selections don't leak
+    // into the new one while the new data is still loading.
+    this.product.set(null);
+    this.selectedVariant.set(null);
+    this.quantity.set(1);
+    this.addedMessage.set('');
+    this.justAdded.set(false);
+    this.priceAlertSet.set(false);
+
     this.productService.getProductById(id).subscribe(data => {
       this.product.set(data);
 
@@ -122,10 +143,7 @@ export class ProductDetail implements OnInit {
       this.addedMessage.set('Please select a size first.');
       return;
     }
-    this.cartService.addToCart({
-      productVariantId: variant.productVariantId,
-      quantity: this.quantity()
-    }).subscribe({
+    this.cartService.addToCart(variant.productVariantId, this.quantity()).subscribe({
       next: () => {
         this.addedMessage.set('');
         this.justAdded.set(true);
@@ -143,10 +161,7 @@ export class ProductDetail implements OnInit {
       this.addedMessage.set('Please select a size first.');
       return;
     }
-    this.cartService.addToCart({
-      productVariantId: variant.productVariantId,
-      quantity: this.quantity()
-    }).subscribe({
+    this.cartService.addToCart(variant.productVariantId, this.quantity()).subscribe({
       next: () => this.router.navigate(['/checkout']),
       error: () => this.addedMessage.set('Something went wrong. Please try again.')
     });

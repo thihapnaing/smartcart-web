@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment'
     providedIn: 'root'
 })
 export class OrderService {
-    private http = inject(HttpClient);
+    private readonly http = inject(HttpClient);
 
     checkout(request: CheckoutRequest): Observable<CheckoutResponse> {
         const url = `${environment.apiUrl}/orders/checkout`;
