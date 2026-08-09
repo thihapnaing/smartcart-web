@@ -121,13 +121,9 @@
 <div
   class="image-search-overlay"
   *ngIf="imageSearchOpen()"
-  (click)="closeImageSearch()"
 >
 
-  <div
-    class="image-search-dialog"
-    (click)="$event.stopPropagation()"
-  >
+  <div class="image-search-dialog">
 
     <!-- Header -->
     <div class="image-search-dialog__header">
@@ -180,7 +176,7 @@
 
         <img
           [src]="imagePreviewUrl()"
-          alt="Selected image"
+          alt="Selected product"
         />
 
         <button
