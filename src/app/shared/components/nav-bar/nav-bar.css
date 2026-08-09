@@ -174,3 +174,188 @@
     gap: 20px;
   }
 }
+
+  /* =========================================================
+     Search by Photo Popup
+     ========================================================= */
+  .image-search-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 26, 16, 0.55);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 16px;
+    z-index: 1000;
+  }
+
+  .image-search-dialog {
+    background: var(--bg, #fff);
+    color: var(--fg, #2c1a10);
+
+    width: 100%;
+    max-width: 420px;
+
+    border-radius: var(--radius-lg, 14px);
+
+    box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
+
+    padding: 20px;
+  }
+
+
+  /* =========================================================
+     Popup Header
+     ========================================================= */
+  .image-search-dialog__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 16px;
+  }
+
+  .image-search-dialog__header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .image-search-dialog__close {
+    border: none;
+    background: none;
+
+    font-size: 16px;
+    cursor: pointer;
+
+    color: inherit;
+
+    padding: 4px;
+    line-height: 1;
+  }
+
+
+  /* =========================================================
+     Upload Area
+     ========================================================= */
+  .image-search-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    border: 1.5px dashed var(--border, rgba(74, 50, 38, 0.3));
+
+    border-radius: var(--radius, 10px);
+
+    min-height: 160px;
+    padding: 16px;
+
+    cursor: pointer;
+
+    color: var(--muted-fg, #7a5c44);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .image-search-upload:hover {
+    background: rgba(74, 50, 38, 0.04);
+  }
+
+  .image-search-upload__icon {
+    font-size: 28px;
+  }
+
+
+  /* =========================================================
+     Image Preview
+     ========================================================= */
+  .image-search-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-search-preview img {
+    display: block;
+
+    width: 100%;
+    max-height: 260px;
+
+    object-fit: contain;
+
+    border-radius: var(--radius, 10px);
+  }
+
+  .image-search-preview button {
+    display: block;
+
+    margin: 10px auto 0;
+
+    border: none;
+    background: none;
+
+    color: var(--accent, #8b6a4f);
+
+    font-size: 13px;
+    text-decoration: underline;
+
+    cursor: pointer;
+  }
+
+
+  /* =========================================================
+     Error Message
+     ========================================================= */
+  .image-search-error {
+    color: #b93f3f;
+
+    font-size: 13px;
+
+    margin-top: 10px;
+    margin-bottom: 0;
+  }
+
+
+  /* =========================================================
+     Popup Actions
+     ========================================================= */
+  .image-search-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 18px;
+  }
+
+  .image-search-dialog__actions button {
+    border: none;
+    border-radius: 8px;
+
+    padding: 8px 16px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+  }
+
+  .image-search-dialog__actions button:first-child {
+    background: #eee;
+    color: #333;
+  }
+
+  .image-search-dialog__actions button:last-child {
+    background: #4a3226;
+    color: #fff;
+  }
+
+  .image-search-dialog__actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
