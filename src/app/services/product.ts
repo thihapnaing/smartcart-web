@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ProductSearchResult } from '../models/product-search-result';
 import { ProductDetailResponse } from '../models/product-detail-response';
+import { ImageSearchLabel } from '../models/image-search-label'; //Junior
 
 @Injectable({
   providedIn: 'root'
@@ -31,5 +32,15 @@ export class ProductService {
 
   getProductById(id: number): Observable<ProductDetailResponse> {
     return this.http.get<ProductDetailResponse>(`${this.apiBase}/${id}`);
+  }
+
+  detectImageSearchLabel(file: File): Observable<ImageSearchLabel> {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    return this.http.post<ImageSearchLabel>(
+      `${this.apiBase}/search/image`,
+      formData
+    );
   }
 }

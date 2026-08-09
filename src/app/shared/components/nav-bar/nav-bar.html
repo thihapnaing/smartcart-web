@@ -1,4 +1,5 @@
 <!-- Author: Htet Nandar (Grace) -->
+
 <nav class="nav-bar">
   <a class="brand" routerLink="/" (click)="closeMenu()">
     <span class="brand-icon">🛍️</span>
@@ -16,14 +17,44 @@
   </button>
 
   <div class="nav-collapsible" [class.open]="menuOpen">
+
     <div class="nav-links">
-      <a class="nav-link" routerLink="/search" [queryParams]="{ gender: 'WOMEN' }" (click)="closeMenu()">Women</a>
-      <a class="nav-link" routerLink="/search" [queryParams]="{ gender: 'MEN' }" (click)="closeMenu()">Men</a>
-      <a class="nav-link" routerLink="/search" (click)="closeMenu()">Categories</a>
+      <a
+        class="nav-link"
+        routerLink="/search"
+        [queryParams]="{ gender: 'WOMEN' }"
+        (click)="closeMenu()"
+      >
+        Women
+      </a>
+
+      <a
+        class="nav-link"
+        routerLink="/search"
+        [queryParams]="{ gender: 'MEN' }"
+        (click)="closeMenu()"
+      >
+        Men
+      </a>
+
+      <a
+        class="nav-link"
+        routerLink="/search"
+        (click)="closeMenu()"
+      >
+        Categories
+      </a>
     </div>
 
+    <!-- Search -->
     <div class="nav-search">
-      <label for="nav-search-input" class="sr-only">Search products</label>
+      <label
+        for="nav-search-input"
+        class="sr-only"
+      >
+        Search products
+      </label>
+
       <input
         id="nav-search-input"
         type="text"
@@ -32,15 +63,171 @@
         name="searchKeyword"
         (keyup.enter)="onSearch()"
       />
-      <button type="button" title="Search by photo">📷</button>
-    </div>
-    <div class="nav-icons">
-      <button type="button" title="Notifications">🔔</button>
-      <button type="button" title="Cart" class="cart-btn" routerLink="/cart" (click)="closeMenu()">
-        🛒
-        <span class="cart-badge" *ngIf="cartService.itemCount() > 0">{{ cartService.itemCount() }}</span>
+
+      <!-- Search by Photo -->
+      <button
+        type="button"
+        title="Search by photo"
+        (click)="openImageSearch()"
+      >
+        📷
       </button>
-      <button type="button" title="Account">👤</button>
     </div>
+
+    <!-- Navigation icons -->
+    <div class="nav-icons">
+
+      <button
+        type="button"
+        title="Notifications"
+      >
+        🔔
+      </button>
+
+      <button
+        type="button"
+        title="Cart"
+        class="cart-btn"
+        routerLink="/cart"
+        (click)="closeMenu()"
+      >
+        🛒
+
+        <span
+          class="cart-badge"
+          *ngIf="cartService.itemCount() > 0"
+        >
+          {{ cartService.itemCount() }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        title="Account"
+      >
+        👤
+      </button>
+
+    </div>
+
   </div>
 </nav>
+
+
+<!-- ========================================================= -->
+<!-- Image Search Popup -->
+<!-- ========================================================= -->
+
+<div
+  class="image-search-overlay"
+  *ngIf="imageSearchOpen()"
+  (click)="closeImageSearch()"
+>
+
+  <div
+    class="image-search-dialog"
+    (click)="$event.stopPropagation()"
+  >
+
+    <!-- Header -->
+    <div class="image-search-dialog__header">
+
+      <h2>Search by Photo</h2>
+
+      <button
+        type="button"
+        class="image-search-dialog__close"
+        (click)="closeImageSearch()"
+      >
+        ✕
+      </button>
+
+    </div>
+
+
+    <!-- Body -->
+    <div class="image-search-dialog__body">
+
+      <!-- Upload image -->
+      <label
+        class="image-search-upload"
+        *ngIf="!imagePreviewUrl()"
+      >
+
+        <span class="image-search-upload__icon">
+          📷
+        </span>
+
+        <span>
+          Click to upload an image
+        </span>
+
+        <input
+          type="file"
+          accept="image/*"
+          (change)="onImageFileSelected($event)"
+          hidden
+        />
+
+      </label>
+
+
+      <!-- Image preview -->
+      <div
+        class="image-search-preview"
+        *ngIf="imagePreviewUrl()"
+      >
+
+        <img
+          [src]="imagePreviewUrl()"
+          alt="Selected image"
+        />
+
+        <button
+          type="button"
+          (click)="clearSelectedImage()"
+        >
+          Remove photo
+        </button>
+
+      </div>
+
+
+      <!-- Error message -->
+      <p
+        class="image-search-error"
+        *ngIf="imageSearchError()"
+      >
+        {{ imageSearchError() }}
+      </p>
+
+    </div>
+
+
+    <!-- Actions -->
+    <div class="image-search-dialog__actions">
+
+      <button
+        type="button"
+        (click)="closeImageSearch()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        [disabled]="!imagePreviewUrl() || imageSearchLoading()"
+        (click)="onImageSearch()"
+      >
+        {{
+          imageSearchLoading()
+            ? 'Searching...'
+            : 'Search'
+        }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
