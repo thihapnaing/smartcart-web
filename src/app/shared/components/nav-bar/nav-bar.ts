@@ -105,17 +105,21 @@ export class NavBar {
       next: (result) => {
         this.imageSearchLoading.set(false);
 
-        if (!result.searchText?.trim()) {
+        // Backend returns an array of products
+        if (!result || !Array.isArray(result) || result.length === 0) {
           this.imageSearchError.set('No product could be detected.');
           return;
         }
 
+        console.log('Image search results:', result);
+
         this.imageSearchOpen.set(false);
         this.clearSelectedImage();
 
+        // Pass the returned products to the search-results page
         this.router.navigate(['/search'], {
-          queryParams: {
-            keyword: result.searchText.trim(),
+          state: {
+            imageSearchResults: result,
           },
         });
 
