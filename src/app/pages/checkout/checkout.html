@@ -87,6 +87,7 @@
                             <img [src]="item.imageUrl" [alt]="item.productName" style="width: 3.5rem; height: 4rem; object-fit: cover; border-radius: var(--radius);">
                             <div style="flex: 1;">
                                 <p class="cart-item__name">{{item.productName}}</p>
+                                <p class="text-muted">Size: {{item.size}}</p>
                                 <p class="text-muted">Qty: {{item.quantity}}</p>
                             </div>
                             <p class="cart-item__price">S${{ item.subtotal | number:'1.2-2' }}</p>
