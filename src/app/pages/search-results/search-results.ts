@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink, Router } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { ProductService } from '../../services/product';
 import { ProductSearchResult } from '../../models/product-search-result';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-search-results',
@@ -25,58 +26,53 @@ export class SearchResults implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // =========================================================
-    // STEP 5: CHECK IMAGE SEARCH RESULTS FIRST
-    // =========================================================
+    // Handle the first page load
+    this.handleImageSearchState(history.state);
 
-    const navigation = this.router.getCurrentNavigation();
+    // Handle image searches when we are already on /search
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        console.log('========== NAVIGATION END ==========');
+        console.log('Current URL:', this.router.url);
+        console.log('Current history state:', history.state);
 
-    const navigationState = navigation?.extras?.state;
+        this.handleImageSearchState(history.state);
+      });
 
-    const browserState = history.state;
-
-    const state = (
-      navigationState ?? browserState
-    ) as {
-      imageSearchResults?: ProductSearchResult[];
-      imageSearchPrediction?: string;
-      imageSearchLabel?: string;
-    };
-
-    console.log('========== SEARCH RESULTS PAGE ==========');
-    console.log('Navigation state:', state);
-
-    if (state?.imageSearchResults) {
-      console.log('========== IMAGE SEARCH RESULTS ==========');
-      console.log('Received image results:', state.imageSearchResults);
-      console.log('Number of image results:', state.imageSearchResults.length);
-
-      this.imageSearchMode.set(true);
-
-      this.imageSearchPrediction.set(state.imageSearchPrediction ?? '');
-
-      this.imageSearchLabel.set(state.imageSearchLabel ?? '');
-
-      this.loadImageSearchProducts(state.imageSearchResults);
-
-      // IMPORTANT:
-      // Do not run normal keyword search after image search.
-      return;
-    }
-
-    // =========================================================
-    // NORMAL KEYWORD SEARCH
-    // =========================================================
-
+    // Normal keyword search
     this.route.queryParamMap.subscribe((params) => {
       const keyword = params.get('keyword');
 
       console.log('Keyword:', keyword);
 
-      if (keyword) {
+      // Only run normal search if this is NOT an image search
+      if (keyword && !history.state?.imageSearchResults) {
         this.runSearch(keyword);
       }
     });
+  }
+
+  private handleImageSearchState(state: any): void {
+    console.log('========== CHECK IMAGE SEARCH STATE ==========');
+    console.log('State:', state);
+
+    if (!state?.imageSearchResults) {
+      return;
+    }
+
+    console.log('========== IMAGE SEARCH RESULTS ==========');
+    console.log('Received image results:', state.imageSearchResults);
+
+    console.log('Number of image results:', state.imageSearchResults.length);
+
+    this.imageSearchMode.set(true);
+
+    this.imageSearchPrediction.set(state.imageSearchPrediction ?? '');
+
+    this.imageSearchLabel.set(state.imageSearchLabel ?? '');
+
+    this.loadImageSearchProducts(state.imageSearchResults);
   }
 
   // =========================================================

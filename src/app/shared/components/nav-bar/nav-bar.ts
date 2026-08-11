@@ -5,8 +5,9 @@ import { FormsModule } from '@angular/forms';
 import {RouterLinkActive, Router, RouterLink} from '@angular/router';
 import { CartService } from '../../../services/cart';
 import { signal } from '@angular/core'; //Junior
-import { ProductService } from '../../../services/product'; //Junior
-  
+import { ProductService } from '../../../services/product';
+import { ProductSearchResult } from '../../../models/product-search-result'; //Junior
+
 /**
  * Top nav bar. Women/Men link to /search filtered by gender, Categories browses
  * everything, and the search box does a free-text search - all backed by
@@ -72,11 +73,6 @@ export class NavBar {
     this.imageSearchLoading.set(false);
   }
 
-  resetImageFileInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    input.value = '';
-  }
-
   onImageFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -132,7 +128,7 @@ export class NavBar {
     this.imageSearchError.set('');
 
     this.productService.detectImageSearchLabel(this.selectedImageFile).subscribe({
-      next: (result: any[]) => {
+      next: (result: ProductSearchResult[]) => {
         console.log('Image search results:', result);
 
         this.imageSearchLoading.set(false);
@@ -148,18 +144,33 @@ export class NavBar {
 
         const category = firstProduct.categoryName?.trim();
         const color = firstProduct.color?.trim();
+        const rawGender = firstProduct.gender?.trim();
 
         console.log('Detected category:', category);
         console.log('Detected color:', color);
+        console.log('Detected gender:', rawGender);
 
-        if (!category || !color) {
+        if (!category || !color || !rawGender) {
           this.imageSearchError.set('Could not determine the product.');
           return;
         }
 
-        // Build search keyword
-        const keyword = `${color} ${category}`;
+        // Convert gender to user-friendly wording
+        let gender = '';
 
+        if (rawGender.toUpperCase() === 'MALE' || rawGender.toUpperCase() === 'MEN') {
+          gender = 'MAN';
+        } else if (rawGender.toUpperCase() === 'FEMALE' || rawGender.toUpperCase() === 'WOMEN') {
+          gender = 'WOMAN';
+        } else {
+          console.warn('Unknown gender:', rawGender);
+          gender = rawGender;
+        }
+
+        // Build search keyword
+        const keyword = `${gender} ${color} ${category}`;
+
+        console.log('Detected gender:', gender);
         console.log('Navigating to search:', keyword);
 
         // Close image-search popup
@@ -167,11 +178,18 @@ export class NavBar {
         this.clearSelectedImage();
 
         // Go to search page
-        this.router.navigate(['/search'], {
-          queryParams: {
-            keyword: keyword,
-          },
-        });
+        this.router
+          .navigate(['/search'], {
+            state: {
+              imageSearchResults: result,
+              imageSearchPrediction: keyword,
+              imageSearchLabel: keyword,
+            },
+            onSameUrlNavigation: 'reload',
+          })
+          .then((success) => {
+            console.log('Navigation completed to /search:', success);
+          });
 
         this.closeMenu();
       },
