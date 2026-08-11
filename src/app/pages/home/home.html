@@ -58,7 +58,7 @@
         @for (product of products(); track product.id) {
           <a class="product-card" [routerLink]="['/products', product.id]">
             <div class="product-card__image-wrap">
-              <img class="product-card__image" [src]="product.imageUrl" [alt]="product.name" />
+              <img class="product-card__image" [src]="'http://localhost:8080' + product.imageUrl" [alt]="product.name" />
             </div>
             <div class="product-card__info">
               <div class="product-card__meta">{{ product.shopName }}</div>

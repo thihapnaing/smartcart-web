@@ -145,18 +145,14 @@
     <div class="image-search-dialog__body">
 
       <!-- Upload image -->
-      <label
-        class="image-search-upload"
-        *ngIf="!imagePreviewUrl()"
-      >
-
-        <span class="image-search-upload__icon">
-          📷
-        </span>
+      <label class="image-search-upload">
+  <span class="image-search-upload__icon">
+    📷
+  </span>
 
         <span>
-          Click to upload an image
-        </span>
+    {{ imagePreviewUrl() ? 'Choose another image' : 'Click to upload an image' }}
+  </span>
 
         <input
           type="file"
@@ -164,9 +160,7 @@
           (change)="onImageFileSelected($event)"
           hidden
         />
-
       </label>
-
 
       <!-- Image preview -->
       <div

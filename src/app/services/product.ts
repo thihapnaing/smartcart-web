@@ -34,11 +34,11 @@ export class ProductService {
     return this.http.get<ProductDetailResponse>(`${this.apiBase}/${id}`);
   }
 
-  detectImageSearchLabel(file: File): Observable<ImageSearchLabel> {
+  detectImageSearchLabel(file: File): Observable<ImageSearchLabel[]> {
     const formData = new FormData();
     formData.append('image', file);
 
-    return this.http.post<ImageSearchLabel>(
+    return this.http.post<ImageSearchLabel[]>(
       `${this.apiBase}/search/image`,
       formData
     );

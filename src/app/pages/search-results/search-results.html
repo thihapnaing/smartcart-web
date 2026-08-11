@@ -1,7 +1,7 @@
 <div class="results-grid">
   @for (p of results(); track p.id) {
     <a class="result-card" [routerLink]="['/products', p.id]">
-      <img [src]="p.imageUrl" [alt]="p.name" />
+      <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name" />
       <h3>{{ p.name }}</h3>
       <p class="price">S${{ p.price }}</p>
       <p class="shop">{{ p.shopName }}</p>

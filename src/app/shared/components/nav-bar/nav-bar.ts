@@ -6,7 +6,7 @@ import {RouterLinkActive, Router, RouterLink} from '@angular/router';
 import { CartService } from '../../../services/cart';
 import { signal } from '@angular/core'; //Junior
 import { ProductService } from '../../../services/product'; //Junior
-
+  
 /**
  * Top nav bar. Women/Men link to /search filtered by gender, Categories browses
  * everything, and the search box does a free-text search - all backed by
@@ -61,18 +61,39 @@ export class NavBar {
   openImageSearch(): void {
     this.imageSearchOpen.set(true);
     this.imageSearchError.set('');
+    this.imageSearchLoading.set(false);
   }
 
   closeImageSearch(): void {
     this.imageSearchOpen.set(false);
-    this.clearSelectedImage();
+    this.selectedImageFile = null;
+    this.imagePreviewUrl.set(null);
+    this.imageSearchError.set('');
+    this.imageSearchLoading.set(false);
+  }
+
+  resetImageFileInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = '';
   }
 
   onImageFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
+
+    console.log('Selected image:', file.name);
+    console.log('Image type:', file.type);
+    console.log('Image size:', file.size);
+
+    if (!file.type.startsWith('image/')) {
+      this.imageSearchError.set('Please select a valid image file.');
+      input.value = '';
+      return;
+    }
 
     this.selectedImageFile = file;
     this.imageSearchError.set('');
@@ -80,10 +101,19 @@ export class NavBar {
     const reader = new FileReader();
 
     reader.onload = () => {
+      console.log('Preview loaded:', file.name);
       this.imagePreviewUrl.set(reader.result as string);
     };
 
+    reader.onerror = () => {
+      console.error('Failed to read image:', file.name);
+      this.imageSearchError.set('Could not read the selected image.');
+    };
+
     reader.readAsDataURL(file);
+
+    // Allow another image to be selected next time
+    input.value = '';
   }
 
   clearSelectedImage(): void {
@@ -102,24 +132,44 @@ export class NavBar {
     this.imageSearchError.set('');
 
     this.productService.detectImageSearchLabel(this.selectedImageFile).subscribe({
-      next: (result) => {
+      next: (result: any[]) => {
+        console.log('Image search results:', result);
+
         this.imageSearchLoading.set(false);
 
         // Backend returns an array of products
-        if (!result || !Array.isArray(result) || result.length === 0) {
+        if (!result || result.length === 0) {
           this.imageSearchError.set('No product could be detected.');
           return;
         }
 
-        console.log('Image search results:', result);
+        // Get the detected category and colour from the first result
+        const firstProduct = result[0];
 
+        const category = firstProduct.categoryName?.trim();
+        const color = firstProduct.color?.trim();
+
+        console.log('Detected category:', category);
+        console.log('Detected color:', color);
+
+        if (!category || !color) {
+          this.imageSearchError.set('Could not determine the product.');
+          return;
+        }
+
+        // Build search keyword
+        const keyword = `${color} ${category}`;
+
+        console.log('Navigating to search:', keyword);
+
+        // Close image-search popup
         this.imageSearchOpen.set(false);
         this.clearSelectedImage();
 
-        // Pass the returned products to the search-results page
+        // Go to search page
         this.router.navigate(['/search'], {
-          state: {
-            imageSearchResults: result,
+          queryParams: {
+            keyword: keyword,
           },
         });
 
