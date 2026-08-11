@@ -1,4 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProductService } from '../../services/product';
 import { ProductSearchResult } from '../../models/product-search-result';
@@ -9,7 +10,7 @@ import { RecommendationResult } from '../../models/recommendation.model';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './home.html',
 })
 export class Home implements OnInit {

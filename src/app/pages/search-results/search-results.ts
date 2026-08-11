@@ -1,11 +1,12 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductService } from '../../services/product';
 import { ProductSearchResult } from '../../models/product-search-result';
 
 @Component({
   selector: 'app-search-results',
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './search-results.html',
   styleUrl: './search-results.css',
 })

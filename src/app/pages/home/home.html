@@ -120,7 +120,7 @@
             <div class="product-card__info">
               <div class="product-card__meta">{{ product.shopName }}</div>
               <div class="product-card__name">{{ product.name }}</div>
-              <div class="product-card__price">S${{ product.price }}</div>
+              <div class="product-card__price">S${{ product.price | number:'1.2-2'}}</div>
             </div>
           </a>
         }
