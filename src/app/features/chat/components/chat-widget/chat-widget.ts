@@ -16,6 +16,7 @@ import { SuggestionChips } from '../suggestion-chips/suggestion-chips';
 })
 export class ChatWidget implements OnInit {
   isOpen = false;
+  isExpanded = false;
   draft = '';
 
   constructor(public chat: Chat) {}
@@ -38,6 +39,10 @@ export class ChatWidget implements OnInit {
 
   toggle(): void {
     this.isOpen = !this.isOpen;
+  }
+
+  toggleExpand(): void {
+    this.isExpanded = !this.isExpanded;
   }
 
   send(): void {

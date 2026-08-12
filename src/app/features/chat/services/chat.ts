@@ -26,7 +26,7 @@ export class Chat {
         this.sessionId.set(res.sessionId);
         this.suggestions.set(res.suggestions ?? []);
         this.messages.set([
-          { senderRole: 'assistant', content: res.reply, createdAt: new Date().toISOString(), products: res.products }
+          { senderRole: 'assistant', content: res.reply, createdAt: new Date().toISOString(), products: res.products, orders: res.orders }
         ]);
       })
     );
@@ -50,7 +50,7 @@ export class Chat {
         this.suggestions.set(res.suggestions ?? []);
         this.messages.update((msgs) => [
           ...msgs,
-          { senderRole: 'assistant', content: res.reply, createdAt: new Date().toISOString(), products: res.products }
+          { senderRole: 'assistant', content: res.reply, createdAt: new Date().toISOString(), products: res.products, orders: res.orders }
         ]);
         this.isLoading.set(false);
       },

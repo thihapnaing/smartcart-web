@@ -1,12 +1,1 @@
-<!-- Author: Htet Nandar (Grace) -->
-@if (!hideNav()) {
-  @if (isAdminArea()) {
-    <app-admin-bar></app-admin-bar>
-  } @else {
-    <app-nav-bar></app-nav-bar>
-  }
-}
 <router-outlet />
-@if (showChat()) {
-  <app-chat-widget></app-chat-widget>
-}
