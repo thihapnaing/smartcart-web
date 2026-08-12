@@ -1,0 +1,6 @@
+<!-- Author: Htet Nandar (Grace) -->
+<div class="mini-card">
+  <p class="order-date">{{ order.orderDate | date:'MMM d, y' }}</p>
+  <p class="order-total">S${{ order.totalAmount.toFixed(2) }}</p>
+  <span class="status-badge" [ngClass]="order.status?.toLowerCase()">{{ statusLabel }}</span>
+</div>
