@@ -9,5 +9,6 @@ export interface ProductRequest {
     gender: Gender;
     categoryId: number;
     status: ProductStatus;
+    imageUrl: string;
     variants: VariantRequest[];
 }
