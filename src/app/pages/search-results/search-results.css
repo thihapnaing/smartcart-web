@@ -50,3 +50,19 @@
   color: #888;
   margin: 0.25rem 0.75rem 0.75rem;
 }
+
+.image-search-info {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+}
+
+.image-search-info p {
+  margin: 0.25rem 0;
+}
+
+.image-search-info strong {
+  font-weight: 600;
+}

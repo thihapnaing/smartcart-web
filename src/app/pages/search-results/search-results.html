@@ -5,6 +5,27 @@
     <h2 class="section__title">{{ pageTitle() }}</h2>
   </div>
 
+  <!--imageSearch :: Junior-->
+  @if (imageSearchMode()) {
+    <div class="image-search-info">
+
+      @if (imageSearchPrediction()) {
+        <p>
+          <strong>Prediction:</strong>
+          {{ imageSearchPrediction() }}
+        </p>
+      }
+
+      @if (imageSearchLabel()) {
+        <p>
+          <strong>Detected:</strong>
+          {{ imageSearchLabel() }}
+        </p>
+      }
+
+    </div>
+  }
+
   <!-- While waiting for the server, show placeholder boxes -->
   @if (loading()) {
     <div class="results-grid">
@@ -12,15 +33,9 @@
         <div class="skeleton" style="aspect-ratio: 2 / 3;"></div>
       }
     </div>
-  }
-
-  <!-- Server replied but sent back nothing -->
-  @else if (results().length === 0) {
+  } @else if (results().length === 0) {
     <p>No products found.</p>
-  }
-
-  <!-- Server replied with products -->
-  @else {
+  } @else {
     <div class="results-grid">
       @for (p of results(); track p.id) {
         <a class="result-card" [routerLink]="['/products', p.id]">
@@ -32,5 +47,4 @@
       }
     </div>
   }
-
 </div>
