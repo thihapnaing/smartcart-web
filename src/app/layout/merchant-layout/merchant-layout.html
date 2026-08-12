@@ -1,0 +1,21 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">SmartCartel</div>
+
+    <nav>
+      <div class="nav-label">MAIN MENU</div>
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
+      <a routerLink="/merchant/products" routerLinkActive="active" class="nav-item">Products</a>
+      <a routerLink="/merchant/orders" routerLinkActive="active" class="nav-item">Orders</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="merchant-name">SmartCartel Store</div>
+      <div class="merchant-email">merchant&#64;smartcartel.co</div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

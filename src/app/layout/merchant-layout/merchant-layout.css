@@ -1,0 +1,63 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 240px;
+  background: #2b1d15;
+  color: #e8ddd0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  padding: 0 8px;
+}
+
+.nav-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: #9c8a76;
+  margin-bottom: 8px;
+  padding: 0 8px;
+}
+
+.nav-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #e8ddd0;
+  text-decoration: none;
+  margin-bottom: 4px;
+}
+
+.nav-item.active {
+  background: #4a372a;
+  color: #fff;
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 8px;
+  font-size: 0.85rem;
+}
+
+.merchant-name {
+  font-weight: 600;
+}
+
+.merchant-email {
+  color: #9c8a76;
+}
+
+.content {
+  flex: 1;
+  background: #f5efe6;
+  padding: 32px;
+}
