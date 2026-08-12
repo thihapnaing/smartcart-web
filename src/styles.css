@@ -22,6 +22,35 @@
   --font-body:    'Plus Jakarta Sans', system-ui, sans-serif;
   --font-serif:   'Playfair Display', Georgia, serif;
   --transition:   0.2s ease;
+
+  /* Admin area (light theme) - same warm cream/brown family as the customer store tokens
+     above, just applied as a light layout (white cards on cream) rather than a dark palette.
+     Used only by components under src/app/admin. */
+  --admin-bg:         linear-gradient(160deg, #FFFFFF 0%, #F8F1E7 42%, #EEDFC7 100%);
+  --admin-surface:    #FFFFFF;
+  --admin-surface-2:  #F3E9DC;
+  --admin-border:     rgba(74,50,38,0.14);
+  --admin-fg:         #2C1A10;
+  --admin-fg-muted:   #7A5C44;
+  --admin-accent:     #8B6A4F;
+  --admin-accent-soft:rgba(139,106,79,0.12);
+  --admin-success:    #15803d;
+  --admin-success-soft: rgba(21,128,61,0.12);
+  --admin-danger:     #dc2626;
+  --admin-danger-soft: rgba(220,38,38,0.12);
+  --admin-warning:    #b45309;
+  --admin-warning-soft: rgba(180,83,9,0.12);
+  --admin-radius:     12px;
+  --admin-radius-lg:  16px;
+
+  /* Admin vertical nav - its own dark warm-brown token set (not --admin-bg), matching the
+     merchant dashboard's sidebar so the nav reads as a distinct branded rail against the
+     admin content area. */
+  --admin-nav-bg:         #1c130d;
+  --admin-nav-fg:         #f5ede4;
+  --admin-nav-fg-muted:   #b49a82;
+  --admin-nav-border:     rgba(201,164,123,0.16);
+  --admin-nav-active-bg:  rgba(217,122,70,0.18);
 }
 
 /* ─── Reset & Base ───────────────────────────────────────────────────────────── */

@@ -122,17 +122,19 @@
   class="image-search-overlay"
   *ngIf="imageSearchOpen()"
   (click)="closeImageSearch()"
+  (keydown.escape)="closeImageSearch()"
 >
 
-  <div
-    class="image-search-dialog"
-    (click)="$event.stopPropagation()"
-  >
+    <div
+      class="image-search-dialog"
+      (click)="$event.stopPropagation()"
+      (keydown.escape)="closeImageSearch()"
+    >
 
     <!-- Header -->
     <div class="image-search-dialog__header">
 
-      <h2>Search by Photo</h2>
+      <h2 id="image-search-title">Search by Photo</h2>
 
       <button
         type="button"
@@ -180,7 +182,7 @@
 
         <img
           [src]="imagePreviewUrl()"
-          alt="Selected image"
+          alt="Preview of selected upload"
         />
 
         <button
