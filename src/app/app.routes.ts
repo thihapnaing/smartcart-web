@@ -1,39 +1,48 @@
 import { Routes } from '@angular/router';
-import { CartComponent } from './pages/cart/cart';
-import { CheckoutComponent } from './pages/checkout/checkout';
-import { OrderConfirmationComponent } from './pages/order-confirmation/order-confirmation';
 import { adminAuthGuard } from './admin/guards/admin-auth-guard';
 import { AdminLayout } from './layout/admin-layout/admin-layout';
 
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./pages/home/home').then(m => m.Home)
+    loadComponent: () => import('./layout/customer-layout/customer-layout').then(m => m.CustomerLayout),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./pages/home/home').then(m => m.Home)
+      },
+      {
+        path: 'search',
+        loadComponent: () => import('./pages/search-results/search-results').then(m => m.SearchResults)
+      },
+      {
+        path: 'products/:id',
+        loadComponent: () => import('./pages/product-detail/product-detail').then(m => m.ProductDetail)
+      },
+      {
+        path: 'cart',
+        loadComponent: () => import('./pages/cart/cart').then(m => m.CartComponent)
+      },
+      {
+        path: 'checkout',
+        loadComponent: () => import('./pages/checkout/checkout').then(m => m.CheckoutComponent)
+      },
+      {
+        path: 'order-confirmation/:orderId',
+        loadComponent: () => import('./pages/order-confirmation/order-confirmation').then(m => m.OrderConfirmationComponent)
+      }
+    ]
   },
   {
-    path: 'search',
-    loadComponent: () => import('./pages/search-results/search-results').then(m => m.SearchResults)
-  },
-  {
-    path: 'products/:id',
-    loadComponent: () => import('./pages/product-detail/product-detail').then(m => m.ProductDetail)
-  },
-  {
-    path: 'cart',
-    component: CartComponent
-  },
-  {
-    path: 'checkout',
-    component: CheckoutComponent
-  },
-  {
-    path: 'order-confirmation/:orderId',
-    component: OrderConfirmationComponent
-  },
-  {
-    path: 'admin/login',
-    loadComponent: () => import('./admin/pages/admin-login/admin-login').then(m => m.AdminLogin),
-    data: { hideChat: true, hideNav: true }
+    path: 'merchant',
+    loadComponent: () => import('./layout/merchant-layout/merchant-layout').then(m => m.MerchantLayout),
+    children: [
+      {
+        path: 'products',
+        loadComponent: () => import('./pages/merchant/products/products-list/products-list').then(m => m.ProductsList)
+      }
+      // add routing to orders-list component once created by Shannon
+    ]
   },
   {
     path: 'admin',

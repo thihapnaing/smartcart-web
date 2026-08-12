@@ -1,5 +1,6 @@
 import { ProductVariantDetail } from "./product-variant-detail";
 import { Gender } from "./gender";
+import { ProductStatus } from "./product-status";
 export interface ProductDetailResponse {
     productId: number;
     name: string;
@@ -9,5 +10,6 @@ export interface ProductDetailResponse {
     gender: Gender;
     categoryName: string;
     shopName: string;
+    status: ProductStatus;
     variants: ProductVariantDetail[];
 }
