@@ -19,17 +19,14 @@ export class Chat {
 
   constructor(private readonly http: HttpClient) {}
 
-  startSession(userId?: number): Observable<ChatResponse> {
-    const params: Record<string, number> = {};
-    if (userId !== undefined) {
-      params['userId'] = userId;
-    }
-    return this.http.post<ChatResponse>(`${this.apiBase}/start`, {}, { params }).pipe(
+  // userId is resolved server-side (CurrentUserProvider) - the client no longer sends it.
+  startSession(): Observable<ChatResponse> {
+    return this.http.post<ChatResponse>(`${this.apiBase}/start`, {}).pipe(
       tap((res) => {
         this.sessionId.set(res.sessionId);
         this.suggestions.set(res.suggestions ?? []);
         this.messages.set([
-          { senderRole: 'assistant', content: res.reply, createdAt: new Date().toISOString(), products: res.products }
+          { senderRole: 'assistant', content: res.reply, createdAt: new Date().toISOString(), products: res.products, orders: res.orders }
         ]);
       })
     );
@@ -53,7 +50,7 @@ export class Chat {
         this.suggestions.set(res.suggestions ?? []);
         this.messages.update((msgs) => [
           ...msgs,
-          { senderRole: 'assistant', content: res.reply, createdAt: new Date().toISOString(), products: res.products }
+          { senderRole: 'assistant', content: res.reply, createdAt: new Date().toISOString(), products: res.products, orders: res.orders }
         ]);
         this.isLoading.set(false);
       },

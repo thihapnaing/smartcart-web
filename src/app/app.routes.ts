@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { adminAuthGuard } from './admin/guards/admin-auth-guard';
+import { AdminLayout } from './layout/admin-layout/admin-layout';
 
 export const routes: Routes = [
   {
@@ -40,6 +42,30 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/merchant/products/products-list/products-list').then(m => m.ProductsList)
       }
       // add routing to orders-list component once created by Shannon
+    ]
+  },
+  {
+    path: 'admin/login',
+    loadComponent: () => import('./admin/pages/admin-login/admin-login').then(m => m.AdminLogin)
+  },
+  {
+    path: 'admin',
+    component: AdminLayout,
+    canActivate: [adminAuthGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./admin/pages/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)
+      },
+      {
+        path: 'products',
+        loadComponent: () => import('./admin/pages/admin-products/admin-products').then(m => m.AdminProducts)
+      }
     ]
   }
 ];

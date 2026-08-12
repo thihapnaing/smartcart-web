@@ -1,0 +1,65 @@
+/* Author: Htet Nandar (Grace) */
+:host {
+  display: block;
+}
+
+.mini-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
+  flex-shrink: 0;
+  padding: 10px 10px 12px;
+  border: 1px solid #e5ded3;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mini-card .order-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4a3226;
+  margin: 0;
+}
+
+.mini-card .order-total {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a3226;
+  margin: 0;
+}
+
+.mini-card .status-badge {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+  background: #5b4636;
+  color: #ffffff;
+}
+
+.mini-card .status-badge.delivered {
+  background: #166534;
+  color: #ffffff;
+}
+
+.mini-card .status-badge.paid,
+.mini-card .status-badge.packed {
+  background: #4a3226;
+  color: #ffffff;
+}
+
+.mini-card .status-badge.pending {
+  background: #92400e;
+  color: #ffffff;
+}
+
+.mini-card .status-badge.cancelled {
+  background: #b91c1c;
+  color: #ffffff;
+}

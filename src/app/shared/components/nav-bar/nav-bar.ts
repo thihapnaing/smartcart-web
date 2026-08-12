@@ -1,10 +1,9 @@
 // Author: Htet Nandar (Grace)
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {RouterLinkActive, Router, RouterLink} from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CartService } from '../../../services/cart';
-import { signal } from '@angular/core'; //Junior
 import { ProductService } from '../../../services/product'; //Junior
 
 /**

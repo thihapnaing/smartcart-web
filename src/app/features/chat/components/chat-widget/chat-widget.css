@@ -29,6 +29,12 @@
   flex-direction: column;
   overflow: hidden;
   z-index: 1000;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.chat-panel.expanded {
+  width: 480px;
+  height: 720px;
 }
 
 .chat-panel .chat-header {
@@ -42,6 +48,8 @@
 
 .chat-panel .chat-header .title { margin: 0; font-weight: 600; font-size: 14px; color: #fff; }
 .chat-panel .chat-header .subtitle { margin: 0; font-size: 11px; opacity: 0.8; color: #fff; }
+.chat-panel .chat-header .header-actions { display: flex; align-items: center; gap: 10px; }
+.chat-panel .chat-header .expand-btn { display: flex; align-items: center; background: none; border: none; color: #fff; cursor: pointer; padding: 0; }
 .chat-panel .chat-header .close-btn { background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; }
 
 .chat-panel .typing {

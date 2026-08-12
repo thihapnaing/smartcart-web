@@ -1,0 +1,108 @@
+<div class="admin-dashboard">
+  <span class="eyebrow">OVERVIEW</span>
+  <h1>Dashboard</h1>
+  <p class="subtitle">
+    {{ today | date:'EEEE, MMMM d, y' }} · Platform health:
+    <span [class.status-ok]="platformHealthy()" [class.status-warn]="!platformHealthy()">
+      {{ platformHealthy() ? 'All good' : 'Needs attention' }}
+    </span>
+  </p>
+
+  @if (loading()) {
+    <p class="status-text">Loading dashboard…</p>
+  } @else if (stats(); as s) {
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-icon kpi-icon--revenue">💰</span>
+        <span class="kpi-label">Total Revenue</span>
+        <span class="kpi-value">S${{ s.totalRevenue | number:'1.0-0' }}</span>
+        <span class="kpi-caption">From paid orders</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon kpi-icon--listings">🏷️</span>
+        <span class="kpi-label">Active Listings</span>
+        <span class="kpi-value">{{ s.activeListings | number }}</span>
+        <span class="kpi-caption kpi-caption--up">{{ s.newListingsThisWeek }} new this week</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon kpi-icon--inactive">⏳</span>
+        <span class="kpi-label">Inactive Listings</span>
+        <span class="kpi-value">{{ s.inactiveListings | number }}</span>
+        <span class="kpi-caption">Deactivated by admin</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon kpi-icon--merchants">🏪</span>
+        <span class="kpi-label">Active Merchants</span>
+        <span class="kpi-value">{{ s.activeMerchants | number }}</span>
+        <span class="kpi-caption">Selling on SmartCart</span>
+      </div>
+    </div>
+
+    <div class="dashboard-lower">
+      <div class="panel recent-activity">
+        <div class="panel-header">
+          <div>
+            <h2>Recent Listings</h2>
+            <p class="panel-subtitle">Latest products added to the catalog</p>
+          </div>
+          <a routerLink="/admin/products" class="view-all-link">View all →</a>
+        </div>
+
+        @if (s.recentListings.length === 0) {
+          <p class="status-text">No listings yet.</p>
+        } @else {
+          <div class="activity-list">
+            @for (item of s.recentListings; track item.id) {
+              <div class="activity-row">
+                <span class="dot" [class.dot--active]="item.status === 'ACTIVE'" [class.dot--inactive]="item.status === 'INACTIVE'"></span>
+                <div class="activity-info">
+                  <span class="activity-name">{{ item.name }}</span>
+                  <span class="activity-meta">{{ item.shopName }} · {{ item.categoryName }}</span>
+                </div>
+                <span class="status-badge" [class.status-badge--active]="item.status === 'ACTIVE'" [class.status-badge--inactive]="item.status === 'INACTIVE'">
+                  {{ item.status === 'ACTIVE' ? 'Active' : 'Inactive' }}
+                </span>
+                <span class="activity-time">{{ timeAgo(item.createdAt) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="side-panels">
+        <div class="panel">
+          <h2>By Category</h2>
+          <p class="panel-subtitle">Listing distribution</p>
+          <div class="category-list">
+            @for (c of s.categoryBreakdown; track c.categoryName) {
+              <div class="category-row">
+                <div class="category-row-head">
+                  <span>{{ c.categoryName }}</span>
+                  <span class="category-count">{{ c.count | number }}</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" [style.width.%]="(c.count / maxCategoryCount()) * 100"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Gender Split</h2>
+          <p class="panel-subtitle">Across all categories</p>
+          <div class="gender-tiles">
+            @for (g of s.genderSplit; track g.gender) {
+              <div class="gender-tile"
+                   [class.gender-tile--men]="g.gender === 'MEN'"
+                   [class.gender-tile--women]="g.gender === 'WOMEN'">
+                <span class="gender-pct">{{ g.percentage }}%</span>
+                <span class="gender-label">{{ genderLabel(g.gender) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
