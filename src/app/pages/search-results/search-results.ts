@@ -1,8 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { ProductService } from '../../services/product';
 import { ProductSearchResult } from '../../models/product-search-result';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-search-results',
@@ -11,12 +12,19 @@ import { ProductSearchResult } from '../../models/product-search-result';
   styleUrl: './search-results.css',
 })
 export class SearchResults implements OnInit {
-
   // The list of products currently shown on screen.
   results = signal<ProductSearchResult[]>([]);
 
   // True while waiting for the server to reply. Used to show a loading message.
   loading = signal(true);
+
+  //searched
+  searched = signal(false);
+
+  //image-search :: Junior
+  imageSearchPrediction = signal('');
+  imageSearchLabel = signal('');
+  imageSearchMode = signal(false);
 
   // A short line describing what is being shown, e.g. "Women's Collection".
   // Displayed as the page heading.
@@ -24,7 +32,8 @@ export class SearchResults implements OnInit {
 
   constructor(
     private readonly productService: ProductService,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -35,15 +44,47 @@ export class SearchResults implements OnInit {
     //   /search?category=Tops
     //   /search                     (no extras - shows everything)
     // Whenever the address changes, this block runs again automatically.
-    this.route.queryParamMap.subscribe(params => {
+    // Handle the first page load :: Junior
+    this.handleImageSearchState(history.state);
 
+    // Handle image searches when we are already on /search :: Junior
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        console.log('========== NAVIGATION END ==========');
+        console.log('Current URL:', this.router.url);
+        console.log('Current history state:', history.state);
+
+        this.handleImageSearchState(history.state);
+      });
+
+    this.route.queryParamMap.subscribe((params) => {
       // Read each possible piece of information from the address.
       // If a piece is missing, params.get(...) gives back null.
       const keyword = params.get('keyword');
       const gender = params.get('gender');
       const category = params.get('category');
 
+      console.log('========== QUERY PARAM SEARCH ==========');
+
+      console.log('keyword:', keyword);
+      console.log('gender:', gender);
+      console.log('category:', category);
+
+      //check image search
       this.pageTitle.set(this.buildPageTitle(keyword, gender, category));
+      this.loadProducts(keyword, gender, category);
+
+      if (history.state?.imageSearchResults) {
+        console.log('Image search detected - skipping normal product search.');
+
+        return;
+      }
+
+      this.imageSearchMode.set(false);
+
+      this.pageTitle.set(this.buildPageTitle(keyword, gender, category));
+
       this.loadProducts(keyword, gender, category);
     });
   }
@@ -52,10 +93,10 @@ export class SearchResults implements OnInit {
   private loadProducts(
     keyword: string | null,
     gender: string | null,
-    category: string | null
+    category: string | null,
   ): void {
-
     this.loading.set(true);
+    this.searched.set(false);
 
     // Build the list of filters to send.
     // Anything left out is simply not sent, and the server ignores it.
@@ -75,8 +116,12 @@ export class SearchResults implements OnInit {
       searchOptions.category = category;
     }
 
+    console.log('========== LOADING NORMAL PRODUCTS ==========');
+
+    console.log('Search options:', searchOptions);
+
     this.productService.browse(searchOptions).subscribe({
-      next: data => {
+      next: (data) => {
         this.results.set(data);
         this.loading.set(false);
       },
@@ -85,7 +130,8 @@ export class SearchResults implements OnInit {
         // leaving the page stuck on "Loading".
         this.results.set([]);
         this.loading.set(false);
-      }
+        this.searched.set(true);
+      },
     });
   }
 
@@ -93,9 +139,8 @@ export class SearchResults implements OnInit {
   private buildPageTitle(
     keyword: string | null,
     gender: string | null,
-    category: string | null
+    category: string | null,
   ): string {
-
     if (keyword) {
       return `Results for "${keyword}"`;
     }
@@ -124,5 +169,65 @@ export class SearchResults implements OnInit {
       return "Men's";
     }
     return gender;
+  }
+
+  //Junior
+  private handleImageSearchState(state: any): void {
+    console.log('========== CHECK IMAGE SEARCH STATE ==========');
+
+    console.log('State:', state);
+
+    if (!state?.imageSearchResults) {
+      return;
+    }
+
+    console.log('========== IMAGE SEARCH RESULTS ==========');
+
+    console.log('Received image results:', state.imageSearchResults);
+
+    console.log('Number of image results:', state.imageSearchResults.length);
+
+    // Enable image-search mode.
+    this.imageSearchMode.set(true);
+
+    // Change page heading.
+    this.pageTitle.set('Image Search Results');
+
+    // CNN prediction.
+    this.imageSearchPrediction.set(state.imageSearchPrediction ?? '');
+
+    // Detected label.
+    this.imageSearchLabel.set(state.imageSearchLabel ?? '');
+
+    // Display the products returned by the backend.
+    this.loadImageSearchProducts(state.imageSearchResults);
+  }
+
+  private loadImageSearchProducts(imageResults: ProductSearchResult[]): void {
+    console.log('========== IMAGE SEARCH PRODUCTS ==========');
+
+    console.log('Received products:', imageResults);
+
+    console.log('Number of products:', imageResults?.length);
+
+    // Stop loading spinner.
+    this.loading.set(false);
+
+    if (!imageResults || imageResults.length === 0) {
+      console.log('No products returned from image search.');
+
+      this.results.set([]);
+      this.searched.set(true);
+
+      return;
+    }
+
+    this.results.set(imageResults);
+
+    this.searched.set(true);
+
+    console.log('========== PRODUCTS FOR DISPLAY ==========');
+
+    console.log('results():', this.results());
   }
 }
