@@ -19,12 +19,9 @@ export class Chat {
 
   constructor(private readonly http: HttpClient) {}
 
-  startSession(userId?: number): Observable<ChatResponse> {
-    const params: Record<string, number> = {};
-    if (userId !== undefined) {
-      params['userId'] = userId;
-    }
-    return this.http.post<ChatResponse>(`${this.apiBase}/start`, {}, { params }).pipe(
+  // userId is resolved server-side (CurrentUserProvider) - the client no longer sends it.
+  startSession(): Observable<ChatResponse> {
+    return this.http.post<ChatResponse>(`${this.apiBase}/start`, {}).pipe(
       tap((res) => {
         this.sessionId.set(res.sessionId);
         this.suggestions.set(res.suggestions ?? []);

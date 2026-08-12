@@ -21,9 +21,9 @@ export class ChatWidget implements OnInit {
   constructor(public chat: Chat) {}
 
   ngOnInit(): void {
-    // Hardcoded until JWT auth lands - matches CartController's hardcoded 2L (Grace),
-    // the customer the seeded demo order/order-history belongs to.
-    this.chat.startSession(2).subscribe({
+    // No userId sent from the client - the backend resolves the current customer itself
+    // (CurrentUserProvider.getCurrentCustomer(), hardcoded to id 2L/Grace until JWT auth lands).
+    this.chat.startSession().subscribe({
       error: () => {
         this.chat.messages.set([
           {
