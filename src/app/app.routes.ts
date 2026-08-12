@@ -45,11 +45,19 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'admin/login',
+    loadComponent: () => import('./admin/pages/admin-login/admin-login').then(m => m.AdminLogin)
+  },
+  {
     path: 'admin',
     component: AdminLayout,
     canActivate: [adminAuthGuard],
-    data: { hideChat: true, isAdminArea: true },
     children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
       {
         path: 'dashboard',
         loadComponent: () => import('./admin/pages/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)
