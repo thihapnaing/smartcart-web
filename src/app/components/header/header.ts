@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart';
+import { ImageSearchService, ProductSearchResult } from '../../services/image-search.service';
 
 // This component displays the top bar that appears on every page of the
 // site: the logo, the navigation links, the search box, and the icons on
@@ -19,9 +20,17 @@ export class Header {
   // picked, since image search isn't wired up to the backend yet.
   imageSearchMessage = signal('');
 
+  //Junior
+  imageSearching = signal(false);
+
+  selectedImageFile: File | null = null;
+
+  selectedImageUrl = signal<string | null>(null);
+
   constructor(
     private readonly router: Router,
-    protected readonly cart: CartService
+    protected readonly cart: CartService,
+    private readonly imageSearchService: ImageSearchService,
   ) {}
 
   // Runs when Enter is pressed in the search box, or the search icon is clicked.
@@ -33,15 +42,90 @@ export class Header {
     this.router.navigate(['/search'], { queryParams: { keyword: trimmedKeyword } });
   }
 
-  // Runs when a file is chosen through the hidden file picker triggered
-  // by the camera button. Image search isn't available on the backend
-  // yet, so this just confirms a file was picked for now.
+  //Junior
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const selectedFile = input.files?.[0];
-    if (selectedFile) {
-      this.imageSearchMessage.set('Image search is coming soon.');
+
+    if (!selectedFile) {
+      return;
     }
+
+    console.log('Selected image:', selectedFile.name);
+
+    if (!selectedFile.type.startsWith('image/')) {
+      this.imageSearchMessage.set('Please select a valid image file.');
+      input.value = '';
+      return;
+    }
+
+    this.selectedImageFile = selectedFile;
+
+    this.selectedImageUrl.set(URL.createObjectURL(selectedFile));
+
+    this.imageSearchMessage.set('');
+
+    // DO NOT search here.
+    // The user will click the Search button.
+
     input.value = '';
+  }
+
+  searchByImage(): void {
+    if (!this.selectedImageFile) {
+      return;
+    }
+
+    console.log('========== ANGULAR IMAGE SEARCH ==========');
+    console.log('Sending:', this.selectedImageFile.name);
+
+    this.imageSearching.set(true);
+    this.imageSearchMessage.set('');
+
+    this.imageSearchService.searchByImage(this.selectedImageFile).subscribe({
+      next: (products: ProductSearchResult[]) => {
+        console.log('========== IMAGE SEARCH SUCCESS ==========');
+        console.log('IMAGE SEARCH RESULTS:', products);
+        console.log('RESULT TYPE:', typeof products);
+        console.log('IS ARRAY:', Array.isArray(products));
+        console.log('RESULT COUNT:', products?.length);
+
+        if (Array.isArray(products) && products.length > 0) {
+          console.log('FIRST PRODUCT:', products[0]);
+        }
+
+        this.imageSearching.set(false);
+
+        console.log('Products found:', products.length);
+
+        if (products.length === 0) {
+          this.imageSearchMessage.set('No matching products found.');
+          return;
+        }
+
+        this.router.navigate(['/search'], {
+          state: {
+            imageSearchResults: products,
+          },
+        });
+      },
+
+      error: (error) => {
+        console.error('========== IMAGE SEARCH ERROR ==========');
+        console.error(error);
+
+        this.imageSearching.set(false);
+
+        this.imageSearchMessage.set(
+          error?.error?.message || 'Image search failed. Please try again.',
+        );
+      },
+    });
+  }
+
+  openImagePicker(): void {
+    const input = document.getElementById('header-image-input') as HTMLInputElement;
+
+    input?.click();
   }
 }

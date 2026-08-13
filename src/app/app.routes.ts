@@ -40,8 +40,11 @@ export const routes: Routes = [
       {
         path: 'products',
         loadComponent: () => import('./pages/merchant/products/products-list/products-list').then(m => m.ProductsList)
-      }
-      // add routing to orders-list component once created by Shannon
+      },
+    {
+        path: 'orders',
+        loadComponent: () => import('./pages/merchant/orders/orders-list/orders-list').then(m => m.OrdersList)
+}
     ]
   },
   {

@@ -4,10 +4,10 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ProductSearchResult } from '../models/product-search-result';
 import { ProductDetailResponse } from '../models/product-detail-response';
-import { ImageSearchLabel } from '../models/image-search-label'; //Junior
+import { ImageSearchResponse } from '../models/image-search-response';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductService {
   private readonly apiBase = `${environment.apiUrl}/products`;
@@ -15,7 +15,13 @@ export class ProductService {
   constructor(private readonly http: HttpClient) {}
 
   /** All params optional; newestFirst=true sorts by createdAt desc. */
-  browse(options?: { keyword?: string; category?: string; gender?: string; newestFirst?: boolean; limit?: number }): Observable<ProductSearchResult[]> {
+  browse(options?: {
+    keyword?: string;
+    category?: string;
+    gender?: string;
+    newestFirst?: boolean;
+    limit?: number;
+  }): Observable<ProductSearchResult[]> {
     const params: Record<string, string | number | boolean> = {};
     if (options?.keyword) params['keyword'] = options.keyword;
     if (options?.category) params['category'] = options.category;
@@ -24,9 +30,10 @@ export class ProductService {
     if (options?.limit !== undefined) params['limit'] = options.limit;
     return this.http.get<ProductSearchResult[]>(`${this.apiBase}/browse`, { params });
   }
+
   searchProducts(keyword: string): Observable<ProductSearchResult[]> {
     return this.http.get<ProductSearchResult[]>(`${this.apiBase}/search`, {
-      params: { keyword: keyword }
+      params: { keyword: keyword },
     });
   }
 
@@ -34,13 +41,12 @@ export class ProductService {
     return this.http.get<ProductDetailResponse>(`${this.apiBase}/${id}`);
   }
 
-  detectImageSearchLabel(file: File): Observable<ImageSearchLabel> {
+  //Junior
+  detectImageSearchLabel(file: File): Observable<ImageSearchResponse> {
     const formData = new FormData();
+
     formData.append('image', file);
 
-    return this.http.post<ImageSearchLabel>(
-      `${this.apiBase}/search/image`,
-      formData
-    );
+    return this.http.post<ImageSearchResponse>(`${this.apiBase}/search/image`, formData);
   }
 }
