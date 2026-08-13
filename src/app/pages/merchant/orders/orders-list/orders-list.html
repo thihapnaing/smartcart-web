@@ -1,0 +1,51 @@
+<div class="merchant-orders-page">
+  <h1>Orders</h1>
+  <p class="page-subtitle">Manage and track your customer orders.</p>
+
+  <!-- One button per tab; clicking a tab updates which orders are shown -->
+  <div class="status-tabs">
+    <button
+      *ngFor="let tab of statusTabs"
+      class="tab-button"
+      [class.active]="selectedStatus === tab"
+      (click)="selectStatus(tab)">
+      {{ tab === 'All' ? 'All Orders' : tab }}
+    </button>
+  </div>
+
+  <p *ngIf="isLoading">Loading orders...</p>
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <table *ngIf="!isLoading && !errorMessage" class="orders-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Product</th>
+        <th>Size</th>
+        <th>Qty</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of filteredOrders">
+        <td>ORD-{{ item.orderId }}</td>
+        <td>{{ item.buyerFirstName }} {{ item.buyerLastName }}</td>
+        <td>{{ item.productName }}</td>
+        <td>{{ item.size }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.subtotal | currency }}</td>
+        <td>{{ item.orderDate | date:'MMM d' }}</td>
+        <td>
+          <span class="status-badge" [ngClass]="item.orderStatus.toLowerCase()">
+            {{ item.orderStatus | titlecase }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!isLoading && !errorMessage && filteredOrders.length === 0">No orders match this filter.</p>
+</div>

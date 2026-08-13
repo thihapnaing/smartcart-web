@@ -46,6 +46,7 @@ export class CheckoutComponent implements OnInit {
 
     this.userProfileService.getProfile().subscribe({
       next: (profile) => {
+        console.log('PROFILE:', profile);
         this.checkoutForm.patchValue({
           firstName: profile.firstName,
           lastName: profile.lastName,

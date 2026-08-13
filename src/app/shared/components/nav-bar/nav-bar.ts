@@ -1,12 +1,11 @@
 // Author: Htet Nandar (Grace)
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {RouterLinkActive, Router, RouterLink} from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CartService } from '../../../services/cart';
-import { signal } from '@angular/core'; //Junior
 import { ProductService } from '../../../services/product';
-import { ProductSearchResult } from '../../../models/product-search-result'; //Junior
+import { ImageSearchResponse } from '../../../models/image-search-response'; //Junior
 
 /**
  * Top nav bar. Women/Men link to /search filtered by gender, Categories browses
@@ -119,87 +118,127 @@ export class NavBar {
   }
 
   onImageSearch(): void {
+
     if (!this.selectedImageFile) {
-      this.imageSearchError.set('Please select an image first.');
+      this.imageSearchError.set(
+        'Please select an image first.'
+      );
       return;
     }
 
     this.imageSearchLoading.set(true);
     this.imageSearchError.set('');
 
-    this.productService.detectImageSearchLabel(this.selectedImageFile).subscribe({
-      next: (result: ProductSearchResult[]) => {
-        console.log('Image search results:', result);
+    this.productService
+      .detectImageSearchLabel(
+        this.selectedImageFile
+      )
+      .subscribe({
 
-        this.imageSearchLoading.set(false);
+        next: (response: ImageSearchResponse) => {
 
-        // Backend returns an array of products
-        if (!result || result.length === 0) {
-          this.imageSearchError.set('No product could be detected.');
-          return;
-        }
+          console.log(
+            '========== IMAGE SEARCH RESPONSE =========='
+          );
 
-        // Get the detected category and colour from the first result
-        const firstProduct = result[0];
+          console.log(
+            'Prediction:',
+            response.prediction
+          );
 
-        const category = firstProduct.categoryName?.trim();
-        const color = firstProduct.color?.trim();
-        const rawGender = firstProduct.gender?.trim();
+          console.log(
+            'Search label:',
+            response.searchLabel
+          );
 
-        console.log('Detected category:', category);
-        console.log('Detected color:', color);
-        console.log('Detected gender:', rawGender);
+          console.log(
+            'Gender:',
+            response.gender
+          );
 
-        if (!category || !color || !rawGender) {
-          this.imageSearchError.set('Could not determine the product.');
-          return;
-        }
+          console.log(
+            'Color:',
+            response.color
+          );
 
-        // Convert gender to user-friendly wording
-        let gender = '';
+          console.log(
+            'Category:',
+            response.category
+          );
 
-        if (rawGender.toUpperCase() === 'MALE' || rawGender.toUpperCase() === 'MEN') {
-          gender = 'MAN';
-        } else if (rawGender.toUpperCase() === 'FEMALE' || rawGender.toUpperCase() === 'WOMEN') {
-          gender = 'WOMAN';
-        } else {
-          console.warn('Unknown gender:', rawGender);
-          gender = rawGender;
-        }
+          console.log(
+            'Products:',
+            response.products
+          );
 
-        // Build search keyword
-        const keyword = `${gender} ${color} ${category}`;
+          this.imageSearchLoading.set(false);
 
-        console.log('Detected gender:', gender);
-        console.log('Navigating to search:', keyword);
+          if (
+            !response.products ||
+            response.products.length === 0
+          ) {
 
-        // Close image-search popup
-        this.imageSearchOpen.set(false);
-        this.clearSelectedImage();
+            this.imageSearchError.set(
+              'No matching products found.'
+            );
 
-        // Go to search page
-        this.router
-          .navigate(['/search'], {
-            state: {
-              imageSearchResults: result,
-              imageSearchPrediction: keyword,
-              imageSearchLabel: keyword,
-            },
-            onSameUrlNavigation: 'reload',
-          })
-          .then((success) => {
-            console.log('Navigation completed to /search:', success);
+            return;
+          }
+
+          // Close popup.
+          this.imageSearchOpen.set(false);
+          this.clearSelectedImage();
+
+          // Pass complete AI response to SearchResults.
+          this.router.navigate(
+            ['/search'],
+            {
+              state: {
+                imageSearchResults:
+                response.products,
+
+                imageSearchPrediction:
+                response.prediction,
+
+                imageSearchLabel:
+                response.searchLabel,
+
+                imageSearchGender:
+                response.gender,
+
+                imageSearchColor:
+                response.color,
+
+                imageSearchCategory:
+                response.category
+              },
+              onSameUrlNavigation: 'reload'
+            }
+          ).then((success) => {
+
+            console.log(
+              'Navigation completed to /search:',
+              success
+            );
+
           });
 
-        this.closeMenu();
-      },
+          this.closeMenu();
+        },
 
-      error: (error) => {
-        console.error('Image search failed:', error);
+        error: (error) => {
 
-        this.imageSearchLoading.set(false);
-        this.imageSearchError.set('Image search failed. Please try again.');
-      },
-    });
+          console.error(
+            'Image search failed:',
+            error
+          );
+
+          this.imageSearchLoading.set(false);
+
+          this.imageSearchError.set(
+            'Image search failed. Please try again.'
+          );
+        }
+      });
   }
 }

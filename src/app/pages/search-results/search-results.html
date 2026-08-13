@@ -1,13 +1,50 @@
-<div class="results-grid">
-  @for (p of results(); track p.id) {
-    <a class="result-card" [routerLink]="['/products', p.id]">
-      <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name" />
-      <h3>{{ p.name }}</h3>
-      <p class="price">S${{ p.price }}</p>
-      <p class="shop">{{ p.shopName }}</p>
-    </a>
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3rem;">
+
+  <!-- Heading tells the user which collection or search this is -->
+  <div class="section__header">
+    <h2 class="section__title">{{ pageTitle() }}</h2>
+  </div>
+
+  <!--imageSearch :: Junior-->
+  @if (imageSearchMode()) {
+    <div class="image-search-info">
+
+      @if (imageSearchPrediction()) {
+        <p>
+          <strong>Prediction:</strong>
+          {{ imageSearchPrediction() }}
+        </p>
+      }
+
+      @if (imageSearchLabel()) {
+        <p>
+          <strong>Detected:</strong>
+          {{ imageSearchLabel() }}
+        </p>
+      }
+
+    </div>
   }
-  @if (searched() && results().length === 0) {
+
+  <!-- While waiting for the server, show placeholder boxes -->
+  @if (loading()) {
+    <div class="results-grid">
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <div class="skeleton" style="aspect-ratio: 2 / 3;"></div>
+      }
+    </div>
+  } @else if (results().length === 0) {
     <p>No products found.</p>
+  } @else {
+    <div class="results-grid">
+      @for (p of results(); track p.id) {
+        <a class="result-card" [routerLink]="['/products', p.id]">
+          <img [src]="p.imageUrl" [alt]="p.name" />
+          <h3>{{ p.name }}</h3>
+          <p class="price">S${{ p.price | number:'1.2-2'}}</p>
+          <p class="shop">{{ p.shopName }}</p>
+        </a>
+      }
+    </div>
   }
 </div>

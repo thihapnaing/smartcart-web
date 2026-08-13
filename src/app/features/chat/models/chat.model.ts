@@ -16,11 +16,21 @@ export interface ProductSummary {
   defaultVariantId: number | null;
 }
 
+/** Matches Spring Boot's OrderSummaryDto exactly - the trimmed-down order shape "track my
+ * order" style chat replies carry, rendered as mini order cards below the reply bubble. */
+export interface OrderSummary {
+  orderId: number;
+  totalAmount: number;
+  status: string;
+  orderDate: string;
+}
+
 export interface ChatMessage {
   senderRole: 'user' | 'assistant';
   content: string;
   createdAt: string;
   products?: ProductSummary[];
+  orders?: OrderSummary[];
 }
 
 /** Matches Spring Boot's ChatResponse DTO exactly. */
@@ -28,5 +38,6 @@ export interface ChatResponse {
   sessionId: string;
   reply: string;
   products?: ProductSummary[];
+  orders?: OrderSummary[];
   suggestions?: string[];
 }
