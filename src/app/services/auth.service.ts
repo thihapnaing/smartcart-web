@@ -18,7 +18,7 @@ export class AuthService {
   login(request: LoginRequest): Observable<LoginResponse> {
     console.log('AUTH SERVICE LOGIN CALLED');
     console.log('Login URL:', `${this.apiUrl}/login`);
-    console.log('Login username:', request.username);
+    console.log('Login email:', request.email);
 
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
       tap((response) => {
@@ -44,6 +44,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('username');
+    localStorage.removeItem('email');
     localStorage.removeItem('role');
 
     console.log('Local authentication data cleared');
@@ -65,21 +66,10 @@ export class AuthService {
   }
 
   getEmail(): string {
-    const user = localStorage.getItem('user');
+    return localStorage.getItem('email') || '';
+  }
 
-    if (!user) {
-      return '';
-    }
-
-    try {
-      const userData = JSON.parse(user);
-      return userData.email || '';
-    } catch {
-      return '';
-    }
-}
-
-    getRole(): string {
+  getRole(): string {
     return localStorage.getItem('role') || '';
   }
 }
