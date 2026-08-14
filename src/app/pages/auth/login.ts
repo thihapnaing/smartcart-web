@@ -45,7 +45,7 @@ export class Login {
 
     this.authService
       .login({
-        username: this.email.trim(),
+        email: this.email.trim(),
         password: this.password,
       })
       .subscribe({
@@ -61,7 +61,7 @@ export class Login {
           this.loading = false;
 
           if (error.status === 401) {
-            this.error = 'Invalid username or password.';
+            this.error = 'Invalid email or password.';
           } else {
             this.error = 'Unable to login. Please try again.';
           }
