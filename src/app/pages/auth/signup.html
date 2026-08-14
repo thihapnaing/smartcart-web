@@ -1,0 +1,239 @@
+<div class="signup-page">
+
+  <div class="signup-container">
+
+    <!-- Header -->
+    <div class="signup-header">
+
+      <h1>Create account.</h1>
+
+      <p>
+        Join SmartCartel for exclusive access.
+      </p>
+
+    </div>
+
+
+    <!-- Sign In / Sign Up Toggle -->
+    <div class="auth-toggle">
+
+      <a
+        routerLink="/login"
+        class="auth-toggle-option"
+      >
+        Sign in
+      </a>
+
+      <div
+        class="auth-toggle-option active"
+      >
+        Sign up
+      </div>
+
+    </div>
+
+
+    <!-- Signup Form -->
+    <form
+      class="signup-form"
+      (ngSubmit)="signup()"
+      #signupForm="ngForm"
+    >
+
+      <!-- Full Name -->
+      <div class="form-group">
+
+        <label for="fullName">
+          USERNAME
+        </label>
+
+        <input
+          id="fullName"
+          type="text"
+          name="fullName"
+          [(ngModel)]="fullName"
+          placeholder="Mei Tan"
+          autocomplete="name"
+          [disabled]="loading"
+        />
+
+      </div>
+
+
+      <!-- Email -->
+      <div class="form-group">
+
+        <label for="email">
+          EMAIL
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="mei@example.com"
+          autocomplete="email"
+          [disabled]="loading"
+        />
+
+      </div>
+
+
+      <!-- Password -->
+      <div class="form-group">
+
+        <label for="password">
+          PASSWORD
+        </label>
+
+        <div class="password-wrapper">
+
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="••••••••"
+            autocomplete="new-password"
+            [disabled]="loading"
+          />
+
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePassword()"
+            [disabled]="loading"
+            [attr.aria-label]="
+              showPassword
+                ? 'Hide password'
+                : 'Show password'
+            "
+          >
+
+            <!-- Eye open -->
+            <svg
+              *ngIf="!showPassword"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+              />
+
+              <circle
+                cx="12"
+                cy="12"
+                r="2.5"
+              />
+            </svg>
+
+
+            <!-- Eye closed -->
+            <svg
+              *ngIf="showPassword"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M3 3l18 18"
+              />
+
+              <path
+                d="M10.6 6.2A10.8 10.8 0 0 1 12 6c6.5 0 10 6 10 6a17.7 17.7 0 0 1-4.1 4.4"
+              />
+
+              <path
+                d="M6.2 6.7C3.5 8.5 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"
+              />
+            </svg>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- Terms -->
+      <p class="terms-text">
+
+        By creating an account you agree to our
+        <a href="javascript:void(0)">
+          Terms of Service
+        </a>
+        and
+        <a href="javascript:void(0)">
+          Privacy Policy
+        </a>.
+
+      </p>
+
+
+      <!-- Error -->
+      <div
+        class="signup-error"
+        *ngIf="errorMessage"
+      >
+        {{ errorMessage }}
+      </div>
+
+
+      <!-- Create Account -->
+      <button
+        type="submit"
+        class="signup-button"
+        [disabled]="loading"
+      >
+
+        <span *ngIf="!loading">
+          Create my account
+        </span>
+
+        <span *ngIf="loading">
+          Creating account...
+        </span>
+
+      </button>
+
+    </form>
+
+
+    <!-- Existing Account -->
+    <div class="login-link">
+
+      <span>
+        Already have an account?
+      </span>
+
+      <a routerLink="/login">
+        Sign in
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- Help button -->
+  <button
+    type="button"
+    class="help-button"
+    title="Help"
+  >
+    ?
+  </button>
+
+</div>

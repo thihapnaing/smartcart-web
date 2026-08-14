@@ -1,5 +1,6 @@
-// Matches Spring Boot's LoginRequest DTO exactly (POST /api/auth/login).
+//Author: Junior
+
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
