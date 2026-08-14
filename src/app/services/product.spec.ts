@@ -1,85 +1,152 @@
+// This file tests the real ProductService, not a stand-in for it. Every other
+// spec file so far has replaced ProductService with a fake object, which is
+// correct for testing components in isolation, but it also means the actual
+// code inside product.ts — the part that builds each web address and reads
+// each server reply — was never run by any test. This file runs it directly.
+//
+// Since ProductService makes real HTTP calls, HttpTestingController stands
+// in for the network: it lets a test say "expect one request to this
+// address" and hand back a made-up reply with req.flush(...), without a
+// real server ever being involved.
+
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+
 import { ProductService } from './product';
 import { environment } from '../../environments/environment';
 import { ProductSearchResult } from '../models/product-search-result';
 import { ProductDetailResponse } from '../models/product-detail-response';
+import { ImageSearchLabel } from '../models/image-search-label';
 
 describe('ProductService', () => {
-  let productService: ProductService;
-  let httpTestingController: HttpTestingController;
+  let service: ProductService;
+  let httpMock: HttpTestingController;
+
+  // Rebuilt from the same environment value product.ts itself reads, so this
+  // file does not need to guess or hard-code the real API address.
+  const apiBase = `${environment.apiUrl}/products`;
 
   beforeEach(() => {
-    // Build a fresh, isolated Angular test environment before each test runs,
-    // so tests never leak state into one another.
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting()
-      ]
+      providers: [ProductService, provideHttpClient(), provideHttpClientTesting()],
     });
 
-    // Request a real, working instance of ProductService from the test environment.
-    productService = TestBed.inject(ProductService);
-
-    // Request the fake network controller that stands in for a real server.
-    httpTestingController = TestBed.inject(HttpTestingController);
+    service = TestBed.inject(ProductService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
+  // Confirms that every request a test expected was actually sent, and that
+  // no extra, unexpected request slipped through unnoticed.
   afterEach(() => {
-    // Fail the test loudly if a request was made but never checked or answered,
-    // since an unchecked request usually means a bug.
-    httpTestingController.verify();
+    httpMock.verify();
   });
 
-  it('should send a GET request to the search endpoint with the keyword and return the results', () => {
-    // A minimal stand-in for what the real server would send back.
-    const fakeSearchResults: ProductSearchResult[] = [];
+  describe('browse', () => {
+    it('calls the browse endpoint with no filters when none are given', () => {
+      const sampleResults: ProductSearchResult[] = [];
 
-    let actualResults: ProductSearchResult[] | undefined;
+      service.browse().subscribe(result => {
+        expect(result).toEqual(sampleResults);
+      });
 
-    // Call the real method under test. Nothing happens over the network yet;
-    // subscribing is what triggers the request.
-    productService.searchProducts('shirt').subscribe(results => {
-      actualResults = results;
+      // req.url is the address only; query filters live separately on
+      // req.params, which is why both are checked here.
+      const req = httpMock.expectOne(
+        request => request.url === `${apiBase}/browse` && request.params.keys().length === 0
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(sampleResults);
     });
 
-    // Look for the one outgoing request whose base address matches the search endpoint.
-    const request = httpTestingController.expectOne(
-      outgoingRequest => outgoingRequest.url === `${environment.apiUrl}/products/search`
-    );
+    it('sends keyword, category, gender, newestFirst, and limit as query filters when given', () => {
+      service
+        .browse({
+          keyword: 'shoes',
+          category: 'Shoes',
+          gender: 'WOMEN',
+          newestFirst: true,
+          limit: 5,
+        })
+        .subscribe();
 
-    // A search should read data, not change it, so the method must be GET.
-    expect(request.request.method).toBe('GET');
+      const req = httpMock.expectOne(request => request.url === `${apiBase}/browse`);
+      expect(req.request.params.get('keyword')).toBe('shoes');
+      expect(req.request.params.get('category')).toBe('Shoes');
+      expect(req.request.params.get('gender')).toBe('WOMEN');
+      expect(req.request.params.get('newestFirst')).toBe('true');
+      expect(req.request.params.get('limit')).toBe('5');
+      req.flush([]);
+    });
 
-    // Confirm the search word was attached as a query parameter, not lost along the way.
-    expect(request.request.params.get('keyword')).toBe('shirt');
+    it('leaves out any filter that was not given', () => {
+      service.browse({ keyword: 'shoes' }).subscribe();
 
-    // Manually deliver the fake response, playing the role of the real server.
-    request.flush(fakeSearchResults);
+      const req = httpMock.expectOne(request => request.url === `${apiBase}/browse`);
+      expect(req.request.params.get('keyword')).toBe('shoes');
+      expect(req.request.params.has('category')).toBe(false);
+      expect(req.request.params.has('gender')).toBe(false);
+      expect(req.request.params.has('newestFirst')).toBe(false);
+      expect(req.request.params.has('limit')).toBe(false);
+      req.flush([]);
+    });
 
-    // Confirm the service handed back exactly what the fake server sent.
-    expect(actualResults).toEqual(fakeSearchResults);
+    it('still sends newestFirst when it is explicitly set to false', () => {
+      // The code checks "!== undefined" rather than a plain truthy check, so
+      // an explicit false must still be sent rather than treated as omitted.
+      service.browse({ newestFirst: false }).subscribe();
+
+      const req = httpMock.expectOne(request => request.url === `${apiBase}/browse`);
+      expect(req.request.params.get('newestFirst')).toBe('false');
+      req.flush([]);
+    });
   });
 
-  it('should send a GET request to the correct product-by-id endpoint', () => {
-    // Cast an empty object to the expected shape; the exact fields do not matter
-    // for this test, only that the same object comes back out.
-    const fakeProduct = {} as ProductDetailResponse;
+  describe('searchProducts', () => {
+    it('calls the search endpoint with the keyword as a query filter', () => {
+      const sampleResults: ProductSearchResult[] = [];
 
-    let actualProduct: ProductDetailResponse | undefined;
+      service.searchProducts('shoes').subscribe(result => {
+        expect(result).toEqual(sampleResults);
+      });
 
-    productService.getProductById(42).subscribe(product => {
-      actualProduct = product;
+      const req = httpMock.expectOne(
+        request => request.url === `${apiBase}/search` && request.params.get('keyword') === 'shoes'
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(sampleResults);
     });
+  });
 
-    const request = httpTestingController.expectOne(`${environment.apiUrl}/products/42`);
+  describe('getProductById', () => {
+    it('calls the product endpoint for the given id', () => {
+      const sampleProduct = {} as ProductDetailResponse;
 
-    expect(request.request.method).toBe('GET');
+      service.getProductById(42).subscribe(result => {
+        expect(result).toEqual(sampleProduct);
+      });
 
-    request.flush(fakeProduct);
+      const req = httpMock.expectOne(`${apiBase}/42`);
+      expect(req.request.method).toBe('GET');
+      req.flush(sampleProduct);
+    });
+  });
 
-    expect(actualProduct).toEqual(fakeProduct);
+  describe('detectImageSearchLabel', () => {
+    it('sends the file as form data to the image search endpoint', () => {
+      const file = new File(['fake-image-bytes'], 'shoe.jpg', { type: 'image/jpeg' });
+      const sampleLabel = {} as ImageSearchLabel;
+
+      service.detectImageSearchLabel(file).subscribe(result => {
+        expect(result).toEqual(sampleLabel);
+      });
+
+      const req = httpMock.expectOne(`${apiBase}/search/image`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toBeInstanceOf(FormData);
+      expect((req.request.body as FormData).get('image')).toBe(file);
+      req.flush(sampleLabel);
+    });
   });
 });
