@@ -1,171 +1,75 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  token: string;
-  userId: number;
-  username: string;
-  email: string;
-  role: string;
-}
+import { LoginRequest } from '../models/login-request';
+import { LoginResponse } from '../models/login-response';
+import { RegisterRequest } from '../models/register-request';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
+
+//Author: Junior
 export class AuthService {
+  private http = inject(HttpClient);
 
-  private readonly API_URL = 'http://localhost:8080/api/auth';
+  private readonly apiUrl = 'http://localhost:8080/api/auth';
 
-  private readonly TOKEN_KEY = 'smartcart_token';
-  private readonly USER_KEY = 'smartcart_user';
+  login(request: LoginRequest): Observable<LoginResponse> {
+    console.log('AUTH SERVICE LOGIN CALLED');
+    console.log('Login URL:', `${this.apiUrl}/login`);
+    console.log('Login username:', request.username);
 
-  constructor(private http: HttpClient) {}
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
+      tap((response) => {
+        console.log('LOGIN RESPONSE:', response);
 
-  /**
-   * Login existing user
-   */
-  login(request: LoginRequest): Observable<AuthResponse> {
-
-    return this.http
-      .post<AuthResponse>(
-        `${this.API_URL}/login`,
-        request
-      )
-      .pipe(
-        tap(response => {
-          this.saveAuthentication(response);
-        })
-      );
-  }
-
-  /**
-   * Register new customer
-   */
-  register(request: RegisterRequest): Observable<AuthResponse> {
-
-    return this.http
-      .post<AuthResponse>(
-        `${this.API_URL}/register`,
-        request
-      )
-      .pipe(
-        tap(response => {
-          this.saveAuthentication(response);
-        })
-      );
-  }
-
-  /**
-   * Save JWT and user information
-   */
-  private saveAuthentication(response: AuthResponse): void {
-
-    localStorage.setItem(
-      this.TOKEN_KEY,
-      response.token
-    );
-
-    localStorage.setItem(
-      this.USER_KEY,
-      JSON.stringify({
-        userId: response.userId,
-        username: response.username,
-        email: response.email,
-        role: response.role
-      })
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('username', response.username);
+        localStorage.setItem('email', response.email);
+        localStorage.setItem('role', response.role);
+      }),
     );
   }
 
-  /**
-   * Get JWT token
-   */
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+  register(data: { username: string; email: string; password: string }) {
+    console.log('AUTH SERVICE REGISTER CALLED');
+
+    return this.http.post<any>(`${this.apiUrl}/register`, data);
   }
 
-  /**
-   * Get logged-in user
-   */
-  getCurrentUser(): AuthResponse | null {
-
-    const user = localStorage.getItem(this.USER_KEY);
-
-    if (!user) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(user) as AuthResponse;
-    } catch {
-      return null;
-    }
-  }
-
-  /**
-   * Check whether user is logged in
-   */
-  isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
-
-  /**
-   * Logout
-   */
   logout(): void {
+    console.log('AUTH SERVICE LOGOUT CALLED');
 
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('username');
+    localStorage.removeItem('role');
+
+    console.log('Local authentication data cleared');
   }
 
-  /**
-   * Get current user ID
-   */
-  getUserId(): number | null {
-
-    const user = this.getCurrentUser();
-
-    return user ? user.userId : null;
+  clearSession(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('email');
+    localStorage.removeItem('role');
   }
 
-  /**
-   * Get current username
-   */
-  getUsername(): string | null {
-
-    const user = this.getCurrentUser();
-
-    return user ? user.username : null;
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
   }
 
-  /**
-   * Get current email
-   */
-  getEmail(): string | null {
-
-    const user = this.getCurrentUser();
-
-    return user ? user.email : null;
+  getUsername(): string {
+    return localStorage.getItem('username') || '';
   }
 
-  /**
-   * Get current role
-   */
-  getRole(): string | null {
+  getEmail(): string {
+    return localStorage.getItem('email') || '';
+  }
 
-    const user = this.getCurrentUser();
-
-    return user ? user.role : null;
+  getRole(): string {
+    return localStorage.getItem('role') || '';
   }
 }

@@ -1,0 +1,236 @@
+<div class="auth-page">
+
+  <!-- LEFT BRAND PANEL -->
+  <div class="brand-panel">
+
+    <div class="brand-overlay"></div>
+
+    <div class="brand-content">
+
+      <div class="brand-logo">
+        <div class="brand-icon">
+          🛍
+        </div>
+
+        <span>SmartCart</span>
+      </div>
+
+      <div class="brand-message">
+
+        <h2>
+          Dressed for<br>
+          Singapore's sky.
+        </h2>
+
+        <p>
+          Climate-intelligent fashion for everyday warmth.
+          <br>
+          Free shipping above S$60 · 14-day returns.
+        </p>
+
+        <div class="brand-badges">
+          <span>10K+ Members</span>
+          <span>4.9★ Rated</span>
+          <span>SG-Exclusive Drops</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- RIGHT FORM -->
+  <div class="form-panel">
+
+    <div class="form-container">
+
+      <!-- MOBILE BRAND -->
+      <div class="mobile-brand">
+        <div class="brand-icon">
+          🛍
+        </div>
+
+        <span>SmartCart</span>
+      </div>
+
+
+      <div class="heading">
+
+        <h1>
+          Welcome back.
+        </h1>
+
+        <p>
+          Sign in to continue shopping.
+        </p>
+
+      </div>
+
+
+      <!-- TABS -->
+      <div class="auth-tabs">
+
+        <button
+          type="button"
+          class="active"
+        >
+          Sign in
+        </button>
+
+        <button
+          type="button"
+          routerLink="/signup"
+        >
+          Sign up
+        </button>
+
+      </div>
+
+
+      <!-- FORM -->
+      <form
+        (ngSubmit)="login()"
+        #loginForm="ngForm"
+      >
+
+        <!-- USERNAME -->
+        <div class="field">
+
+          <label>
+            Username
+          </label>
+
+          <input
+            type="text"
+            name="username"
+            [(ngModel)]="username"
+            placeholder="your username"
+            autocomplete="username"
+          >
+
+        </div>
+
+
+        <!-- PASSWORD -->
+        <div class="field">
+
+          <div class="password-label">
+
+            <label>
+              Password
+            </label>
+
+            <button
+              type="button"
+              class="forgot"
+            >
+              Forgot password?
+            </button>
+
+          </div>
+
+          <div class="password-wrapper">
+
+            <input
+              [type]="
+                showPassword
+                  ? 'text'
+                  : 'password'
+              "
+              name="password"
+              [(ngModel)]="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            >
+
+            <button
+              type="button"
+              class="eye-button"
+              (click)="togglePassword()"
+            >
+              {{ showPassword ? '🙈' : '👁' }}
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- ERROR -->
+        <div
+          class="error-message"
+          *ngIf="error"
+        >
+          {{ error }}
+        </div>
+
+
+        <!-- LOGIN BUTTON -->
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="loading"
+        >
+
+          <span
+            class="spinner"
+            *ngIf="loading"
+          ></span>
+
+          {{
+            loading
+              ? 'Signing in...'
+              : 'Sign in to SmartCart'
+          }}
+
+        </button>
+
+      </form>
+
+
+      <!-- DIVIDER -->
+      <div class="divider">
+
+        <span></span>
+
+        <p>or continue with</p>
+
+        <span></span>
+
+      </div>
+
+
+      <!-- SOCIAL -->
+      <div class="social-buttons">
+
+        <button type="button">
+          <strong>G</strong>
+          Google
+        </button>
+
+        <button type="button">
+          <strong>A</strong>
+          Apple
+        </button>
+
+      </div>
+
+
+      <!-- SIGNUP -->
+      <p class="bottom-text">
+
+        New to SmartCart?
+
+        <a routerLink="/signup">
+          Create an account
+        </a>
+
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
