@@ -4,7 +4,6 @@ import { Observable, tap } from 'rxjs';
 
 import { LoginRequest } from '../models/login-request';
 import { LoginResponse } from '../models/login-response';
-import { RegisterRequest } from '../models/register-request';
 
 @Injectable({
   providedIn: 'root',
@@ -66,10 +65,21 @@ export class AuthService {
   }
 
   getEmail(): string {
-    return localStorage.getItem('email') || '';
-  }
+    const user = localStorage.getItem('user');
 
-  getRole(): string {
+    if (!user) {
+      return '';
+    }
+
+    try {
+      const userData = JSON.parse(user);
+      return userData.email || '';
+    } catch {
+      return '';
+    }
+}
+
+    getRole(): string {
     return localStorage.getItem('role') || '';
   }
 }

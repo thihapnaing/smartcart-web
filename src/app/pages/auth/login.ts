@@ -16,7 +16,7 @@ export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  username = '';
+  email = '';
   password = '';
 
   showPassword = false;
@@ -27,8 +27,8 @@ export class Login {
     console.log('LOGIN BUTTON CLICKED');
     this.error = '';
 
-    if (!this.username.trim()) {
-      this.error = 'Please enter your username.';
+    if (!this.email.trim()) {
+      this.error = 'Please enter your email.';
       return;
     }
 
@@ -40,12 +40,12 @@ export class Login {
     this.loading = true;
 
     console.log('Sending login request:', {
-      username: this.username,
+      email: this.email,
     });
 
     this.authService
       .login({
-        username: this.username.trim(),
+        username: this.email.trim(),
         password: this.password,
       })
       .subscribe({

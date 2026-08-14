@@ -36,7 +36,6 @@
 }
 
 .nav-bar .brand-name {
-  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 19px;
   letter-spacing: -0.01em;
@@ -468,22 +467,118 @@
   padding: 4px 4px 12px;
 }
 
-.account-name {
+.account-username {
+  color: #4b3428;
   font-weight: 600;
-  font-size: 15px;
 }
 
 .account-email {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #777;
+  color: #6f5a4a;
+  font-size: 20px;
+  line-height: 1.4;
+
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.account-menu hr {
+  border: 0;
+  border-top: 2px solid #ddd5ce;
+  margin: 18px 0 22px;
+}
+
+/* =========================
+   NOT LOGGED IN ACCOUNT MENU
+   ========================= */
+
+.not-logged-in {
+  width: 100%;
+}
+
+.not-logged-in-label {
+  font-size: 18px;
+  line-height: 1.3;
+  color: #4b3428;
+  font-weight: 500;
+  margin: 0;
+  padding-bottom: 14px;
+}
+
+.account-separator {
+  height: 1px;
+  width: 100%;
+  background: #d8d2cc;
+  margin: 0 0 14px 0;
+}
+
+.account-signin {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: #4b3428;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.account-signin:hover {
+  background: #3d2a20;
+}
+
+.logged-in {
+  width: 100%;
+}
+
+.account-username {
+  font-size: 18px;
+  line-height: 1.3;
+  color: #4b3428;
+  font-weight: 600;
+  margin: 0;
+}
+
+.logged-in-label {
+  font-size: 18px;
+  line-height: 1.3;
+  color: #6f625b;
+  font-weight: 400;
+
+  padding-top: 8px;
+  padding-bottom: 14px;
+
+  /* Keep email inside popup */
+  width: 100%;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-.account-divider {
+.account-separator {
   height: 1px;
-  background: #e5e5e5;
-  margin: 4px 0 8px;
+  width: 100%;
+  background: #d8d2cc;
+  margin: 0 0 14px 0;
+}
+
+.account-logout {
+  width: 100%;
+  height: 44px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #4b3428;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.account-logout:hover {
+  background: #3d2a20;
 }
 
 .account-menu-item {

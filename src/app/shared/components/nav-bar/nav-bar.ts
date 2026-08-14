@@ -26,7 +26,12 @@ export class NavBar {
 
   searchKeyword = '';
   username = '';
+  email = '';
   accountMenuOpen = false;
+
+  get isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
+  }
 
   //Junior
   imageSearchOpen = signal(false);
@@ -45,10 +50,16 @@ export class NavBar {
 
   ngOnInit(): void {
     this.username = this.authService.getUsername();
+    this.email = localStorage.getItem('email') || '';
   }
 
   toggleAccountMenu(): void {
     this.accountMenuOpen = !this.accountMenuOpen;
+
+    if (this.accountMenuOpen) {
+      this.username = this.authService.getUsername();
+      this.email = localStorage.getItem('email') || '';
+    }
   }
 
   toggleMenu(): void {
@@ -199,6 +210,11 @@ export class NavBar {
         this.imageSearchError.set('Image search failed. Please try again.');
       },
     });
+  }
+
+  goToLogin(): void {
+    this.accountMenuOpen = false;
+    this.router.navigate(['/login']);
   }
 
   logout(): void {

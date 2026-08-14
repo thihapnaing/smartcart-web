@@ -162,35 +162,61 @@
 
 
         <!-- Account popup -->
-        <div
-          class="account-menu"
-          *ngIf="accountMenuOpen"
-        >
+        <div class="account-menu" *ngIf="accountMenuOpen">
 
-          <div class="account-info">
+          <!-- ========================= -->
+          <!-- LOGGED IN -->
+          <!-- ========================= -->
 
-            <div class="account-name">
-              {{ username }}
+          <ng-container *ngIf="isLoggedIn; else notLoggedIn">
+
+            <div class="logged-in">
+
+              <div class="account-username">
+                {{ username }}
+              </div>
+
+              <div class="logged-in-label">
+                {{ email }}
+              </div>
+
+              <div class="account-separator"></div>
+
+              <button
+                type="button"
+                class="account-logout"
+                (click)="logout()"
+              >
+                Logout
+              </button>
+
             </div>
+          </ng-container>
 
-            <div class="account-email">
-              {{ authService.getEmail() }}
-            </div>
+          <!-- ========================= -->
+          <!-- NOT LOGGED IN -->
+          <!-- ========================= -->
+             <ng-template #notLoggedIn>
 
-          </div>
+              <div class="not-logged-in">
 
+                <div class="not-logged-in-label">
+                  You are not logged in
+                </div>
 
-          <div class="account-divider"></div>
+                <div class="account-separator"></div>
 
+                <button
+                  type="button"
+                  class="account-signin"
+                  (click)="goToLogin()"
+                >
+                  Sign In
+                </button>
 
-          <button
-            type="button"
-            class="account-menu-item logout-button"
-            (click)="logout()"
-          >
-            Logout
-          </button>
+              </div>
 
+            </ng-template>
         </div>
 
       </div>
