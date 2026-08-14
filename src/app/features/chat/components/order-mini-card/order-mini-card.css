@@ -1,39 +1,50 @@
 /* Author: Htet Nandar (Grace) */
 :host {
   display: block;
+  width: 100%;
 }
 
-.mini-card {
+.order-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 130px;
-  min-width: 130px;
-  max-width: 130px;
-  flex-shrink: 0;
-  padding: 10px 10px 12px;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
   border: 1px solid #e5ded3;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
+  box-sizing: border-box;
 }
 
-.mini-card .order-date {
-  font-size: 11px;
-  font-weight: 600;
-  color: #4a3226;
+.order-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.order-number {
   margin: 0;
-}
-
-.mini-card .order-total {
   font-size: 13px;
   font-weight: 700;
   color: #4a3226;
-  margin: 0;
 }
 
-.mini-card .status-badge {
-  align-self: flex-start;
-  margin-top: 2px;
+.order-sub {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #8a7a68;
+}
+
+.order-card__summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.status-badge {
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 10px;
@@ -41,25 +52,98 @@
   text-transform: capitalize;
   background: #5b4636;
   color: #ffffff;
+  white-space: nowrap;
 }
 
-.mini-card .status-badge.delivered {
+.status-badge.delivered {
   background: #166534;
   color: #ffffff;
 }
 
-.mini-card .status-badge.paid,
-.mini-card .status-badge.packed {
+.status-badge.paid,
+.status-badge.packed {
   background: #4a3226;
   color: #ffffff;
 }
 
-.mini-card .status-badge.pending {
+.status-badge.pending {
   background: #92400e;
   color: #ffffff;
 }
 
-.mini-card .status-badge.cancelled {
+.status-badge.cancelled {
   background: #b91c1c;
   color: #ffffff;
+}
+
+.order-total {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a3226;
+}
+
+.order-card__items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 8px;
+  background: #faf7f2;
+}
+
+.order-item__image {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #eee;
+}
+
+.order-item__info {
+  min-width: 0;
+}
+
+.order-item__name {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a3226;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-item__price {
+  margin: 1px 0 0;
+  font-size: 11px;
+  color: #8a7a68;
+}
+
+.buy-again {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;
+  background: #4a3226;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.buy-again:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.buy-again:hover:not(:disabled) {
+  background: #3a2519;
 }
