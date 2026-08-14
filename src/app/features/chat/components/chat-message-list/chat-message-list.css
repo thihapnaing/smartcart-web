@@ -52,3 +52,12 @@
   margin-top: 8px;
   overflow-x: auto;
 }
+
+/* Order cards are full-width detail cards, not small pills like .products - stack them
+   vertically instead of the horizontal scroller used for product mini-cards. */
+.message-list .message .orders {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
