@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+// Author: Htet Nandar (Grace)
 
 @Component({
   selector: 'app-root',

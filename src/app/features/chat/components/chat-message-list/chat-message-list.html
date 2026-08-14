@@ -5,5 +5,8 @@
     <div class="products" *ngIf="msg.products?.length">
       <app-product-mini-card *ngFor="let p of msg.products" [product]="p"></app-product-mini-card>
     </div>
+    <div class="orders" *ngIf="msg.orders?.length">
+      <app-order-mini-card *ngFor="let o of msg.orders" [order]="o"></app-order-mini-card>
+    </div>
   </div>
 </div>

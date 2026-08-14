@@ -1,0 +1,27 @@
+<!-- Author: Htet Nandar (Grace) -->
+<div class="order-card">
+  <div class="order-card__header">
+    <div class="order-card__meta">
+      <p class="order-number">{{ order.orderNumber }}</p>
+      <p class="order-sub">{{ order.orderDate | date:'d MMM y' }} · {{ itemCount }} item{{ itemCount === 1 ? '' : 's' }}</p>
+    </div>
+    <div class="order-card__summary">
+      <span class="status-badge" [ngClass]="order.status?.toLowerCase()">{{ statusLabel }}</span>
+      <p class="order-total">S${{ order.totalAmount.toFixed(2) }}</p>
+    </div>
+  </div>
+
+  <div class="order-card__items" *ngIf="order.items?.length">
+    <div class="order-item" *ngFor="let item of order.items">
+      <img class="order-item__image" [src]="item.imageUrl" [alt]="item.name" />
+      <div class="order-item__info">
+        <p class="order-item__name">{{ item.name }}</p>
+        <p class="order-item__price">S${{ item.price.toFixed(2) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <button class="buy-again" type="button" (click)="buyAgain()" [disabled]="buying()">
+    {{ buying() ? 'Adding…' : 'Buy again' }}
+  </button>
+</div>

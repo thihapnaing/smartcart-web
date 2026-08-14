@@ -1,11 +1,11 @@
 // Author: Htet Nandar (Grace)
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {RouterLinkActive, Router, RouterLink} from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CartService } from '../../../services/cart';
-import { signal } from '@angular/core'; //Junior
-import { ProductService } from '../../../services/product'; //Junior
+import { ProductService } from '../../../services/product';
+import { ImageSearchResponse } from '../../../models/image-search-response'; //Junior
 
 /**
  * Top nav bar. Women/Men link to /search filtered by gender, Categories browses
@@ -61,18 +61,34 @@ export class NavBar {
   openImageSearch(): void {
     this.imageSearchOpen.set(true);
     this.imageSearchError.set('');
+    this.imageSearchLoading.set(false);
   }
 
   closeImageSearch(): void {
     this.imageSearchOpen.set(false);
-    this.clearSelectedImage();
+    this.selectedImageFile = null;
+    this.imagePreviewUrl.set(null);
+    this.imageSearchError.set('');
+    this.imageSearchLoading.set(false);
   }
 
   onImageFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
+
+    console.log('Selected image:', file.name);
+    console.log('Image type:', file.type);
+    console.log('Image size:', file.size);
+
+    if (!file.type.startsWith('image/')) {
+      this.imageSearchError.set('Please select a valid image file.');
+      input.value = '';
+      return;
+    }
 
     this.selectedImageFile = file;
     this.imageSearchError.set('');
@@ -80,10 +96,19 @@ export class NavBar {
     const reader = new FileReader();
 
     reader.onload = () => {
+      console.log('Preview loaded:', file.name);
       this.imagePreviewUrl.set(reader.result as string);
     };
 
+    reader.onerror = () => {
+      console.error('Failed to read image:', file.name);
+      this.imageSearchError.set('Could not read the selected image.');
+    };
+
     reader.readAsDataURL(file);
+
+    // Allow another image to be selected next time
+    input.value = '';
   }
 
   clearSelectedImage(): void {
@@ -93,41 +118,127 @@ export class NavBar {
   }
 
   onImageSearch(): void {
+
     if (!this.selectedImageFile) {
-      this.imageSearchError.set('Please select an image first.');
+      this.imageSearchError.set(
+        'Please select an image first.'
+      );
       return;
     }
 
     this.imageSearchLoading.set(true);
     this.imageSearchError.set('');
 
-    this.productService.detectImageSearchLabel(this.selectedImageFile).subscribe({
-      next: (result) => {
-        this.imageSearchLoading.set(false);
+    this.productService
+      .detectImageSearchLabel(
+        this.selectedImageFile
+      )
+      .subscribe({
 
-        if (!result.searchText?.trim()) {
-          this.imageSearchError.set('No product could be detected.');
-          return;
+        next: (response: ImageSearchResponse) => {
+
+          console.log(
+            '========== IMAGE SEARCH RESPONSE =========='
+          );
+
+          console.log(
+            'Prediction:',
+            response.prediction
+          );
+
+          console.log(
+            'Search label:',
+            response.searchLabel
+          );
+
+          console.log(
+            'Gender:',
+            response.gender
+          );
+
+          console.log(
+            'Color:',
+            response.color
+          );
+
+          console.log(
+            'Category:',
+            response.category
+          );
+
+          console.log(
+            'Products:',
+            response.products
+          );
+
+          this.imageSearchLoading.set(false);
+
+          if (
+            !response.products ||
+            response.products.length === 0
+          ) {
+
+            this.imageSearchError.set(
+              'No matching products found.'
+            );
+
+            return;
+          }
+
+          // Close popup.
+          this.imageSearchOpen.set(false);
+          this.clearSelectedImage();
+
+          // Pass complete AI response to SearchResults.
+          this.router.navigate(
+            ['/search'],
+            {
+              state: {
+                imageSearchResults:
+                response.products,
+
+                imageSearchPrediction:
+                response.prediction,
+
+                imageSearchLabel:
+                response.searchLabel,
+
+                imageSearchGender:
+                response.gender,
+
+                imageSearchColor:
+                response.color,
+
+                imageSearchCategory:
+                response.category
+              },
+              onSameUrlNavigation: 'reload'
+            }
+          ).then((success) => {
+
+            console.log(
+              'Navigation completed to /search:',
+              success
+            );
+
+          });
+
+          this.closeMenu();
+        },
+
+        error: (error) => {
+
+          console.error(
+            'Image search failed:',
+            error
+          );
+
+          this.imageSearchLoading.set(false);
+
+          this.imageSearchError.set(
+            'Image search failed. Please try again.'
+          );
         }
-
-        this.imageSearchOpen.set(false);
-        this.clearSelectedImage();
-
-        this.router.navigate(['/search'], {
-          queryParams: {
-            keyword: result.searchText.trim(),
-          },
-        });
-
-        this.closeMenu();
-      },
-
-      error: (error) => {
-        console.error('Image search failed:', error);
-
-        this.imageSearchLoading.set(false);
-        this.imageSearchError.set('Image search failed. Please try again.');
-      },
-    });
+      });
   }
 }
