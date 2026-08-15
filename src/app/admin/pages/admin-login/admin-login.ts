@@ -3,14 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminAuthService } from '../../services/admin-auth';
-import { AdminDashboardService } from '../../services/admin-dashboard';
-import { AdminDashboardStats } from '../../models/admin-dashboard-stats';
+import { PublicStatsService } from '../../../services/public-stats';
+import { PublicStats } from '../../../models/public-stats';
 
 // AUTHOR: Htet Nandar(Grace)
 /**
- * /admin/login - dark split-panel design matching the Figma admin reference. There's no real
- * backend auth yet (see AdminAuthService), so this just checks both fields are non-empty and
- * flips the session flag - it's a UI gate, not a security boundary.
+ * /admin/login - dark split-panel design matching the Figma admin reference. Calls the real
+ * POST /api/auth/login via AdminAuthService; a successful login for a non-ADMIN account is
+ * immediately logged back out client-side (see the role check in onSubmit()) rather than
+ * landing in the admin UI shell just to have every subsequent API call rejected server-side.
  */
 @Component({
   selector: 'app-admin-login',
@@ -25,7 +26,7 @@ export class AdminLogin implements OnInit {
   error = signal('');
   submitting = signal(false);
 
-  stats = signal<AdminDashboardStats | null>(null);
+  stats = signal<PublicStats | null>(null);
   formattedRevenue = computed(() => {
     const s = this.stats();
     if (!s) return '—';
@@ -34,14 +35,15 @@ export class AdminLogin implements OnInit {
 
   constructor(
     private readonly adminAuth: AdminAuthService,
-    private readonly adminDashboardService: AdminDashboardService,
+    private readonly publicStatsService: PublicStatsService,
     private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
-    // Live numbers for the left panel - real data from the same stats endpoint the
-    // dashboard uses, not placeholder marketing figures.
-    this.adminDashboardService.getStats().subscribe({
+    // Live numbers for the left panel - this page renders before there's a JWT, so it hits
+    // the unauthenticated /api/public/stats endpoint (PublicStatsService), not the ADMIN-gated
+    // /api/admin/dashboard/stats the dashboard itself uses.
+    this.publicStatsService.getStats().subscribe({
       next: (data) => this.stats.set(data),
       error: () => this.stats.set(null),
     });
@@ -55,7 +57,25 @@ export class AdminLogin implements OnInit {
 
     this.error.set('');
     this.submitting.set(true);
-    this.adminAuth.login();
-    this.router.navigate(['/admin/dashboard']);
+
+    this.adminAuth.login(this.email.trim(), this.password).subscribe({
+      next: (response) => {
+        this.submitting.set(false);
+
+        if (response.role !== 'ADMIN') {
+          // Login succeeded but this account isn't an admin - undo the session AdminAuthService
+          // just stored and keep the user on the login page instead of the dashboard.
+          this.adminAuth.logout();
+          this.error.set('This account does not have admin access.');
+          return;
+        }
+
+        this.router.navigate(['/admin/dashboard']);
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        this.error.set(typeof err?.error === 'string' ? err.error : 'Invalid email or password.');
+      },
+    });
   }
 }

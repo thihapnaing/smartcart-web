@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { vi } from 'vitest';
 import { AdminBar } from './admin-bar';
-import { AdminAuthService } from '../../services/admin-auth';
 
 describe('AdminBar', () => {
   let fixture: ComponentFixture<AdminBar>;
@@ -13,7 +14,7 @@ describe('AdminBar', () => {
     sessionStorage.clear();
     await TestBed.configureTestingModule({
       imports: [AdminBar],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdminBar);
@@ -32,7 +33,7 @@ describe('AdminBar', () => {
   it('signOut() logs the admin out and navigates to /admin/login', () => {
     vi.spyOn(component.adminAuth, 'logout');
     vi.spyOn(router, 'navigate').mockResolvedValue(true);
-    (component.adminAuth as AdminAuthService).login();
+    component.adminAuth.isLoggedIn.set(true);
 
     component.signOut();
 
