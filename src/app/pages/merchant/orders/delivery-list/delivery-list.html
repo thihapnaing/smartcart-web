@@ -1,0 +1,145 @@
+<section class="delivery-page">
+  <header class="page-header">
+    <h1>Delivery</h1>
+    <p>Manage order deliveries and delivery assignments.</p>
+  </header>
+
+  <!-- Success message -->
+  <div *ngIf="successMessage" class="message success-message">
+    {{ successMessage }}
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="errorMessage" class="message error-message">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading message -->
+  <div *ngIf="loading" class="loading-message">Loading delivery records...</div>
+
+  <!-- Delivery table -->
+  <div *ngIf="!loading" class="table-container">
+    <table class="delivery-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>CUSTOMER NAME</th>
+          <th>
+            <div>STATUS</div>
+            <select class="status-filter" [(ngModel)]="selectedStatus" name="statusFilter">
+              <option value="">All Statuses</option>
+
+              <option *ngFor="let status of statuses" [value]="status">
+                {{ formatStatus(status) }}
+              </option>
+            </select>
+          </th>
+          <th>TRACKING NO.</th>
+          <th>DELIVERY MAN</th>
+          <th>DELIVERED AT</th>
+          <th>PHOTO PROOF</th>
+          <th>ACTION</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let order of orders"></tr>
+        <tr *ngFor="let order of filteredOrders">
+          <!-- Order ID -->
+          <td>ORD-{{ order.id }}</td>
+
+          <!-- Customer name -->
+          <td>
+            {{ order.firstName || '' }}
+            {{ order.lastName || '' }}
+          </td>
+
+          <!-- status -->
+          <td>
+            <select
+              class="table-control status-select"
+              [(ngModel)]="order.status"
+              [name]="'status-' + order.id"
+              [disabled]="isDelivered(order)"
+            >
+              <option *ngFor="let status of statuses" [value]="status">
+                {{ formatStatus(status) }}
+              </option>
+            </select>
+          </td>
+
+          <!-- Editable tracking number -->
+          <td>
+            <input
+              class="table-control tracking-input"
+              type="text"
+              [(ngModel)]="order.trackingNo"
+              [name]="'tracking-' + order.id"
+              placeholder="Enter tracking no."
+              [disabled]="isDelivered(order)"
+            />
+          </td>
+
+          <!-- Editable delivery person -->
+          <td>
+            <select
+              class="table-control"
+              [(ngModel)]="order.deliveryPersonId"
+              [name]="'delivery-person-' + order.id"
+              [disabled]="isDelivered(order)"
+            >
+              <option [ngValue]="null">Not assigned</option>
+
+              <option *ngFor="let person of deliveryPersonel" [ngValue]="person.id">
+                {{ person.name }}
+              </option>
+            </select>
+          </td>
+
+          <!-- Delivered date and time -->
+          <td>
+            <span class="delivered-at">
+              {{ order.deliveredAt | date: 'dd MMM yyyy, h:mm a' }}
+            </span>
+
+            <ng-template #notDelivered> — </ng-template>
+          </td>
+
+          <td>
+            @if (order.deliveryProofKey) {
+              <a
+                class="proof-link"
+                role="button"
+                tabindex="0"
+                (click)="viewProof(order)"
+                (keydown.enter)="viewProof(order)"
+              >
+                Photo Proof
+              </a>
+            } @else {
+              <span class="no-proof">—</span>
+            }
+          </td>
+
+          <!-- Save button -->
+          <td>
+            <button
+              type="button"
+              class="save-button"
+              [disabled]="order.saving"
+              (click)="saveDelivery(order)"
+              [disabled]="isDelivered(order)"
+            >
+              {{ order.saving ? 'Saving...' : 'Save' }}
+            </button>
+          </td>
+        </tr>
+
+        <!-- No records -->
+        <tr *ngIf="filteredOrders.length === 0">
+          <td colspan="7" class="empty-message">No delivery records found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

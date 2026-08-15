@@ -1,0 +1,170 @@
+.delivery-page {
+  padding: 48px 80px;
+}
+
+.page-header {
+  margin-bottom: 32px;
+
+  h1 {
+    margin: 0 0 4px;
+    font-family: Georgia, serif;
+    font-size: 38px;
+  }
+
+  p {
+    margin: 0;
+    color: #9a744d;
+    font-size: 18px;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  background: #ffffff;
+}
+
+.delivery-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 18px 20px;
+    text-align: left;
+    border-bottom: 1px solid #eadfd4;
+  }
+
+  th {
+    color: #92704c;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  td {
+    font-size: 16px;
+  }
+}
+
+.table-control {
+  width: 100%;
+  min-width: 145px;
+  padding: 10px 12px;
+  border: 1px solid #d7c7b8;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 15px;
+
+  &:focus {
+    border-color: #5b3e2e;
+    outline: none;
+  }
+}
+
+.tracking-input {
+  min-width: 160px;
+}
+
+.save-button {
+  padding: 10px 20px;
+  color: #ffffff;
+  background: #321f15;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #543829;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.message {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border-radius: 6px;
+}
+
+.success-message {
+  color: #176b38;
+  background: #e0f3e5;
+}
+
+.error-message {
+  color: #9b2525;
+  background: #fbe3e3;
+}
+
+.loading-message,
+.empty-message {
+  padding: 30px;
+  color: #806851;
+  text-align: center;
+}
+
+.delivered-at{
+  color: #a0a0a0;
+}
+
+input:disabled,
+select:disabled {
+  color: #a0a0a0;
+  background-color: #eeeeee;
+  border-color: #d0d0d0;
+  cursor: not-allowed;
+  opacity: 0.7;
+  -webkit-text-fill-color: #a0a0a0;
+}
+
+input:disabled::placeholder {
+  color: #b5b5b5;
+  opacity: 1;
+}
+
+.save-button:disabled {
+  color: #888888;
+  background-color: #d3d3d3;
+  border-color: #bdbdbd;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.save-button:disabled:hover {
+  background-color: #d3d3d3;
+}
+
+.status-filter {
+  display: block;
+  width: 140px;
+  margin-top: 8px;
+  padding: 7px 9px;
+  color: #5b422f;
+  background-color: #ffffff;
+  border: 1px solid #d4c4b5;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.status-filter:focus {
+  border-color: #5b3e2e;
+  outline: none;
+}
+
+.proof-link {
+  color: #6b4226;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.proof-link:hover {
+  color: #321f15;
+}
+
+.no-proof {
+  color: #aaaaaa;
+}
