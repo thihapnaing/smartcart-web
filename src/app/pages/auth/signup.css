@@ -1,165 +1,185 @@
+/* =========================================================
+   SMARTCART CUSTOMER SIGNUP
+   ========================================================= */
+
 :host {
   display: block;
+  width: 100%;
+  min-height: 100vh;
 }
 
 
 /* =========================================================
-   MAIN PAGE
+   PAGE
    ========================================================= */
 
-.auth-page {
+.signup-page {
   min-height: 100vh;
 
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 50% 50%;
 
-  background: #faf6f1;
-
-  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  background: #f8f5f0;
 }
 
 
 /* =========================================================
    LEFT BRAND PANEL
-   SAME DESIGN AS LOGIN
    ========================================================= */
 
 .brand-panel {
   position: relative;
 
+  min-height: 100vh;
+
   overflow: hidden;
 
-  background: #2c1a10;
+  /*
+   * IMPORTANT:
+   * Change this path to the same clothing-store image
+   * you were using in your previous signup design.
+   */
+  background-image:
+    url('/assets/images/signup-bg.jpg');
 
-  padding: 48px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  color: #faf6f1;
+  background-size: cover;
+  background-position: center;
 }
 
 
-.brand-panel::before {
-  content: '';
+/* DARK OVERLAY */
 
+.brand-overlay {
   position: absolute;
+
   inset: 0;
 
   background:
     linear-gradient(
-      rgba(44, 26, 16, .7),
-      rgba(44, 26, 16, .75)
-    ),
-    url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=900&h=1200&fit=crop&auto=format')
-    center / cover;
-}
-
-
-.brand-content {
-  position: relative;
+      to bottom,
+      rgba(43, 28, 20, 0.45),
+      rgba(43, 28, 20, 0.72)
+    );
 
   z-index: 1;
-
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
 
 
 /* =========================================================
-   LOGO
+   BRAND LOGO
    ========================================================= */
 
-.brand-logo,
-.mobile-brand {
-  display: flex;
+.brand-logo {
+  position: absolute;
 
+  top: 50px;
+  left: 65px;
+
+  z-index: 2;
+
+  display: flex;
   align-items: center;
 
-  gap: 10px;
+  gap: 14px;
+
+  color: #ffffff;
+
+  font-family: Georgia, 'Times New Roman', serif;
+
+  font-size: 30px;
+
+  font-weight: 700;
 }
 
 
-.brand-logo span,
-.mobile-brand span {
-  font-family: Georgia, serif;
+.brand-logo-icon {
+  width: 50px;
+  height: 50px;
 
-  font-size: 21px;
-
-  font-weight: 600;
-}
-
-
-.brand-icon {
-  width: 32px;
-  height: 32px;
-
-  border-radius: 8px;
+  border-radius: 12px;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
-  background: #c9a47b;
+  background: #e4bb7c;
 
-  color: #2c1a10;
+  color: #4e3022;
+
+  font-size: 22px;
 }
 
 
 /* =========================================================
-   BRAND MESSAGE
+   BRAND CONTENT
    ========================================================= */
 
-.brand-message h2 {
-  font-family: Georgia, serif;
+.brand-content {
+  position: absolute;
 
-  font-size: 38px;
+  z-index: 2;
 
-  line-height: 1.2;
-
-  margin-bottom: 24px;
+  left: 65px;
+  right: 60px;
+  bottom: 65px;
 }
 
 
-.brand-message p {
-  color: #c9a47b;
+.brand-content h2 {
+  margin: 0 0 24px;
 
-  line-height: 1.7;
+  color: #ffffff;
 
-  font-size: 14px;
+  font-family: Georgia, 'Times New Roman', serif;
+
+  font-size: clamp(42px, 4vw, 66px);
+
+  line-height: 0.98;
+
+  font-weight: 700;
+
+  letter-spacing: -1.5px;
 }
 
+
+.brand-content p {
+  margin: 0 0 7px;
+
+  color: rgba(255, 255, 255, 0.88);
+
+  font-size: 17px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   BADGES
+   ========================================================= */
 
 .brand-badges {
   display: flex;
 
+  flex-wrap: wrap;
+
   gap: 12px;
 
-  margin-top: 30px;
-
-  flex-wrap: wrap;
+  margin-top: 36px;
 }
 
 
 .brand-badges span {
-  border: 1px solid #c9a47b55;
+  padding: 9px 17px;
 
-  background: #faf6f115;
+  border: 1px solid rgba(230, 191, 136, 0.65);
 
-  color: #c9a47b;
+  border-radius: 22px;
 
-  padding: 7px 12px;
+  color: #f2d19c;
 
-  border-radius: 999px;
+  font-size: 12px;
 
-  font-size: 11px;
-
-  font-weight: 600;
+  white-space: nowrap;
 }
 
 
@@ -168,20 +188,26 @@
    ========================================================= */
 
 .form-panel {
+  min-height: 100vh;
+
+  background: #fbf9f6;
+
+  overflow-y: auto;
+
   display: flex;
 
-  align-items: center;
-
   justify-content: center;
-
-  padding: 48px 64px;
 }
 
 
 .form-container {
   width: 100%;
 
-  max-width: 430px;
+  max-width: 560px;
+
+  padding: 72px 50px 50px;
+
+  box-sizing: border-box;
 }
 
 
@@ -190,72 +216,110 @@
    ========================================================= */
 
 .heading {
-  margin-bottom: 30px;
-}
-
-
-.heading h1 {
-  font-family: Georgia, serif;
-
-  color: #2c1a10;
-
-  font-size: 34px;
-
-  margin: 0 0 8px;
-}
-
-
-.heading p {
-  color: #8b6a4f;
-
-  font-size: 14px;
-}
-
-
-/* =========================================================
-   SIGN IN / SIGN UP TABS
-   ========================================================= */
-
-.auth-tabs {
-  display: flex;
-
-  padding: 4px;
-
-  border-radius: 12px;
-
-  background: #efe2d2;
-
   margin-bottom: 28px;
 }
 
 
-.auth-tabs button {
-  flex: 1;
+.heading h1 {
+  margin: 0;
 
-  border: 0;
+  color: #20140e;
 
-  background: transparent;
+  font-family: Georgia, 'Times New Roman', serif;
 
-  padding: 10px;
+  font-size: 47px;
 
-  border-radius: 9px;
+  line-height: 1.05;
 
-  color: #8b6a4f;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  font-family: inherit;
-
-  font-size: 14px;
+  letter-spacing: -1.3px;
 }
 
 
-.auth-tabs button.active {
-  background: #4a3226;
+.heading p {
+  margin: 12px 0 0;
 
-  color: #faf6f1;
+  color: #9a7052;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   AUTH TABS
+   ========================================================= */
+
+.auth-tabs {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  padding: 5px;
+
+  margin-bottom: 27px;
+
+  background: #eee2ce;
+
+  border-radius: 16px;
+
+  box-sizing: border-box;
+}
+
+
+.auth-tab {
+  height: 58px;
+
+  border: 0;
+
+  border-radius: 13px;
+
+  background: transparent;
+
+  color: #916f55;
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+
+.auth-tab.active {
+  background: #4f3023;
+
+  color: #ffffff;
+
+  box-shadow: 0 2px 5px rgba(49, 28, 19, 0.12);
+}
+
+
+/* =========================================================
+   MERCHANT LINK
+   ========================================================= */
+
+.merchant-link {
+  margin: 0 0 20px;
+
+  color: #2d211b;
+
+  font-size: 15px;
+}
+
+
+.merchant-link a {
+  color: #4f3023;
+
+  font-weight: 600;
+
+  text-decoration: none;
+
+  margin-left: 4px;
+}
+
+
+.merchant-link a:hover {
+  text-decoration: underline;
 }
 
 
@@ -263,12 +327,19 @@
    FORM
    ========================================================= */
 
-.signup-form {
+.signup-form,
+.profile-form {
   width: 100%;
 }
 
 
+/* =========================================================
+   FIELD
+   ========================================================= */
+
 .field {
+  width: 100%;
+
   margin-bottom: 18px;
 }
 
@@ -276,50 +347,67 @@
 .field label {
   display: block;
 
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 
-  color: #8b6a4f;
+  color: #79543c;
 
-  font-size: 11px;
+  font-size: 12px;
 
-  font-weight: 700;
+  font-weight: 600;
 
-  text-transform: uppercase;
-
-  letter-spacing: .12em;
+  letter-spacing: 1.4px;
 }
 
 
 .field input {
-  box-sizing: border-box;
-
   width: 100%;
 
-  padding: 13px 15px;
+  height: 52px;
 
-  border-radius: 12px;
+  box-sizing: border-box;
 
-  border: 1px solid #c9a47b44;
+  padding: 0 17px;
 
-  background: #efe2d2;
+  border: 1px solid #e3ccb0;
 
-  color: #2c1a10;
-
-  font-size: 14px;
+  border-radius: 13px;
 
   outline: none;
 
+  background: #f1e5d2;
+
+  color: #38271e;
+
   font-family: inherit;
-}
 
+  font-size: 15px;
 
-.field input:focus {
-  border-color: #c9a47b;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
 
 .field input::placeholder {
-  color: #8b6a4f;
+  color: #a8907c;
+}
+
+
+.field input:focus {
+  border-color: #a77d5a;
+
+  background: #f5eadb;
+
+  box-shadow:
+    0 0 0 3px rgba(167, 125, 90, 0.10);
+}
+
+
+.field input:disabled {
+  opacity: 0.65;
+
+  cursor: not-allowed;
 }
 
 
@@ -333,41 +421,61 @@
 
 
 .password-wrapper input {
-  padding-right: 48px;
+  padding-right: 52px;
 }
 
 
 .password-toggle {
   position: absolute;
 
-  right: 10px;
-
   top: 50%;
+  right: 16px;
 
   transform: translateY(-50%);
+
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
 
   border: 0;
 
   background: transparent;
 
-  color: #8b6a4f;
-
-  cursor: pointer;
+  color: #92745d;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
-  padding: 4px;
+  cursor: pointer;
 }
 
 
 .password-toggle:disabled {
-  cursor: not-allowed;
+  opacity: 0.5;
 
-  opacity: .5;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   PASSWORD HELP
+   ========================================================= */
+
+.password-help {
+  margin: -3px 0 17px;
+}
+
+
+.password-help p {
+  margin: 0;
+
+  color: #967660;
+
+  font-size: 12px;
+
+  line-height: 1.4;
 }
 
 
@@ -376,26 +484,19 @@
    ========================================================= */
 
 .terms-text {
-  margin: 20px 0;
+  margin: 0 0 18px;
 
-  color: #8b6a4f;
+  color: #8c6c55;
 
-  font-size: 11px;
+  font-size: 11.5px;
 
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 
 .terms-text a {
-  color: #4a3226;
+  color: #62402e;
 
-  font-weight: 600;
-
-  text-decoration: none;
-}
-
-
-.terms-text a:hover {
   text-decoration: underline;
 }
 
@@ -404,81 +505,94 @@
    ERROR
    ========================================================= */
 
-.signup-error {
-  padding: 12px 15px;
+.error-message {
+  width: 100%;
 
-  margin-bottom: 16px;
+  box-sizing: border-box;
 
-  border-radius: 12px;
+  margin: 0 0 16px;
 
-  color: #b94040;
+  padding: 13px 16px;
 
-  background: #b9404015;
+  border: 1px solid #e9aaa4;
 
-  border: 1px solid #b9404033;
+  border-radius: 11px;
+
+  background: #fff1f0;
+
+  color: #c9342b;
 
   font-size: 13px;
+
+  line-height: 1.4;
 }
 
 
 /* =========================================================
-   CREATE ACCOUNT BUTTON
+   PRIMARY BUTTON
    ========================================================= */
 
-.signup-button {
+.primary-button {
   width: 100%;
+
+  height: 54px;
 
   border: 0;
 
-  border-radius: 12px;
+  border-radius: 13px;
 
-  padding: 14px;
+  background: #4f3023;
 
-  background: #4a3226;
+  color: #ffffff;
 
-  color: #faf6f1;
-
-  font-size: 14px;
+  font-size: 15px;
 
   font-weight: 600;
 
   cursor: pointer;
 
-  font-family: inherit;
+  transition:
+    background 0.2s,
+    transform 0.1s;
 }
 
 
-.signup-button:hover {
-  background: #3d2920;
+.primary-button:hover:not(:disabled) {
+  background: #41271d;
 }
 
 
-.signup-button:disabled {
-  opacity: .65;
+.primary-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+
+.primary-button:disabled {
+  background: #a49388;
 
   cursor: not-allowed;
 }
 
 
 /* =========================================================
-   BOTTOM LOGIN LINK
+   LOGIN LINK
    ========================================================= */
 
 .login-link {
-  margin-top: 28px;
+  margin-top: 24px;
 
   text-align: center;
 
-  color: #8b6a4f;
+  color: #a27f66;
 
   font-size: 12px;
 }
 
 
 .login-link a {
-  color: #4a3226;
+  color: #4f3023;
 
-  font-weight: 700;
+  font-weight: 600;
 
   text-decoration: none;
 
@@ -492,79 +606,282 @@
 
 
 /* =========================================================
-   MOBILE BRAND
+   STEP 2 AVATAR
    ========================================================= */
 
-.mobile-brand {
-  display: none;
+.avatar-area {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  margin: 2px 0 22px;
 }
 
 
-/* =========================================================
-   HELP BUTTON
-   ========================================================= */
+/* CIRCLE */
 
-.help-button {
-  position: fixed;
-
-  right: 20px;
-
-  bottom: 20px;
-
-  width: 48px;
-
-  height: 48px;
-
-  border: none;
+.avatar-circle {
+  width: 76px;
+  height: 76px;
 
   border-radius: 50%;
 
-  background: #2c1a10;
+  overflow: hidden;
 
-  color: #faf6f1;
+  box-sizing: border-box;
 
-  font-size: 24px;
+  border: 1.5px solid #dfbf96;
+
+  background: #f4e8d6;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
 
   cursor: pointer;
 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+
+.avatar-circle:hover {
+  border-color: #a77d5a;
+
+  transform: scale(1.02);
+}
+
+
+.avatar-circle img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* DEFAULT AVATAR */
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 2px;
+
+  color: #b38d67;
+}
+
+
+.avatar-placeholder span {
+  font-size: 9px;
+}
+
+
+/* AVATAR TEXT */
+
+.avatar-label {
+  margin: 7px 0 0;
+
+  color: #9a7052;
+
+  font-size: 10px;
+}
+
+
+.avatar-label span {
+  color: #b3a092;
 }
 
 
 /* =========================================================
-   MOBILE
+   STEP 2 TWO-COLUMN NAME FIELDS
+   ========================================================= */
+
+.two-column-fields {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   STEP 2 BUTTON
+   ========================================================= */
+
+.profile-button {
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+.back-button {
+  display: block;
+
+  margin: 15px auto 0;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #9a7052;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+
+.back-button:hover {
+  color: #4f3023;
+
+  text-decoration: underline;
+}
+
+
+.back-button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   RESPONSIVE
    ========================================================= */
 
 @media (max-width: 900px) {
 
-  .auth-page {
+  .signup-page {
     grid-template-columns: 1fr;
   }
 
 
   .brand-panel {
-    display: none;
+    min-height: 300px;
+  }
+
+
+  .brand-logo {
+    top: 30px;
+    left: 35px;
+  }
+
+
+  .brand-content {
+    left: 35px;
+    bottom: 35px;
+  }
+
+
+  .brand-content h2 {
+    font-size: 42px;
   }
 
 
   .form-panel {
-    padding: 40px 24px;
-
-    min-height: 100vh;
+    min-height: auto;
   }
 
 
-  .mobile-brand {
-    display: flex;
+  .form-container {
+    max-width: 620px;
 
-    margin-bottom: 40px;
+    padding:
+      45px 35px
+      45px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .brand-panel {
+    min-height: 250px;
   }
 
 
-  .mobile-brand .brand-icon {
-    background: #4a3226;
+  .brand-logo {
+    top: 24px;
+    left: 24px;
 
-    color: #faf6f1;
+    font-size: 23px;
+  }
+
+
+  .brand-logo-icon {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 10px;
+  }
+
+
+  .brand-content {
+    left: 24px;
+    right: 24px;
+    bottom: 25px;
+  }
+
+
+  .brand-content h2 {
+    font-size: 34px;
+
+    margin-bottom: 12px;
+  }
+
+
+  .brand-content p {
+    font-size: 13px;
+  }
+
+
+  .brand-badges {
+    margin-top: 18px;
+
+    gap: 7px;
+  }
+
+
+  .brand-badges span {
+    padding: 7px 11px;
+
+    font-size: 10px;
+  }
+
+
+  .form-container {
+    padding: 35px 22px;
+  }
+
+
+  .heading h1 {
+    font-size: 37px;
+  }
+
+
+  .two-column-fields {
+    grid-template-columns: 1fr;
   }
 
 }

@@ -2,29 +2,50 @@
   display: block;
 }
 
+
+/* =========================================================
+   MAIN PAGE
+   ========================================================= */
+
 .auth-page {
   min-height: 100vh;
+
   display: grid;
   grid-template-columns: 1fr 1fr;
+
   background: #faf6f1;
+
   font-family: 'Plus Jakarta Sans', Arial, sans-serif;
 }
 
+
+/* =========================================================
+   LEFT BRAND PANEL
+   ========================================================= */
+
 .brand-panel {
   position: relative;
+
   overflow: hidden;
+
   background: #2c1a10;
+
   padding: 48px;
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
   color: #faf6f1;
 }
 
+
 .brand-panel::before {
   content: '';
+
   position: absolute;
   inset: 0;
+
   background:
     linear-gradient(
       rgba(44, 26, 16, .7),
@@ -34,290 +55,860 @@
     center / cover;
 }
 
+
 .brand-content {
   position: relative;
+
   z-index: 1;
+
   height: 100%;
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
 .brand-logo,
 .mobile-brand {
   display: flex;
+
   align-items: center;
+
   gap: 10px;
 }
+
 
 .brand-logo span,
 .mobile-brand span {
   font-family: Georgia, serif;
+
   font-size: 21px;
+
   font-weight: 600;
 }
+
 
 .brand-icon {
   width: 32px;
   height: 32px;
+
   border-radius: 8px;
+
   display: flex;
+
   align-items: center;
   justify-content: center;
+
   background: #c9a47b;
+
   color: #2c1a10;
+
+  font-size: 16px;
 }
+
+
+/* =========================================================
+   BRAND MESSAGE
+   ========================================================= */
 
 .brand-message h2 {
   font-family: Georgia, serif;
+
   font-size: 38px;
+
   line-height: 1.2;
-  margin-bottom: 24px;
+
+  margin: 0 0 24px;
 }
+
 
 .brand-message p {
   color: #c9a47b;
+
   line-height: 1.7;
+
   font-size: 14px;
+
+  max-width: 450px;
 }
+
 
 .brand-badges {
   display: flex;
+
   gap: 12px;
+
   margin-top: 30px;
+
   flex-wrap: wrap;
 }
 
+
 .brand-badges span {
   border: 1px solid #c9a47b55;
+
   background: #faf6f115;
+
   color: #c9a47b;
+
   padding: 7px 12px;
+
   border-radius: 999px;
+
   font-size: 11px;
+
   font-weight: 600;
 }
 
+
+/* =========================================================
+   RIGHT FORM PANEL
+   ========================================================= */
+
 .form-panel {
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   padding: 48px 64px;
+
+  overflow-y: auto;
 }
+
 
 .form-container {
   width: 100%;
+
   max-width: 430px;
+
+  padding: 20px 0;
 }
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
 
 .heading {
   margin-bottom: 30px;
 }
 
+
 .heading h1 {
   font-family: Georgia, serif;
+
   color: #2c1a10;
+
   font-size: 34px;
+
   margin: 0 0 8px;
 }
 
+
 .heading p {
   color: #8b6a4f;
+
   font-size: 14px;
+
+  margin: 0;
 }
+
+
+/* =========================================================
+   SIGN IN / SIGN UP TABS
+   ========================================================= */
 
 .auth-tabs {
   display: flex;
+
   padding: 4px;
+
   border-radius: 12px;
+
   background: #efe2d2;
+
   margin-bottom: 28px;
 }
 
+
 .auth-tabs button {
   flex: 1;
+
   border: 0;
+
   background: transparent;
+
   padding: 10px;
+
   border-radius: 9px;
+
   color: #8b6a4f;
+
   font-weight: 600;
+
   cursor: pointer;
+
+  font-family: inherit;
+
+  font-size: 14px;
 }
+
+
+.auth-tabs button:hover {
+  color: #4a3226;
+}
+
 
 .auth-tabs button.active {
   background: #4a3226;
+
   color: #faf6f1;
 }
+
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.signup-form {
+  width: 100%;
+}
+
 
 .field {
   margin-bottom: 18px;
 }
 
+
 .field label,
-.password-label label {
+.upload-label {
   display: block;
+
   margin-bottom: 7px;
+
   color: #8b6a4f;
+
   font-size: 11px;
+
   font-weight: 700;
+
   text-transform: uppercase;
+
   letter-spacing: .12em;
 }
 
-.field input {
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.field input,
+.field select,
+.field textarea {
   box-sizing: border-box;
+
   width: 100%;
+
   padding: 13px 15px;
+
   border-radius: 12px;
+
   border: 1px solid #c9a47b44;
+
   background: #efe2d2;
+
   color: #2c1a10;
+
   font-size: 14px;
+
   outline: none;
+
+  font-family: inherit;
+
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
 }
 
-.field input:focus {
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
   border-color: #c9a47b;
+
+  box-shadow: 0 0 0 3px #c9a47b22;
 }
 
-.password-label {
-  display: flex;
-  justify-content: space-between;
-}
 
-.forgot {
-  border: 0;
-  background: transparent;
+.field input::placeholder,
+.field textarea::placeholder {
   color: #8b6a4f;
-  font-size: 11px;
-  cursor: pointer;
 }
+
+
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled {
+  opacity: .65;
+
+  cursor: not-allowed;
+}
+
+
+.field select {
+  cursor: pointer;
+
+  appearance: auto;
+}
+
+
+.field textarea {
+  min-height: 100px;
+
+  resize: vertical;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   PASSWORD
+   ========================================================= */
 
 .password-wrapper {
   position: relative;
 }
 
+
 .password-wrapper input {
   padding-right: 48px;
 }
 
-.eye-button {
+
+.password-toggle {
   position: absolute;
+
   right: 10px;
+
   top: 50%;
+
   transform: translateY(-50%);
+
   border: 0;
+
   background: transparent;
+
+  color: #8b6a4f;
+
   cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 4px;
+
+  font-size: 16px;
 }
 
-.error-message {
-  padding: 12px 15px;
-  margin-bottom: 16px;
-  border-radius: 12px;
-  color: #b94040;
-  background: #b9404015;
-  border: 1px solid #b9404033;
-  font-size: 13px;
+
+.password-toggle:hover {
+  color: #4a3226;
 }
 
-.submit-button {
-  width: 100%;
-  border: 0;
-  border-radius: 12px;
-  padding: 14px;
-  background: #4a3226;
-  color: #faf6f1;
-  font-size: 14px;
+
+.password-toggle:disabled {
+  cursor: not-allowed;
+
+  opacity: .5;
+}
+
+
+.password-hint {
+  margin-top: 7px;
+
+  color: #9a806c;
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   TERMS
+   ========================================================= */
+
+.terms-text {
+  margin: 20px 0;
+
+  color: #8b6a4f;
+
+  font-size: 11px;
+
+  line-height: 1.6;
+}
+
+
+.terms-text a {
+  color: #4a3226;
+
   font-weight: 600;
-  cursor: pointer;
+
+  text-decoration: none;
 }
 
-.submit-button:disabled {
+
+.terms-text a:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
+
+.signup-error {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 12px 14px;
+
+  margin: 12px 0 16px;
+
+  border-radius: 10px;
+
+  color: #a33a32;
+
+  background: #fdf0ee;
+
+  border: 1px solid #d9a6a0;
+
+  font-size: 13px;
+
+  line-height: 1.4;
+
+  animation: errorFadeIn .2s ease;
+}
+
+
+.error-icon {
+  width: 21px;
+  height: 21px;
+
+  min-width: 21px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #a33a32;
+
+  color: #ffffff;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+
+.error-text {
+  flex: 1;
+
+  word-break: break-word;
+}
+
+
+@keyframes errorFadeIn {
+
+  from {
+    opacity: 0;
+
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+
+}
+
+
+/* =========================================================
+   CREATE ACCOUNT / SUBMIT BUTTON
+   ========================================================= */
+
+.signup-button {
+  width: 100%;
+
+  border: 0;
+
+  border-radius: 12px;
+
+  padding: 14px;
+
+  background: #4a3226;
+
+  color: #faf6f1;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  font-family: inherit;
+
+  transition:
+    background .2s ease,
+    transform .1s ease,
+    opacity .2s ease;
+}
+
+
+.signup-button:hover:not(:disabled) {
+  background: #3d2920;
+}
+
+
+.signup-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+
+.signup-button:disabled {
   opacity: .65;
+
   cursor: not-allowed;
 }
 
-.spinner {
-  display: inline-block;
-  width: 15px;
-  height: 15px;
-  margin-right: 8px;
-  border: 2px solid #ffffff55;
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* =========================================================
+   STEP 2 BUTTONS
+   ========================================================= */
 
-.divider {
+.step-buttons {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 25px 0;
+
+  gap: 10px;
+
+  margin-top: 22px;
 }
 
-.divider span {
+
+.step-buttons .signup-button {
   flex: 1;
-  height: 1px;
-  background: #c9a47b33;
 }
 
-.divider p {
-  color: #8b6a4f;
-  font-size: 11px;
-}
 
-.social-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
+.back-button {
+  border: 1px solid #c9a47b;
 
-.social-buttons button {
-  border: 1px solid #c9a47b44;
-  background: #efe2d2;
-  color: #2c1a10;
   border-radius: 12px;
-  padding: 12px;
+
+  padding: 14px 18px;
+
+  background: transparent;
+
+  color: #4a3226;
+
+  font-size: 14px;
+
   font-weight: 600;
+
+  cursor: pointer;
+
+  font-family: inherit;
+
+  transition:
+    background .2s ease,
+    opacity .2s ease;
+}
+
+
+.back-button:hover:not(:disabled) {
+  background: #efe2d2;
+}
+
+
+.back-button:disabled {
+  opacity: .5;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   CHECKBOX
+   ========================================================= */
+
+.checkbox-field {
+  margin: 4px 0 22px;
+}
+
+
+.checkbox-label {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  color: #8b6a4f;
+
+  font-size: 13px;
+
   cursor: pointer;
 }
 
-.social-buttons strong {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #4a3226;
-  color: white;
-  margin-right: 6px;
+
+.checkbox-label input {
+  width: 17px;
+
+  height: 17px;
+
+  accent-color: #4a3226;
+
+  cursor: pointer;
 }
 
-.bottom-text {
-  margin-top: 28px;
-  text-align: center;
+
+.checkbox-label input:disabled {
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   FILE UPLOAD
+   ========================================================= */
+
+.upload-section {
+  margin-bottom: 22px;
+}
+
+
+.upload-box {
+  position: relative;
+
+  width: 100%;
+
+  min-height: 105px;
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 20px;
+
+  border: 1.5px dashed #c9a47b;
+
+  border-radius: 12px;
+
+  background: #efe2d2;
+
   color: #8b6a4f;
+
+  cursor: pointer;
+
+  text-align: center;
+
+  transition:
+    background .2s ease,
+    border-color .2s ease;
+}
+
+
+.upload-box:hover {
+  background: #e9dac8;
+
+  border-color: #8b6a4f;
+}
+
+
+.upload-box input[type="file"] {
+  position: absolute;
+
+  width: 1px;
+
+  height: 1px;
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+
+.upload-icon {
+  font-size: 25px;
+
+  line-height: 1;
+}
+
+
+.upload-title {
+  color: #4a3226;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  max-width: 100%;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+.upload-description {
+  color: #9a806c;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   LOGO PREVIEW
+   ========================================================= */
+
+.logo-preview {
+  display: flex;
+
+  justify-content: center;
+
+  margin-top: 12px;
+}
+
+
+.logo-preview img {
+  width: 90px;
+
+  height: 90px;
+
+  object-fit: cover;
+
+  border-radius: 12px;
+
+  border: 1px solid #c9a47b;
+
+  background: #efe2d2;
+}
+
+
+/* =========================================================
+   BOTTOM LOGIN LINK
+   ========================================================= */
+
+.login-link {
+  margin-top: 28px;
+
+  text-align: center;
+
+  color: #8b6a4f;
+
   font-size: 12px;
 }
 
-.bottom-text a {
+
+.login-link a {
   color: #4a3226;
+
   font-weight: 700;
+
   text-decoration: none;
+
+  margin-left: 4px;
 }
+
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   MOBILE BRAND
+   ========================================================= */
 
 .mobile-brand {
   display: none;
 }
+
+
+/* =========================================================
+   HELP BUTTON
+   ========================================================= */
+
+.help-button {
+  position: fixed;
+
+  right: 20px;
+
+  bottom: 20px;
+
+  width: 48px;
+
+  height: 48px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #2c1a10;
+
+  color: #faf6f1;
+
+  font-size: 22px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+
+  z-index: 100;
+}
+
+
+.help-button:hover {
+  background: #4a3226;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media (max-width: 900px) {
 
@@ -325,21 +916,125 @@
     grid-template-columns: 1fr;
   }
 
+
   .brand-panel {
     display: none;
   }
 
+
   .form-panel {
     padding: 40px 24px;
+
+    min-height: 100vh;
+
+    align-items: flex-start;
   }
+
+
+  .form-container {
+    max-width: 500px;
+
+    margin: 0 auto;
+  }
+
 
   .mobile-brand {
     display: flex;
+
     margin-bottom: 40px;
   }
 
+
   .mobile-brand .brand-icon {
     background: #4a3226;
+
     color: #faf6f1;
   }
+
+
+  .signup-error {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    margin: 12px 0 16px;
+
+    padding: 10px 14px;
+
+    border: 1px solid #d9a6a0;
+
+    border-radius: 8px;
+
+    background: #fdf0ee;
+
+    color: #a33a32;
+
+    font-size: 14px;
+
+    line-height: 1.4;
+
+    text-align: left;
+  }
+
+
+  .step-buttons {
+    flex-direction: column;
+  }
+
+
+  .back-button {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .form-panel {
+    padding: 28px 18px;
+  }
+
+
+  .heading h1 {
+    font-size: 29px;
+  }
+
+
+  .auth-tabs button {
+    font-size: 12px;
+
+    padding: 9px 6px;
+  }
+
+
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 13px;
+
+    padding: 12px 13px;
+  }
+
+
+  .signup-button,
+  .back-button {
+    padding: 13px;
+  }
+
+
+  .help-button {
+    width: 44px;
+
+    height: 44px;
+
+    right: 15px;
+
+    bottom: 15px;
+  }
+
 }

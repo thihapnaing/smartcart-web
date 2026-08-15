@@ -1,18 +1,18 @@
 <div class="auth-page">
 
-  <!-- =====================================================
+  <!-- =========================================================
        LEFT BRAND PANEL
-       ===================================================== -->
+       ========================================================= -->
 
-  <div class="brand-panel">
+  <section class="brand-panel">
 
     <div class="brand-content">
 
-      <!-- Logo -->
+      <!-- LOGO -->
       <div class="brand-logo">
 
         <div class="brand-icon">
-          🛍
+          🛒
         </div>
 
         <span>SmartCart</span>
@@ -20,286 +20,694 @@
       </div>
 
 
-      <!-- Brand Message -->
+      <!-- BRAND MESSAGE -->
       <div class="brand-message">
 
         <h2>
-          Grow your<br>
-          store with SmartCart.
+          Grow your business<br />
+          with SmartCart.
         </h2>
 
         <p>
-          Reach more shoppers with intelligent
-          <br>
-          fashion recommendations and discovery.
+          Join SmartCart and connect your products
+          with customers looking for exactly what
+          you offer.
         </p>
 
+
+        <!-- BADGES -->
         <div class="brand-badges">
-          <span>10K+ Members</span>
-          <span>AI-Powered</span>
-          <span>Smart Selling</span>
+
+          <span>
+            AI-Powered
+          </span>
+
+          <span>
+            More Customers
+          </span>
+
+          <span>
+            Easy Management
+          </span>
+
         </div>
 
       </div>
 
     </div>
 
-  </div>
+  </section>
 
 
-  <!-- =====================================================
-       RIGHT SIGNUP PANEL
-       ===================================================== -->
 
-  <div class="form-panel">
+  <!-- =========================================================
+       RIGHT FORM PANEL
+       ========================================================= -->
+
+  <section class="form-panel">
 
     <div class="form-container">
 
 
-      <!-- MOBILE BRAND -->
+      <!-- MOBILE LOGO -->
       <div class="mobile-brand">
 
         <div class="brand-icon">
-          🛍
+          🛒
         </div>
 
-        <span>SmartCart</span>
+        <span>
+          SmartCart
+        </span>
 
       </div>
 
 
-      <!-- HEADER -->
+
+      <!-- =====================================================
+           HEADING
+           ===================================================== -->
+
       <div class="heading">
 
         <h1>
-          Create merchant account.
+          Become a Merchant
         </h1>
 
-        <p>
-          Join SmartCart and start selling smarter.
+        <p *ngIf="signupStep === 1">
+          Create your merchant account to get started.
+        </p>
+
+        <p *ngIf="signupStep === 2">
+          Tell us about your business.
         </p>
 
       </div>
 
 
-      <!-- SIGN IN / SIGN UP TABS -->
+
+      <!-- =====================================================
+           SIGN IN / SIGN UP TABS
+           ===================================================== -->
+
       <div class="auth-tabs">
 
         <button
           type="button"
           routerLink="/login"
         >
-          Sign in
+          Sign In
         </button>
 
         <button
           type="button"
           class="active"
         >
-          Sign up
+          Merchant Sign Up
         </button>
 
       </div>
 
 
-      <!-- =================================================
-           MERCHANT SIGNUP FORM
-           ================================================= -->
+
+      <!-- =====================================================
+           SIGNUP FORM
+           ===================================================== -->
 
       <form
         class="signup-form"
         (ngSubmit)="signup()"
-        #signupForm="ngForm"
+        novalidate
       >
 
 
-        <!-- USERNAME -->
-        <div class="field">
+        <!-- ===================================================
+             STEP 1 - ACCOUNT INFORMATION
+             =================================================== -->
 
-          <label for="username">
-            Username
-          </label>
+        <ng-container *ngIf="signupStep === 1">
 
-          <input
-            id="username"
-            type="text"
-            name="username"
-            [(ngModel)]="username"
-            placeholder="Choose a username"
-            autocomplete="username"
-            [disabled]="loading"
-            required
-          />
+          <!-- USERNAME -->
+          <div class="field">
 
-        </div>
-
-
-        <!-- EMAIL -->
-        <div class="field">
-
-          <label for="email">
-            Email
-          </label>
-
-          <input
-            id="email"
-            type="email"
-            name="email"
-            [(ngModel)]="email"
-            placeholder="merchant@example.com"
-            autocomplete="email"
-            [disabled]="loading"
-            required
-          />
-
-        </div>
-
-
-        <!-- PASSWORD -->
-        <div class="field">
-
-          <label for="password">
-            Password
-          </label>
-
-          <div class="password-wrapper">
+            <label for="username">
+              Username
+            </label>
 
             <input
-              id="password"
-              [type]="showPassword ? 'text' : 'password'"
-              name="password"
-              [(ngModel)]="password"
-              placeholder="••••••••"
-              autocomplete="new-password"
+              id="username"
+              name="username"
+              type="text"
+              [(ngModel)]="username"
+              placeholder="Enter your username"
+              autocomplete="username"
               [disabled]="loading"
-              required
             />
 
+          </div>
 
-            <!-- PASSWORD TOGGLE -->
-            <button
-              type="button"
-              class="password-toggle"
-              (click)="togglePassword()"
+
+          <!-- EMAIL -->
+          <div class="field">
+
+            <label for="email">
+              Email
+            </label>
+
+            <input
+              id="email"
+              name="email"
+              type="email"
+              [(ngModel)]="email"
+              placeholder="Enter your email"
+              autocomplete="email"
               [disabled]="loading"
-              [attr.aria-label]="
-                showPassword
-                  ? 'Hide password'
-                  : 'Show password'
-              "
+            />
+
+          </div>
+
+
+          <!-- PASSWORD -->
+          <div class="field">
+
+            <label for="password">
+              Password
+            </label>
+
+            <div class="password-wrapper">
+
+              <input
+                id="password"
+                name="password"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="password"
+                placeholder="Create a password"
+                autocomplete="new-password"
+                [disabled]="loading"
+              />
+
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePassword()"
+                [disabled]="loading"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              >
+                {{ showPassword ? '🙈' : '👁' }}
+              </button>
+
+            </div>
+
+            <div class="password-hint">
+              Minimum 6 characters with uppercase,
+              lowercase and number.
+            </div>
+
+          </div>
+
+
+
+          <!-- =================================================
+               ERROR MESSAGE
+               IMPORTANT
+               ================================================= -->
+
+          <div
+            *ngIf="errorMessage"
+            class="signup-error"
+            role="alert"
+          >
+
+            <span class="error-icon">
+              !
+            </span>
+
+            <span class="error-text">
+              {{ errorMessage }}
+            </span>
+
+          </div>
+
+
+
+          <!-- TERMS -->
+          <p class="terms-text">
+
+            By creating a merchant account, you agree to our
+
+            <a
+              href="javascript:void(0)"
+              (click)="$event.preventDefault()"
+            >
+              Terms of Service
+            </a>
+
+            and
+
+            <a
+              href="javascript:void(0)"
+              (click)="$event.preventDefault()"
+            >
+              Privacy Policy
+            </a>.
+
+          </p>
+
+
+
+          <!-- STEP 1 BUTTON -->
+          <button
+            type="submit"
+            class="signup-button"
+            [disabled]="loading"
+          >
+
+            <span *ngIf="!loading">
+              Continue →
+            </span>
+
+            <span *ngIf="loading">
+              Creating account...
+            </span>
+
+          </button>
+
+        </ng-container>
+
+
+
+        <!-- ===================================================
+             STEP 2 - BUSINESS INFORMATION
+             =================================================== -->
+
+        <ng-container *ngIf="signupStep === 2">
+
+
+          <!-- BUSINESS NAME -->
+          <div class="field">
+
+            <label for="businessName">
+              Business / Shop Name
+            </label>
+
+            <input
+              id="businessName"
+              name="businessName"
+              type="text"
+              [(ngModel)]="businessName"
+              placeholder="Enter your business name"
+              [disabled]="loading"
+            />
+
+          </div>
+
+
+          <!-- UEN -->
+          <div class="field">
+
+            <label for="uen">
+              UEN / Registration Number
+            </label>
+
+            <input
+              id="uen"
+              name="uen"
+              type="text"
+              [(ngModel)]="uen"
+              placeholder="Enter your UEN"
+              [disabled]="loading"
+            />
+
+          </div>
+
+
+          <!-- BUSINESS TYPE -->
+          <div class="field">
+
+            <label for="businessType">
+              Business Type
+            </label>
+
+            <select
+              id="businessType"
+              name="businessType"
+              [(ngModel)]="businessType"
+              [disabled]="loading"
             >
 
-              <!-- Eye open -->
-              <svg
-                *ngIf="!showPassword"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <option value="">
+                Select business type
+              </option>
 
-                <path
-                  d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
-                />
+              <option value="Sole Proprietorship">
+                Sole Proprietorship
+              </option>
 
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="2.5"
-                />
+              <option value="Partnership">
+                Partnership
+              </option>
 
-              </svg>
+              <option value="Private Limited">
+                Private Limited
+              </option>
+
+              <option value="Limited Liability Partnership">
+                Limited Liability Partnership
+              </option>
+
+              <option value="Other">
+                Other
+              </option>
+
+            </select>
+
+          </div>
 
 
-              <!-- Eye closed -->
-              <svg
-                *ngIf="showPassword"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+          <!-- BUSINESS ADDRESS -->
+          <div class="field">
 
-                <path d="M3 3l18 18" />
+            <label for="businessAddress">
+              Business Address
+            </label>
 
-                <path
-                  d="M10.6 6.2A10.8 10.8 0 0 1 12 6c6.5 0 10 6 10 6a17.7 17.7 0 0 1-4.1 4.4"
-                />
+            <input
+              id="businessAddress"
+              name="businessAddress"
+              type="text"
+              [(ngModel)]="businessAddress"
+              placeholder="Enter your business address"
+              [disabled]="loading"
+            />
 
-                <path
-                  d="M6.2 6.7C3.5 8.5 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"
-                />
+          </div>
 
-              </svg>
+
+          <!-- POSTAL CODE -->
+          <div class="field">
+
+            <label for="postalCode">
+              Postal Code
+            </label>
+
+            <input
+              id="postalCode"
+              name="postalCode"
+              type="text"
+              [(ngModel)]="postalCode"
+              placeholder="Enter postal code"
+              [disabled]="loading"
+            />
+
+          </div>
+
+
+          <!-- CONTACT NUMBER -->
+          <div class="field">
+
+            <label for="contactNumber">
+              Contact Number
+            </label>
+
+            <input
+              id="contactNumber"
+              name="contactNumber"
+              type="tel"
+              [(ngModel)]="contactNumber"
+              placeholder="Enter contact number"
+              [disabled]="loading"
+            />
+
+          </div>
+
+
+          <!-- PRODUCT CATEGORY -->
+          <div class="field">
+
+            <label for="productCategory">
+              Product Category
+            </label>
+
+            <select
+              id="productCategory"
+              name="productCategory"
+              [(ngModel)]="productCategory"
+              [disabled]="loading"
+            >
+
+              <option value="">
+                Select product category
+              </option>
+
+              <option value="Fashion">
+                Fashion
+              </option>
+
+              <option value="Electronics">
+                Electronics
+              </option>
+
+              <option value="Beauty">
+                Beauty
+              </option>
+
+              <option value="Food">
+                Food
+              </option>
+
+              <option value="Home & Living">
+                Home & Living
+              </option>
+
+              <option value="Sports">
+                Sports
+              </option>
+
+              <option value="Books">
+                Books
+              </option>
+
+              <option value="Other">
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- BUSINESS DESCRIPTION -->
+          <div class="field">
+
+            <label for="businessDescription">
+              Business Description
+            </label>
+
+            <textarea
+              id="businessDescription"
+              name="businessDescription"
+              [(ngModel)]="businessDescription"
+              placeholder="Describe your business and products"
+              rows="4"
+              [disabled]="loading"
+            ></textarea>
+
+          </div>
+
+
+          <!-- PICKUP AVAILABLE -->
+          <div class="checkbox-field">
+
+            <label class="checkbox-label">
+
+              <input
+                type="checkbox"
+                name="pickupAvailable"
+                [(ngModel)]="pickupAvailable"
+                [disabled]="loading"
+              />
+
+              <span>
+                Pickup available for customers
+              </span>
+
+            </label>
+
+          </div>
+
+
+
+          <!-- =================================================
+               BUSINESS LOGO
+               ================================================= -->
+
+          <div class="upload-section">
+
+            <label class="upload-label">
+              Business Logo
+            </label>
+
+            <label
+              class="upload-box"
+              for="logoFile"
+            >
+
+              <input
+                id="logoFile"
+                name="logoFile"
+                type="file"
+                accept="image/*"
+                (change)="onLogoSelected($event)"
+                [disabled]="loading"
+              />
+
+              <span class="upload-icon">
+                🖼️
+              </span>
+
+              <span class="upload-title">
+                {{ logoFile ? logoFile.name : 'Upload business logo' }}
+              </span>
+
+              <span class="upload-description">
+                PNG, JPG or JPEG · Maximum 2 MB
+              </span>
+
+            </label>
+
+
+            <!-- LOGO PREVIEW -->
+            <div
+              *ngIf="logoPreview"
+              class="logo-preview"
+            >
+
+              <img
+                [src]="logoPreview"
+                alt="Business logo preview"
+              />
+
+            </div>
+
+          </div>
+
+
+
+          <!-- =================================================
+               BUSINESS DOCUMENT
+               ================================================= -->
+
+          <div class="upload-section">
+
+            <label class="upload-label">
+              Business Registration Document
+            </label>
+
+            <label
+              class="upload-box"
+              for="businessDocument"
+            >
+
+              <input
+                id="businessDocument"
+                name="businessDocument"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                (change)="onDocumentSelected($event)"
+                [disabled]="loading"
+              />
+
+              <span class="upload-icon">
+                📄
+              </span>
+
+              <span class="upload-title">
+                {{
+                  businessDocument
+                    ? businessDocument.name
+                    : 'Upload registration document'
+                }}
+              </span>
+
+              <span class="upload-description">
+                PDF, JPG or PNG · Maximum 5 MB
+              </span>
+
+            </label>
+
+          </div>
+
+
+
+          <!-- =================================================
+               STEP 2 ERROR
+               ================================================= -->
+
+          <div
+            *ngIf="errorMessage"
+            class="signup-error"
+            role="alert"
+          >
+
+            <span class="error-icon">
+              !
+            </span>
+
+            <span class="error-text">
+              {{ errorMessage }}
+            </span>
+
+          </div>
+
+
+
+          <!-- =================================================
+               STEP 2 BUTTONS
+               ================================================= -->
+
+          <div class="step-buttons">
+
+            <button
+              type="button"
+              class="back-button"
+              (click)="backToStep1()"
+              [disabled]="loading"
+            >
+              ← Back
+            </button>
+
+
+            <button
+              type="submit"
+              class="signup-button"
+              [disabled]="loading"
+            >
+
+              <span *ngIf="!loading">
+                Submit Application →
+              </span>
+
+              <span *ngIf="loading">
+                Submitting...
+              </span>
 
             </button>
 
           </div>
 
-        </div>
-
-
-        <!-- TERMS -->
-        <p class="terms-text">
-
-          By creating a merchant account you agree to our
-
-          <a href="javascript:void(0)">
-            Terms of Service
-          </a>
-
-          and
-
-          <a href="javascript:void(0)">
-            Privacy Policy
-          </a>.
-
-        </p>
-
-
-        <!-- ERROR -->
-        <div
-          class="signup-error"
-          *ngIf="errorMessage"
-        >
-          {{ errorMessage }}
-        </div>
-
-
-        <!-- CREATE MERCHANT ACCOUNT -->
-        <button
-          type="submit"
-          class="signup-button"
-          [disabled]="loading"
-        >
-
-          <span *ngIf="!loading">
-            Create merchant account
-          </span>
-
-          <span *ngIf="loading">
-            Creating account...
-          </span>
-
-        </button>
+        </ng-container>
 
       </form>
 
 
-      <!-- LOGIN -->
+
+      <!-- =====================================================
+           LOGIN LINK
+           ===================================================== -->
+
       <div class="login-link">
 
-        <span>
-          Already have an account?
-        </span>
+        Already have a merchant account?
 
         <a routerLink="/login">
           Sign in
@@ -307,8 +715,23 @@
 
       </div>
 
+
     </div>
 
-  </div>
+  </section>
+
+
+
+  <!-- =========================================================
+       HELP BUTTON
+       ========================================================= -->
+
+  <button
+    type="button"
+    class="help-button"
+    title="Help"
+  >
+    ?
+  </button>
 
 </div>
