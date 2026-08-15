@@ -9,7 +9,7 @@ import { LookbookResponse } from '../models/lookbook.model';
 export class LookbookService {
   private apiUrl = 'http://localhost:8080/api/home/trends/lookbook';
 
-  constructor(private http: HttpClient) {} //[cite: 11]
+  constructor(private readonly http: HttpClient) {} //[cite: 11]
 
   getLookbookTrends(): Observable<LookbookResponse> {
     return this.http.get<LookbookResponse>(this.apiUrl);

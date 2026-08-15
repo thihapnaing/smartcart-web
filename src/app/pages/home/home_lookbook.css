@@ -17,7 +17,7 @@
 /* Badge Styling */
 .trend-badge {
   background-color: #d4a373;
-  color: #ffffff;
+  color: #2c221e;
   font-size: 0.85rem;
   font-weight: 600;
   padding: 0.4em 0.8em;
@@ -76,9 +76,7 @@
 }
 
 /* Total Price Highlight */
-::ng-deep .lookbook-content h4:last-of-type,
-::ng-deep .lookbook-content p:contains('Total Cost'),
-::ng-deep .lookbook-content strong:contains('$') {
+::ng-deep .lookbook-content h4:last-of-type {
   color: #b07d4f;
   font-weight: 700;
 }
