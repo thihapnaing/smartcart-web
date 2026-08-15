@@ -56,6 +56,10 @@ describe('createAuthGuard', () => {
       loggedIn = true;
     }
 
+    // The outer beforeEach already called TestBed.inject(Router), which instantiates the
+    // module - configureTestingModule() refuses to run again after that point unless the
+    // module is reset first (same pattern admin-auth.spec.ts uses for its fresh-instance test).
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), LoginStatusProbe],
     });
