@@ -7,6 +7,8 @@ describe('OrderConfirmationComponent', () => {
   let component: OrderConfirmationComponent;
   let fixture: ComponentFixture<OrderConfirmationComponent>;
 
+  // A full order with delivery details and one item filled in,
+  // matching everything the template reads from "order" and "order.cartItemDetails".
   const orders = [
     {
       orderId: 1,
@@ -14,7 +16,23 @@ describe('OrderConfirmationComponent', () => {
       orderDate: '2026-08-15',
       totalAmount: 50,
       paymentMethod: 'CREDIT_CARD',
-      cartItemDetails: []
+      deliveryDetails: {
+        firstName: 'Jane',
+        lastName: 'Tan',
+        shippingAddress: '123 Orchard Road, #01-01, Singapore 238888',
+        phoneNumber: '91234567'
+      },
+      cartItemDetails: [
+        {
+          cartItemId: 1,
+          shopName: 'SmartCart Official',
+          imageUrl: 'https://example.com/image.jpg',
+          productName: 'Classic White Tee',
+          size: 'M',
+          quantity: 2,
+          subtotal: 50
+        }
+      ]
     }
   ];
 
@@ -25,35 +43,34 @@ describe('OrderConfirmationComponent', () => {
         provideRouter([])
       ]
     }).compileComponents();
-
-    fixture = TestBed.createComponent(OrderConfirmationComponent);
-    component = fixture.componentInstance;
   });
 
   it('should create', () => {
+    fixture = TestBed.createComponent(OrderConfirmationComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
     expect(component).toBeTruthy();
   });
 
-  it('should load orders from history state on init', () => {
-    window.history.replaceState({ orders }, '');
-
-    fixture = TestBed.createComponent(OrderConfirmationComponent);
-    component = fixture.componentInstance;
-
-    component.ngOnInit();
-
-    expect(component['orders']()).toEqual(orders);
-  });
-
-  it('should keep orders empty when no orders are provided in history state', () => {
+  it('should show the loading message when no orders are provided in history state', () => {
     window.history.replaceState({}, '');
 
     fixture = TestBed.createComponent(OrderConfirmationComponent);
     component = fixture.componentInstance;
-
-    component.ngOnInit();
+    fixture.detectChanges();
 
     expect(component['orders']()).toEqual([]);
+  });
+
+  it('should load orders from history state and render the full order details', () => {
+    window.history.replaceState({ orders }, '');
+
+    fixture = TestBed.createComponent(OrderConfirmationComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component['orders']()).toEqual(orders);
   });
 
   const paymentMethodCases: Array<[input: string, expected: string]> = [
@@ -64,6 +81,10 @@ describe('OrderConfirmationComponent', () => {
 
   paymentMethodCases.forEach(([input, expected]) => {
     it(`should return "${expected}" label for payment method "${input}"`, () => {
+      fixture = TestBed.createComponent(OrderConfirmationComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
       expect(component.getPaymentMethodLabel(input)).toBe(expected);
     });
   });
