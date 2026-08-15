@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AdminProductService } from '../../services/admin-product';
 import { AdminProductSummary } from '../../models/admin-product-summary';
@@ -29,6 +30,11 @@ export class AdminProducts implements OnInit {
 
   selectedIds = signal<Set<number>>(new Set());
 
+  // Set when arriving here via "Listings" in a merchant's detail modal (?merchantId=&merchantName=)
+  // - filters to just that merchant's products, on top of whatever else is selected above.
+  merchantIdFilter = signal<number | null>(null);
+  merchantNameFilter = signal<string | null>(null);
+
   categories = computed(() => {
     const names = new Set(this.products().map(p => p.categoryName));
     return ['All', ...Array.from(names).sort((a, b) => a.localeCompare(b))];
@@ -43,6 +49,8 @@ export class AdminProducts implements OnInit {
     // Include the whole "to" day, not just midnight.
     const to = this.dateTo() ? new Date(this.dateTo() + 'T23:59:59.999') : null;
 
+    const merchantId = this.merchantIdFilter();
+
     return this.products().filter(p => {
       const matchesTerm = !term || p.name.toLowerCase().includes(term) || p.shopName.toLowerCase().includes(term);
       const matchesCategory = category === 'All' || p.categoryName === category;
@@ -51,7 +59,8 @@ export class AdminProducts implements OnInit {
       const createdAt = new Date(p.createdAt);
       const matchesFrom = !from || createdAt >= from;
       const matchesTo = !to || createdAt <= to;
-      return matchesTerm && matchesCategory && matchesGender && matchesStatus && matchesFrom && matchesTo;
+      const matchesMerchant = merchantId === null || p.merchantId === merchantId;
+      return matchesTerm && matchesCategory && matchesGender && matchesStatus && matchesFrom && matchesTo && matchesMerchant;
     });
   });
 
@@ -80,9 +89,20 @@ export class AdminProducts implements OnInit {
     return Array.from(this.selectedIds()).some(id => products.find(p => p.id === id)?.status === 'ACTIVE');
   });
 
-  constructor(private readonly adminProductService: AdminProductService) {}
+  constructor(
+    private readonly adminProductService: AdminProductService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+  ) {}
 
   ngOnInit(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const merchantId = params.get('merchantId');
+    if (merchantId !== null) {
+      this.merchantIdFilter.set(Number(merchantId));
+      this.merchantNameFilter.set(params.get('merchantName'));
+    }
+
     this.loadProducts();
   }
 
@@ -129,6 +149,14 @@ export class AdminProducts implements OnInit {
   onDateToChange(value: string): void {
     this.dateTo.set(value);
     this.onFilterChange();
+  }
+
+  clearMerchantFilter(): void {
+    this.merchantIdFilter.set(null);
+    this.merchantNameFilter.set(null);
+    this.currentPage.set(1);
+    // Drop merchantId/merchantName from the URL too, so a refresh doesn't reapply the filter.
+    this.router.navigate([], { relativeTo: this.route, queryParams: {} });
   }
 
   clearFilters(): void {
