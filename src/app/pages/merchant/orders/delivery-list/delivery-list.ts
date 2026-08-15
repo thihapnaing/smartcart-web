@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../../../../src/environments/environment';
 
 interface DeliveryPerson {
   id: number;
@@ -35,8 +36,7 @@ interface ViewUrlResponse {
 export class DeliveryList implements OnInit {
   private readonly ordersUrl = '/api/orders/orders';
   private readonly deliveryPersonelUrl = '/api/orders/delivery-men';
-  private readonly proofViewApi =
-    'https://mwpd6bfwfd.execute-api.us-east-1.amazonaws.com/delivery-proof/view-url';
+  private readonly proofViewApi = environment.proofViewApi;
 
   readonly statuses: string[] = ['PAID', 'PACKED', 'PICKED_UP', 'DELIVERED', 'CANCELLED'];
 
@@ -75,9 +75,7 @@ export class DeliveryList implements OnInit {
       })
       .subscribe({
         next: (orders) => {
-          console.log('Orders response:', orders);
 
-          // this.orders = orders;
           this.orders = [...orders].sort((a, b) => (b.status ?? '').localeCompare(a.status ?? ''));
           this.loading = false;
 
@@ -105,8 +103,6 @@ export class DeliveryList implements OnInit {
       })
       .subscribe({
         next: (people) => {
-          console.log('Delivery people:', people);
-
           this.deliveryPersonel = people;
           this.changeDetector.detectChanges();
         },
@@ -115,31 +111,6 @@ export class DeliveryList implements OnInit {
         },
       });
   }
-
-  // saveDelivery(order: DeliveryOrder): void {
-  //   order.saving = true;
-  //   this.errorMessage = '';
-  //   this.successMessage = '';
-
-  //   const request = {
-  //     status: order.status,
-  //     trackingNo: order.trackingNo,
-  //     deliveryPersonId: order.deliveryPersonId,
-  //   };
-
-  //   this.http.patch<DeliveryOrder>(`${this.ordersUrl}/${order.id}`, request).subscribe({
-  //     next: (updatedOrder) => {
-  //       Object.assign(order, updatedOrder);
-  //       order.saving = false;
-  //       this.successMessage = `Order ${order.id} updated successfully.`;
-  //     },
-  //     error: (error) => {
-  //       console.error('Unable to update delivery', error);
-  //       order.saving = false;
-  //       this.errorMessage = `Unable to update order ${order.id}.`;
-  //     },
-  //   });
-  // }
 
   get filteredOrders(): DeliveryOrder[] {
     if (!this.selectedStatus) {
@@ -163,8 +134,6 @@ export class DeliveryList implements OnInit {
       })
       .subscribe({
         next: (response) => {
-          console.log('View URL response:', response);
-
           if (response.viewUrl) {
             if (photoWindow) {
               photoWindow.location.href = response.viewUrl;

@@ -43,7 +43,6 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let order of orders"></tr>
         <tr *ngFor="let order of filteredOrders">
           <!-- Order ID -->
           <td>ORD-{{ order.id }}</td>
@@ -126,9 +125,8 @@
             <button
               type="button"
               class="save-button"
-              [disabled]="order.saving"
+              [disabled]="order.saving || isDelivered(order)"
               (click)="saveDelivery(order)"
-              [disabled]="isDelivered(order)"
             >
               {{ order.saving ? 'Saving...' : 'Save' }}
             </button>
@@ -137,7 +135,7 @@
 
         <!-- No records -->
         <tr *ngIf="filteredOrders.length === 0">
-          <td colspan="7" class="empty-message">No delivery records found.</td>
+          <td colspan="8" class="empty-message">No delivery records found.</td>
         </tr>
       </tbody>
     </table>
