@@ -7,9 +7,9 @@
     <button
       *ngFor="let tab of statusTabs"
       class="tab-button"
-      [class.active]="selectedStatus === tab"
-      (click)="selectStatus(tab)">
-      {{ tab === 'All' ? 'All Orders' : tab }}
+      [class.active]="selectedStatus === tab.value"
+      (click)="selectStatus(tab.value)">
+      {{ tab.label }}
     </button>
   </div>
 
@@ -27,6 +27,7 @@
         <th>Amount</th>
         <th>Date</th>
         <th>Status</th>
+        <th *ngIf="showActionColumn">Action</th>
       </tr>
     </thead>
     <tbody>
@@ -40,8 +41,18 @@
         <td>{{ item.orderDate | date:'MMM d' }}</td>
         <td>
           <span class="status-badge" [ngClass]="item.orderStatus.toLowerCase()">
-            {{ item.orderStatus | titlecase }}
+            {{ item.orderStatus.replace('_', ' ') | titlecase }}
           </span>
+        </td>
+        <td *ngIf="showActionColumn">
+          <button
+            *ngIf="item.orderStatus === 'PAID'; else noAction"
+            class="mark-packed-button"
+            [disabled]="updatingOrderId === item.orderId"
+            (click)="markAsPacked(item)">
+            {{ updatingOrderId === item.orderId ? 'Updating...' : 'Mark as Packed' }}
+          </button>
+          <ng-template #noAction>&mdash;</ng-template>
         </td>
       </tr>
     </tbody>
