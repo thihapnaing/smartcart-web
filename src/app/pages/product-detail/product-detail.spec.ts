@@ -89,6 +89,17 @@ describe('ProductDetail', () => {
     paramMapSubject.next(convertToParamMap({ id: String(id) }));
   }
 
+  // Shared by every test in the "template rendering" groups below. Unlike
+  // TestBed.inject(...) used above, TestBed.createComponent(...) actually
+  // draws product-detail.html on screen, so the @if / @else blocks inside
+  // that file run too. That is what moves product-detail.html's coverage
+  // off 0%.
+  function createAndRender() {
+    const fixture = TestBed.createComponent(ProductDetail);
+    fixture.detectChanges(); // runs ngOnInit and draws the initial "loading" view
+    return fixture;
+  }
+
   describe('ngOnInit / loading a product', () => {
     it('fetches the product for the id in the route and stores it', () => {
       component.ngOnInit();
@@ -413,16 +424,9 @@ describe('ProductDetail', () => {
 
   // The tests above call component methods directly, which exercises every
   // branch in product-detail.ts but never actually draws the HTML template.
-  // These tests use TestBed.createComponent(...) instead, which does render
-  // product-detail.html for real, so the @if / @else blocks inside that file
-  // get run too. That's what moves product-detail.html's coverage off 0%.
+  // These tests render the real template so the @if / @else blocks inside
+  // that file get run too.
   describe('template rendering', () => {
-    function createAndRender() {
-      const fixture = TestBed.createComponent(ProductDetail);
-      fixture.detectChanges(); // runs ngOnInit and draws the initial "loading" view
-      return fixture;
-    }
-
     it('shows a loading message before the product has arrived', () => {
       const fixture = createAndRender();
 
@@ -506,6 +510,68 @@ describe('ProductDetail', () => {
       fixture.detectChanges();
 
       expect(el.textContent).toContain('Please select a size first.');
+    });
+  });
+
+  // These tests cover a few interactions that were previously only exercised
+  // by calling the component's methods directly (see "buyNow" and "choosing
+  // a size and adjusting quantity" above). Clicking the real buttons in the
+  // rendered template gives the same methods extra coverage through the
+  // template's own click bindings and disabled-state bindings.
+  describe('template rendering — buy now and quantity buttons', () => {
+    it('navigates to checkout when the "Buy now" button is clicked', () => {
+      const fixture = createAndRender();
+      emitId(1);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      (el.querySelector('.btn-secondary') as HTMLButtonElement).click();
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/checkout']);
+    });
+
+    it('lets a shopper change the quantity using the + and - buttons, disabling them at the stock limits', () => {
+      const fixture = createAndRender();
+      emitId(1);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      const [decreaseButton, increaseButton] = Array.from(
+        el.querySelectorAll('.qty-step-btn')
+      ) as HTMLButtonElement[];
+      const quantityText = () => el.querySelector('.qty-value')?.textContent?.trim();
+
+      // Pre-selected size is M, which has 3 in stock, so quantity starts at 1
+      // and the "-" button should already be disabled.
+      expect(quantityText()).toBe('1');
+      expect(decreaseButton.disabled).toBe(true);
+      expect(increaseButton.disabled).toBe(false);
+
+      increaseButton.click();
+      fixture.detectChanges();
+      increaseButton.click();
+      fixture.detectChanges();
+      expect(quantityText()).toBe('3');
+      // The stock limit (3) has been reached, so the "+" button disables itself.
+      expect(increaseButton.disabled).toBe(true);
+
+      decreaseButton.click();
+      fixture.detectChanges();
+      expect(quantityText()).toBe('2');
+      expect(decreaseButton.disabled).toBe(false);
+    });
+
+    it('renders an out-of-stock size button as disabled', () => {
+      const fixture = createAndRender();
+      emitId(1);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      const sizeButtons = Array.from(el.querySelectorAll('.size-btn')) as HTMLButtonElement[];
+      const sButton = sizeButtons.find(button => button.textContent?.trim() === 'S');
+
+      // sampleProduct's "S" size has 0 stock.
+      expect(sButton?.disabled).toBe(true);
     });
   });
 });
