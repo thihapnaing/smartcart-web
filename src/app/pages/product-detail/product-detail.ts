@@ -100,6 +100,7 @@ export class ProductDetail implements OnInit {
   }
 
   // Turns the raw gender value ('MEN' / 'WOMEN') into display text ('Men' / 'Women').
+  //edited by Shannon
   genderLabel(): string {
     const p = this.product();
     if (!p) return '';
@@ -108,17 +109,13 @@ export class ProductDetail implements OnInit {
       .trim()
       .toUpperCase();
 
-    console.log('PRODUCT GENDER:', p.gender);
-    console.log('PRODUCT:', p);
-
-    //added by Junior (image search)
-    // Male → MAN
-    if (gender === 'MAN' || gender === 'MEN' || gender === 'MALE') {
-      return 'MAN';
+    // Male → Men
+    if (gender === 'MEN' || gender === 'MALE') {
+      return 'Men';
     }
-    // Female → WOMAN
-    if (gender === 'WOMAN' || gender === 'WOMEN' || gender === 'FEMALE') {
-      return 'WOMAN';
+    // Female → Women
+    if (gender === 'WOMEN' || gender === 'FEMALE') {
+      return 'Women';
     }
     return '';
   }
