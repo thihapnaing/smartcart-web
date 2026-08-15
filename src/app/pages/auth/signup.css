@@ -1,580 +1,887 @@
 /* =========================================================
-   SmartCartel Signup
-   Based on Figma design
+   SMARTCART CUSTOMER SIGNUP
    ========================================================= */
 
 :host {
   display: block;
+  width: 100%;
+  min-height: 100vh;
 }
 
 
 /* =========================================================
-   Page
+   PAGE
    ========================================================= */
 
 .signup-page {
   min-height: 100vh;
 
-  background: #f8f5f0;
+  display: grid;
+  grid-template-columns: 50% 50%;
 
-  color: #49372c;
+  background: #f8f5f0;
+}
+
+
+/* =========================================================
+   LEFT BRAND PANEL
+   ========================================================= */
+
+.brand-panel {
+  position: relative;
+
+  min-height: 100vh;
+
+  overflow: hidden;
+
+  /*
+   * IMPORTANT:
+   * Change this path to the same clothing-store image
+   * you were using in your previous signup design.
+   */
+  background-image:
+    url('/assets/images/signup-bg.jpg');
+
+  background-size: cover;
+  background-position: center;
+}
+
+
+/* DARK OVERLAY */
+
+.brand-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(43, 28, 20, 0.45),
+      rgba(43, 28, 20, 0.72)
+    );
+
+  z-index: 1;
+}
+
+
+/* =========================================================
+   BRAND LOGO
+   ========================================================= */
+
+.brand-logo {
+  position: absolute;
+
+  top: 50px;
+  left: 65px;
+
+  z-index: 2;
 
   display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  color: #ffffff;
+
+  font-family: Georgia, 'Times New Roman', serif;
+
+  font-size: 30px;
+
+  font-weight: 700;
+}
+
+
+.brand-logo-icon {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
   justify-content: center;
 
-  padding: 34px 24px 80px;
+  background: #e4bb7c;
 
-  box-sizing: border-box;
+  color: #4e3022;
 
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
-  position: relative;
+  font-size: 22px;
 }
 
 
 /* =========================================================
-   Main container
+   BRAND CONTENT
    ========================================================= */
 
-.signup-container {
-  width: 100%;
-  max-width: 814px;
+.brand-content {
+  position: absolute;
 
-  margin: 0 auto;
+  z-index: 2;
+
+  left: 65px;
+  right: 60px;
+  bottom: 65px;
 }
 
 
-/* =========================================================
-   Header
-   ========================================================= */
+.brand-content h2 {
+  margin: 0 0 24px;
 
-.signup-header {
-  margin-bottom: 58px;
-}
+  color: #ffffff;
 
-.signup-header h1 {
-  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
 
-  font-family:
-    Georgia,
-    'Times New Roman',
-    serif;
+  font-size: clamp(42px, 4vw, 66px);
 
-  font-size: 58px;
-  font-weight: 400;
+  line-height: 0.98;
 
-  line-height: 1.1;
-
-  color: #291d17;
+  font-weight: 700;
 
   letter-spacing: -1.5px;
 }
 
-.signup-header p {
-  margin: 18px 0 0;
 
-  font-size: 25px;
-  font-weight: 400;
+.brand-content p {
+  margin: 0 0 7px;
 
-  color: #806d5b;
+  color: rgba(255, 255, 255, 0.88);
 
-  line-height: 1.4;
+  font-size: 17px;
+
+  line-height: 1.5;
 }
 
 
 /* =========================================================
-   Sign in / Sign up toggle
+   BADGES
    ========================================================= */
 
-.auth-toggle {
-  width: 100%;
-
-  height: 74px;
-
-  background: #eadfcd;
-
-  border-radius: 24px;
-
-  padding: 7px;
-
-  box-sizing: border-box;
-
-  display: grid;
-
-  grid-template-columns: 1fr 1fr;
-
-  margin-bottom: 57px;
-}
-
-.auth-toggle-option {
+.brand-badges {
   display: flex;
 
-  align-items: center;
-  justify-content: center;
+  flex-wrap: wrap;
 
-  border-radius: 18px;
+  gap: 12px;
 
-  text-decoration: none;
-
-  font-size: 25px;
-  font-weight: 600;
-
-  color: #806d5b;
-
-  cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
+  margin-top: 36px;
 }
 
-.auth-toggle-option.active {
-  background: #49372c;
+
+.brand-badges span {
+  padding: 9px 17px;
+
+  border: 1px solid rgba(230, 191, 136, 0.65);
+
+  border-radius: 22px;
+
+  color: #f2d19c;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   RIGHT FORM PANEL
+   ========================================================= */
+
+.form-panel {
+  min-height: 100vh;
+
+  background: #fbf9f6;
+
+  overflow-y: auto;
+
+  display: flex;
+
+  justify-content: center;
+}
+
+
+.form-container {
+  width: 100%;
+
+  max-width: 560px;
+
+  padding: 72px 50px 50px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.heading {
+  margin-bottom: 28px;
+}
+
+
+.heading h1 {
+  margin: 0;
+
+  color: #20140e;
+
+  font-family: Georgia, 'Times New Roman', serif;
+
+  font-size: 47px;
+
+  line-height: 1.05;
+
+  letter-spacing: -1.3px;
+}
+
+
+.heading p {
+  margin: 12px 0 0;
+
+  color: #9a7052;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   AUTH TABS
+   ========================================================= */
+
+.auth-tabs {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  padding: 5px;
+
+  margin-bottom: 27px;
+
+  background: #eee2ce;
+
+  border-radius: 16px;
+
+  box-sizing: border-box;
+}
+
+
+.auth-tab {
+  height: 58px;
+
+  border: 0;
+
+  border-radius: 13px;
+
+  background: transparent;
+
+  color: #916f55;
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+
+.auth-tab.active {
+  background: #4f3023;
 
   color: #ffffff;
 
-  box-shadow:
-    0 3px 8px rgba(40, 28, 20, 0.22);
+  box-shadow: 0 2px 5px rgba(49, 28, 19, 0.12);
 }
 
 
 /* =========================================================
-   Form
+   MERCHANT LINK
    ========================================================= */
 
-.signup-form {
-  width: 100%;
+.merchant-link {
+  margin: 0 0 20px;
+
+  color: #2d211b;
+
+  font-size: 15px;
 }
 
 
-/* =========================================================
-   Form group
-   ========================================================= */
-
-.form-group {
-  margin-bottom: 31px;
-}
-
-.form-group label {
-  display: block;
-
-  margin-bottom: 12px;
-
-  font-size: 20px;
+.merchant-link a {
+  color: #4f3023;
 
   font-weight: 600;
 
-  letter-spacing: 1.5px;
+  text-decoration: none;
 
-  color: #806d5b;
+  margin-left: 4px;
+}
+
+
+.merchant-link a:hover {
+  text-decoration: underline;
 }
 
 
 /* =========================================================
-   Inputs
+   FORM
    ========================================================= */
 
-.form-group input {
+.signup-form,
+.profile-form {
+  width: 100%;
+}
+
+
+/* =========================================================
+   FIELD
+   ========================================================= */
+
+.field {
   width: 100%;
 
-  height: 84px;
+  margin-bottom: 18px;
+}
+
+
+.field label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #79543c;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  letter-spacing: 1.4px;
+}
+
+
+.field input {
+  width: 100%;
+
+  height: 52px;
 
   box-sizing: border-box;
 
-  padding: 0 29px;
+  padding: 0 17px;
 
-  border: 2px solid #e3d2b5;
+  border: 1px solid #e3ccb0;
 
-  border-radius: 23px;
-
-  background: #eee3d1;
-
-  color: #49372c;
-
-  font-size: 25px;
+  border-radius: 13px;
 
   outline: none;
 
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
+  background: #f1e5d2;
+
+  color: #38271e;
+
+  font-family: inherit;
+
+  font-size: 15px;
 
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
-.form-group input::placeholder {
-  color: #948575;
 
-  opacity: 1;
+.field input::placeholder {
+  color: #a8907c;
 }
 
-.form-group input:focus {
-  border-color: #8b7259;
+
+.field input:focus {
+  border-color: #a77d5a;
+
+  background: #f5eadb;
 
   box-shadow:
-    0 0 0 3px rgba(139, 114, 89, 0.12);
+    0 0 0 3px rgba(167, 125, 90, 0.10);
 }
 
-.form-group input:disabled {
-  opacity: 0.7;
+
+.field input:disabled {
+  opacity: 0.65;
 
   cursor: not-allowed;
 }
 
 
 /* =========================================================
-   Password
+   PASSWORD
    ========================================================= */
 
 .password-wrapper {
   position: relative;
 }
 
+
 .password-wrapper input {
-  padding-right: 75px;
+  padding-right: 52px;
 }
+
 
 .password-toggle {
   position: absolute;
 
-  right: 23px;
   top: 50%;
+  right: 16px;
 
   transform: translateY(-50%);
 
-  width: 42px;
-  height: 42px;
+  width: 28px;
+  height: 28px;
 
-  display: flex;
+  padding: 0;
 
-  align-items: center;
-  justify-content: center;
-
-  border: none;
+  border: 0;
 
   background: transparent;
 
-  color: #806d5b;
+  color: #92745d;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   cursor: pointer;
-
-  padding: 0;
 }
 
-.password-toggle:hover {
-  color: #49372c;
-}
 
 .password-toggle:disabled {
+  opacity: 0.5;
+
   cursor: not-allowed;
-
-  opacity: 0.6;
 }
 
 
 /* =========================================================
-   Terms
+   PASSWORD HELP
    ========================================================= */
 
-.terms-text {
-  margin: 6px 0 28px;
-
-  font-size: 19px;
-
-  line-height: 1.6;
-
-  color: #806d5b;
-}
-
-.terms-text a {
-  color: #806d5b;
-
-  text-decoration: underline;
-
-  text-underline-offset: 2px;
+.password-help {
+  margin: -3px 0 17px;
 }
 
 
-/* =========================================================
-   Error
-   ========================================================= */
+.password-help p {
+  margin: 0;
 
-.signup-error {
-  width: 100%;
+  color: #967660;
 
-  box-sizing: border-box;
-
-  margin-bottom: 18px;
-
-  padding: 14px 18px;
-
-  border-radius: 12px;
-
-  background: #f4d9d5;
-
-  color: #9b4037;
-
-  font-size: 16px;
+  font-size: 12px;
 
   line-height: 1.4;
 }
 
 
 /* =========================================================
-   Create account button
+   TERMS
    ========================================================= */
 
-.signup-button {
+.terms-text {
+  margin: 0 0 18px;
+
+  color: #8c6c55;
+
+  font-size: 11.5px;
+
+  line-height: 1.5;
+}
+
+
+.terms-text a {
+  color: #62402e;
+
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.error-message {
   width: 100%;
 
-  height: 72px;
+  box-sizing: border-box;
 
-  border: none;
+  margin: 0 0 16px;
 
-  border-radius: 22px;
+  padding: 13px 16px;
 
-  background: #49372c;
+  border: 1px solid #e9aaa4;
+
+  border-radius: 11px;
+
+  background: #fff1f0;
+
+  color: #c9342b;
+
+  font-size: 13px;
+
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   PRIMARY BUTTON
+   ========================================================= */
+
+.primary-button {
+  width: 100%;
+
+  height: 54px;
+
+  border: 0;
+
+  border-radius: 13px;
+
+  background: #4f3023;
 
   color: #ffffff;
 
-  font-size: 23px;
+  font-size: 15px;
 
   font-weight: 600;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
 
   cursor: pointer;
 
   transition:
-    background 0.2s ease,
-    transform 0.1s ease,
-    opacity 0.2s ease;
+    background 0.2s,
+    transform 0.1s;
 }
 
-.signup-button:hover:not(:disabled) {
-  background: #3d2d24;
+
+.primary-button:hover:not(:disabled) {
+  background: #41271d;
 }
 
-.signup-button:active:not(:disabled) {
+
+.primary-button:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.signup-button:disabled {
-  opacity: 0.6;
+
+.primary-button:disabled {
+  background: #a49388;
 
   cursor: not-allowed;
 }
 
 
 /* =========================================================
-   Existing account
+   LOGIN LINK
    ========================================================= */
 
 .login-link {
-  margin-top: 28px;
+  margin-top: 24px;
 
-  display: flex;
+  text-align: center;
 
-  justify-content: center;
-  align-items: center;
+  color: #a27f66;
 
-  gap: 7px;
-
-  font-size: 18px;
-
-  color: #806d5b;
+  font-size: 12px;
 }
 
+
 .login-link a {
-  color: #49372c;
+  color: #4f3023;
 
   font-weight: 600;
 
-  text-decoration: underline;
+  text-decoration: none;
 
-  text-underline-offset: 3px;
+  margin-left: 4px;
+}
+
+
+.login-link a:hover {
+  text-decoration: underline;
 }
 
 
 /* =========================================================
-   Help button
+   STEP 2 AVATAR
    ========================================================= */
 
-.help-button {
-  position: fixed;
+.avatar-area {
+  display: flex;
 
-  right: 22px;
-  bottom: 20px;
+  flex-direction: column;
 
-  width: 58px;
-  height: 58px;
+  align-items: center;
 
-  border: none;
+  margin: 2px 0 22px;
+}
+
+
+/* CIRCLE */
+
+.avatar-circle {
+  width: 76px;
+  height: 76px;
 
   border-radius: 50%;
 
-  background: #252525;
+  overflow: hidden;
 
-  color: #ffffff;
+  box-sizing: border-box;
 
-  font-size: 30px;
+  border: 1.5px solid #dfbf96;
 
-  font-family:
-    Georgia,
-    'Times New Roman',
-    serif;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.3);
+  background: #f4e8d6;
 
   display: flex;
 
   align-items: center;
+
   justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+
+.avatar-circle:hover {
+  border-color: #a77d5a;
+
+  transform: scale(1.02);
+}
+
+
+.avatar-circle img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* DEFAULT AVATAR */
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 2px;
+
+  color: #b38d67;
+}
+
+
+.avatar-placeholder span {
+  font-size: 9px;
+}
+
+
+/* AVATAR TEXT */
+
+.avatar-label {
+  margin: 7px 0 0;
+
+  color: #9a7052;
+
+  font-size: 10px;
+}
+
+
+.avatar-label span {
+  color: #b3a092;
 }
 
 
 /* =========================================================
-   Tablet
+   STEP 2 TWO-COLUMN NAME FIELDS
+   ========================================================= */
+
+.two-column-fields {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   STEP 2 BUTTON
+   ========================================================= */
+
+.profile-button {
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+.back-button {
+  display: block;
+
+  margin: 15px auto 0;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #9a7052;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+
+.back-button:hover {
+  color: #4f3023;
+
+  text-decoration: underline;
+}
+
+
+.back-button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   RESPONSIVE
    ========================================================= */
 
 @media (max-width: 900px) {
 
   .signup-page {
+    grid-template-columns: 1fr;
+  }
+
+
+  .brand-panel {
+    min-height: 300px;
+  }
+
+
+  .brand-logo {
+    top: 30px;
+    left: 35px;
+  }
+
+
+  .brand-content {
+    left: 35px;
+    bottom: 35px;
+  }
+
+
+  .brand-content h2 {
+    font-size: 42px;
+  }
+
+
+  .form-panel {
+    min-height: auto;
+  }
+
+
+  .form-container {
+    max-width: 620px;
+
     padding:
-      30px 30px 70px;
-  }
-
-  .signup-header h1 {
-    font-size: 48px;
-  }
-
-  .signup-header p {
-    font-size: 22px;
-  }
-
-  .auth-toggle-option {
-    font-size: 22px;
+      45px 35px
+      45px;
   }
 
 }
 
 
-/* =========================================================
-   Mobile
-   ========================================================= */
-
 @media (max-width: 600px) {
 
-  .signup-page {
-    padding:
-      25px 18px 60px;
+  .brand-panel {
+    min-height: 250px;
   }
 
-  .signup-header {
-    margin-bottom: 35px;
+
+  .brand-logo {
+    top: 24px;
+    left: 24px;
+
+    font-size: 23px;
   }
 
-  .signup-header h1 {
-    font-size: 38px;
 
-    letter-spacing: -0.8px;
+  .brand-logo-icon {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 10px;
   }
 
-  .signup-header p {
-    margin-top: 12px;
 
-    font-size: 18px;
+  .brand-content {
+    left: 24px;
+    right: 24px;
+    bottom: 25px;
   }
 
-  .auth-toggle {
-    height: 62px;
 
-    border-radius: 19px;
+  .brand-content h2 {
+    font-size: 34px;
 
-    padding: 5px;
-
-    margin-bottom: 40px;
+    margin-bottom: 12px;
   }
 
-  .auth-toggle-option {
-    border-radius: 15px;
 
-    font-size: 18px;
+  .brand-content p {
+    font-size: 13px;
   }
 
-  .form-group {
-    margin-bottom: 24px;
+
+  .brand-badges {
+    margin-top: 18px;
+
+    gap: 7px;
   }
 
-  .form-group label {
-    margin-bottom: 9px;
 
-    font-size: 16px;
+  .brand-badges span {
+    padding: 7px 11px;
 
-    letter-spacing: 1.2px;
+    font-size: 10px;
   }
 
-  .form-group input {
-    height: 65px;
 
-    padding:
-      0 20px;
-
-    border-radius: 17px;
-
-    font-size: 18px;
+  .form-container {
+    padding: 35px 22px;
   }
 
-  .password-wrapper input {
-    padding-right: 62px;
+
+  .heading h1 {
+    font-size: 37px;
   }
 
-  .password-toggle {
-    right: 14px;
+
+  .two-column-fields {
+    grid-template-columns: 1fr;
   }
 
-  .terms-text {
-    font-size: 15px;
-
-    line-height: 1.5;
-
-    margin-bottom: 22px;
-  }
-
-  .signup-button {
-    height: 62px;
-
-    border-radius: 17px;
-
-    font-size: 19px;
-  }
-
-  .login-link {
-    font-size: 15px;
-
-    flex-wrap: wrap;
-  }
-
-  .help-button {
-    width: 50px;
-    height: 50px;
-
-    right: 15px;
-    bottom: 15px;
-
-    font-size: 26px;
-  }
 }
