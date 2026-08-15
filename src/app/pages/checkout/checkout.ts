@@ -61,11 +61,11 @@ export class CheckoutComponent implements OnInit {
   }
 
   selectPaymentMethod(method: 'CREDIT_CARD' | 'PAY_NOW') {
-      this.checkoutForm.patchValue({paymentMethod: method});
-    }
+    this.checkoutForm.patchValue({ paymentMethod: method });
+  }
 
   onSubmit() {
-    if(this.checkoutForm.invalid) {
+    if (this.checkoutForm.invalid) {
       this.checkoutForm.markAllAsTouched();
       return;
     }
@@ -79,8 +79,10 @@ export class CheckoutComponent implements OnInit {
     };
 
     this.orderService.checkout(request).subscribe({
-      next: (response) => {
-        this.router.navigate([`/order-confirmation/${response.orderId}`]);
+      next: (responses) => {
+        this.router.navigate(['/order-confirmation'], {
+          state: { orders: responses }
+        });
       },
       error: (err) => {
         console.error('Checkout failed', err);

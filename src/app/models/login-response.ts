@@ -1,10 +1,9 @@
-// Matches Spring Boot's LoginResponse DTO exactly - returned by POST /api/auth/login
-// and /api/auth/register. `role` is one of the backend's UserRole enum values
-// (CUSTOMER, MERCHANT, ADMIN, DELIVERYMAN), sent as a plain string.
+//Author: Junior
+
 export interface LoginResponse {
-  token: string;
-  userId: number;
+  userId?: number;
   username: string;
   email: string;
   role: string;
+  token: string;
 }
