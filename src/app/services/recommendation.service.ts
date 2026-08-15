@@ -11,7 +11,8 @@ export class RecommendationService {
 
   constructor(private http: HttpClient) {}
 
-  getRecommendations(userId: number): Observable<RecommendationResult> {
-    return this.http.get<RecommendationResult>(`${this.apiUrl}/${userId}`);
+  getRecommendations(): Observable<RecommendationResult> {
+    // Call the base URL; your new auth interceptor will automatically attach the JWT!
+    return this.http.get<RecommendationResult>(this.apiUrl);
   }
 }

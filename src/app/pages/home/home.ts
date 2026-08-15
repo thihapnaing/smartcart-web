@@ -50,7 +50,7 @@ export class Home implements OnInit {
     });
 
     // Fetch AI recommendations (Hardcoding User ID 2 for testing Grace's profile)
-    this.recommendationService.getRecommendations(2).subscribe({
+    this.recommendationService.getRecommendations().subscribe({
       next: (result) => {
         this.recommendations.set(result);
       },
