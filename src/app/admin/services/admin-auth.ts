@@ -1,27 +1,53 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { LoginRequest } from '../../models/login-request';
+import { LoginResponse } from '../../models/login-response';
 
 // AUTHOR: Htet Nandar(Grace)
 /**
- * UI-only session flag for the admin area - there's no real backend auth yet (see
- * CurrentUserProvider.getCurrentAdmin(), which just hardcodes admin id=4), so this doesn't
- * verify a password against anything. It just remembers "the admin login form was submitted"
- * for this browser tab, so /admin/dashboard and /admin/products can't be reached by typing the
- * URL without going through /admin/login first, and the nav bar's Sign out button has something
- * real to do. Swap for a real JWT/session check once backend auth exists.
+ * Real backend auth for the admin area - calls POST /api/auth/login (see AuthController /
+ * AuthService on the backend) and keeps the JWT + role in sessionStorage for this tab.
+ *
+ * isLoggedIn only ever becomes true for an ADMIN-role account. This is a UX check, not a
+ * security boundary by itself - the real enforcement is on the backend, where SecurityConfig
+ * requires hasRole("ADMIN") for /api/admin/**. Without this client-side check, a logged-in
+ * CUSTOMER/MERCHANT would still get redirected past the login screen into the admin UI shell,
+ * then have every API call fail with 403 - checking the role here just avoids that dead end.
  */
 @Injectable({ providedIn: 'root' })
 export class AdminAuthService {
-  private static readonly SESSION_KEY = 'smartcart_admin_session';
+  private static readonly TOKEN_KEY = 'smartcart_admin_token';
+  private static readonly ROLE_KEY = 'smartcart_admin_role';
+  private static readonly ADMIN_ROLE = 'ADMIN';
 
-  readonly isLoggedIn = signal(sessionStorage.getItem(AdminAuthService.SESSION_KEY) === 'true');
+  private readonly http = inject(HttpClient);
+  private readonly apiBase = `${environment.apiUrl}/auth`;
 
-  login(): void {
-    sessionStorage.setItem(AdminAuthService.SESSION_KEY, 'true');
-    this.isLoggedIn.set(true);
+  readonly isLoggedIn = signal(
+    !!sessionStorage.getItem(AdminAuthService.TOKEN_KEY) &&
+      sessionStorage.getItem(AdminAuthService.ROLE_KEY) === AdminAuthService.ADMIN_ROLE,
+  );
+
+  login(email: string, password: string): Observable<LoginResponse> {
+    const request: LoginRequest = { email, password };
+    return this.http.post<LoginResponse>(`${this.apiBase}/login`, request).pipe(
+      tap((response) => {
+        sessionStorage.setItem(AdminAuthService.TOKEN_KEY, response.token);
+        sessionStorage.setItem(AdminAuthService.ROLE_KEY, response.role);
+        this.isLoggedIn.set(response.role === AdminAuthService.ADMIN_ROLE);
+      }),
+    );
   }
 
   logout(): void {
-    sessionStorage.removeItem(AdminAuthService.SESSION_KEY);
+    sessionStorage.removeItem(AdminAuthService.TOKEN_KEY);
+    sessionStorage.removeItem(AdminAuthService.ROLE_KEY);
     this.isLoggedIn.set(false);
+  }
+
+  getToken(): string | null {
+    return sessionStorage.getItem(AdminAuthService.TOKEN_KEY);
   }
 }
