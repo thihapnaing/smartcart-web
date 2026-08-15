@@ -11,7 +11,7 @@ import { LoginResponse } from '../models/login-response';
 
 //Author: Junior
 export class AuthService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   private readonly apiUrl = 'http://localhost:8080/api/auth';
 
