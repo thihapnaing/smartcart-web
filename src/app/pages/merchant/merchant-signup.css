@@ -2,51 +2,29 @@
   display: block;
 }
 
-
-/* =========================================================
-   MAIN PAGE
-   ========================================================= */
-
 .auth-page {
   min-height: 100vh;
-
   display: grid;
   grid-template-columns: 1fr 1fr;
-
   background: #faf6f1;
-
   font-family: 'Plus Jakarta Sans', Arial, sans-serif;
 }
 
-
-/* =========================================================
-   LEFT BRAND PANEL
-   SAME DESIGN AS LOGIN
-   ========================================================= */
-
 .brand-panel {
   position: relative;
-
   overflow: hidden;
-
   background: #2c1a10;
-
   padding: 48px;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
   color: #faf6f1;
 }
 
-
 .brand-panel::before {
   content: '';
-
   position: absolute;
   inset: 0;
-
   background:
     linear-gradient(
       rgba(44, 26, 16, .7),
@@ -56,484 +34,290 @@
     center / cover;
 }
 
-
 .brand-content {
   position: relative;
-
   z-index: 1;
-
   height: 100%;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-
-/* =========================================================
-   LOGO
-   ========================================================= */
-
 .brand-logo,
 .mobile-brand {
   display: flex;
-
   align-items: center;
-
   gap: 10px;
 }
-
 
 .brand-logo span,
 .mobile-brand span {
   font-family: Georgia, serif;
-
   font-size: 21px;
-
   font-weight: 600;
 }
-
 
 .brand-icon {
   width: 32px;
   height: 32px;
-
   border-radius: 8px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   background: #c9a47b;
-
   color: #2c1a10;
 }
 
-
-/* =========================================================
-   BRAND MESSAGE
-   ========================================================= */
-
 .brand-message h2 {
   font-family: Georgia, serif;
-
   font-size: 38px;
-
   line-height: 1.2;
-
   margin-bottom: 24px;
 }
 
-
 .brand-message p {
   color: #c9a47b;
-
   line-height: 1.7;
-
   font-size: 14px;
 }
 
-
 .brand-badges {
   display: flex;
-
   gap: 12px;
-
   margin-top: 30px;
-
   flex-wrap: wrap;
 }
 
-
 .brand-badges span {
   border: 1px solid #c9a47b55;
-
   background: #faf6f115;
-
   color: #c9a47b;
-
   padding: 7px 12px;
-
   border-radius: 999px;
-
   font-size: 11px;
-
   font-weight: 600;
 }
 
-
-/* =========================================================
-   RIGHT FORM PANEL
-   ========================================================= */
-
 .form-panel {
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   padding: 48px 64px;
 }
 
-
 .form-container {
   width: 100%;
-
   max-width: 430px;
 }
-
-
-/* =========================================================
-   HEADING
-   ========================================================= */
 
 .heading {
   margin-bottom: 30px;
 }
 
-
 .heading h1 {
   font-family: Georgia, serif;
-
   color: #2c1a10;
-
   font-size: 34px;
-
   margin: 0 0 8px;
 }
 
-
 .heading p {
   color: #8b6a4f;
-
   font-size: 14px;
 }
-
-
-/* =========================================================
-   SIGN IN / SIGN UP TABS
-   ========================================================= */
 
 .auth-tabs {
   display: flex;
-
   padding: 4px;
-
   border-radius: 12px;
-
   background: #efe2d2;
-
   margin-bottom: 28px;
 }
 
-
 .auth-tabs button {
   flex: 1;
-
   border: 0;
-
   background: transparent;
-
   padding: 10px;
-
   border-radius: 9px;
-
   color: #8b6a4f;
-
   font-weight: 600;
-
   cursor: pointer;
-
-  font-family: inherit;
-
-  font-size: 14px;
 }
-
 
 .auth-tabs button.active {
   background: #4a3226;
-
   color: #faf6f1;
 }
-
-
-/* =========================================================
-   FORM
-   ========================================================= */
-
-.signup-form {
-  width: 100%;
-}
-
 
 .field {
   margin-bottom: 18px;
 }
 
-
-.field label {
+.field label,
+.password-label label {
   display: block;
-
   margin-bottom: 7px;
-
   color: #8b6a4f;
-
   font-size: 11px;
-
   font-weight: 700;
-
   text-transform: uppercase;
-
   letter-spacing: .12em;
 }
 
-
 .field input {
   box-sizing: border-box;
-
   width: 100%;
-
   padding: 13px 15px;
-
   border-radius: 12px;
-
   border: 1px solid #c9a47b44;
-
   background: #efe2d2;
-
   color: #2c1a10;
-
   font-size: 14px;
-
   outline: none;
-
-  font-family: inherit;
 }
-
 
 .field input:focus {
   border-color: #c9a47b;
 }
 
-
-.field input::placeholder {
-  color: #8b6a4f;
+.password-label {
+  display: flex;
+  justify-content: space-between;
 }
 
-
-/* =========================================================
-   PASSWORD
-   ========================================================= */
+.forgot {
+  border: 0;
+  background: transparent;
+  color: #8b6a4f;
+  font-size: 11px;
+  cursor: pointer;
+}
 
 .password-wrapper {
   position: relative;
 }
 
-
 .password-wrapper input {
   padding-right: 48px;
 }
 
-
-.password-toggle {
+.eye-button {
   position: absolute;
-
   right: 10px;
-
   top: 50%;
-
   transform: translateY(-50%);
-
   border: 0;
-
   background: transparent;
-
-  color: #8b6a4f;
-
   cursor: pointer;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 4px;
 }
 
-
-.password-toggle:disabled {
-  cursor: not-allowed;
-
-  opacity: .5;
-}
-
-
-/* =========================================================
-   TERMS
-   ========================================================= */
-
-.terms-text {
-  margin: 20px 0;
-
-  color: #8b6a4f;
-
-  font-size: 11px;
-
-  line-height: 1.6;
-}
-
-
-.terms-text a {
-  color: #4a3226;
-
-  font-weight: 600;
-
-  text-decoration: none;
-}
-
-
-.terms-text a:hover {
-  text-decoration: underline;
-}
-
-
-/* =========================================================
-   ERROR
-   ========================================================= */
-
-.signup-error {
+.error-message {
   padding: 12px 15px;
-
   margin-bottom: 16px;
-
   border-radius: 12px;
-
   color: #b94040;
-
   background: #b9404015;
-
   border: 1px solid #b9404033;
-
   font-size: 13px;
 }
 
-
-/* =========================================================
-   CREATE ACCOUNT BUTTON
-   ========================================================= */
-
-.signup-button {
+.submit-button {
   width: 100%;
-
   border: 0;
-
   border-radius: 12px;
-
   padding: 14px;
-
   background: #4a3226;
-
   color: #faf6f1;
-
   font-size: 14px;
-
   font-weight: 600;
-
   cursor: pointer;
-
-  font-family: inherit;
 }
 
-
-.signup-button:hover {
-  background: #3d2920;
-}
-
-
-.signup-button:disabled {
+.submit-button:disabled {
   opacity: .65;
-
   cursor: not-allowed;
 }
 
+.spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 8px;
+  border: 2px solid #ffffff55;
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
 
-/* =========================================================
-   BOTTOM LOGIN LINK
-   ========================================================= */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-.login-link {
-  margin-top: 28px;
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 25px 0;
+}
 
-  text-align: center;
+.divider span {
+  flex: 1;
+  height: 1px;
+  background: #c9a47b33;
+}
 
+.divider p {
   color: #8b6a4f;
+  font-size: 11px;
+}
 
+.social-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.social-buttons button {
+  border: 1px solid #c9a47b44;
+  background: #efe2d2;
+  color: #2c1a10;
+  border-radius: 12px;
+  padding: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.social-buttons strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #4a3226;
+  color: white;
+  margin-right: 6px;
+}
+
+.bottom-text {
+  margin-top: 28px;
+  text-align: center;
+  color: #8b6a4f;
   font-size: 12px;
 }
 
-
-.login-link a {
+.bottom-text a {
   color: #4a3226;
-
   font-weight: 700;
-
   text-decoration: none;
-
-  margin-left: 4px;
 }
-
-
-.login-link a:hover {
-  text-decoration: underline;
-}
-
-
-/* =========================================================
-   MOBILE BRAND
-   ========================================================= */
 
 .mobile-brand {
   display: none;
 }
-
-
-/* =========================================================
-   HELP BUTTON
-   ========================================================= */
-
-.help-button {
-  position: fixed;
-
-  right: 20px;
-
-  bottom: 20px;
-
-  width: 48px;
-
-  height: 48px;
-
-  border: none;
-
-  border-radius: 50%;
-
-  background: #2c1a10;
-
-  color: #faf6f1;
-
-  font-size: 24px;
-
-  cursor: pointer;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
 
 @media (max-width: 900px) {
 
@@ -541,30 +325,21 @@
     grid-template-columns: 1fr;
   }
 
-
   .brand-panel {
     display: none;
   }
 
-
   .form-panel {
     padding: 40px 24px;
-
-    min-height: 100vh;
   }
-
 
   .mobile-brand {
     display: flex;
-
     margin-bottom: 40px;
   }
 
-
   .mobile-brand .brand-icon {
     background: #4a3226;
-
     color: #faf6f1;
   }
-
 }

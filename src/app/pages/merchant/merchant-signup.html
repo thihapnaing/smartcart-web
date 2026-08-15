@@ -1,12 +1,14 @@
 <div class="auth-page">
 
-  <!-- LEFT BRAND / BACKGROUND PANEL -->
-  <div class="brand-panel">
+  <!-- =====================================================
+       LEFT BRAND PANEL
+       ===================================================== -->
 
-    <div class="brand-overlay"></div>
+  <div class="brand-panel">
 
     <div class="brand-content">
 
+      <!-- Logo -->
       <div class="brand-logo">
 
         <div class="brand-icon">
@@ -18,23 +20,24 @@
       </div>
 
 
+      <!-- Brand Message -->
       <div class="brand-message">
 
         <h2>
-          Dressed for<br>
-          Singapore's sky.
+          Grow your<br>
+          store with SmartCart.
         </h2>
 
         <p>
-          Climate-intelligent fashion for everyday warmth.
+          Reach more shoppers with intelligent
           <br>
-          Free shipping above S$60 · 14-day returns.
+          fashion recommendations and discovery.
         </p>
 
         <div class="brand-badges">
           <span>10K+ Members</span>
-          <span>4.9★ Rated</span>
-          <span>SG-Exclusive Drops</span>
+          <span>AI-Powered</span>
+          <span>Smart Selling</span>
         </div>
 
       </div>
@@ -44,10 +47,14 @@
   </div>
 
 
-  <!-- RIGHT WHITE SIGNUP PANEL -->
+  <!-- =====================================================
+       RIGHT SIGNUP PANEL
+       ===================================================== -->
+
   <div class="form-panel">
 
     <div class="form-container">
+
 
       <!-- MOBILE BRAND -->
       <div class="mobile-brand">
@@ -65,17 +72,17 @@
       <div class="heading">
 
         <h1>
-          Create account.
+          Create merchant account.
         </h1>
 
         <p>
-          Join SmartCart and start shopping smarter.
+          Join SmartCart and start selling smarter.
         </p>
 
       </div>
 
 
-      <!-- SIGN IN / SIGN UP TOGGLE -->
+      <!-- SIGN IN / SIGN UP TABS -->
       <div class="auth-tabs">
 
         <button
@@ -95,26 +102,30 @@
       </div>
 
 
-      <!-- SIGNUP FORM -->
+      <!-- =================================================
+           MERCHANT SIGNUP FORM
+           ================================================= -->
+
       <form
         class="signup-form"
         (ngSubmit)="signup()"
         #signupForm="ngForm"
       >
 
+
         <!-- USERNAME -->
         <div class="field">
 
-          <label for="fullName">
+          <label for="username">
             Username
           </label>
 
           <input
-            id="fullName"
+            id="username"
             type="text"
-            name="fullName"
-            [(ngModel)]="fullName"
-            placeholder="Mei Tan"
+            name="username"
+            [(ngModel)]="username"
+            placeholder="Choose a username"
             autocomplete="username"
             [disabled]="loading"
             required
@@ -135,7 +146,7 @@
             type="email"
             name="email"
             [(ngModel)]="email"
-            placeholder="mei@example.com"
+            placeholder="merchant@example.com"
             autocomplete="email"
             [disabled]="loading"
             required
@@ -164,6 +175,8 @@
               required
             />
 
+
+            <!-- PASSWORD TOGGLE -->
             <button
               type="button"
               class="password-toggle"
@@ -176,6 +189,7 @@
               "
             >
 
+              <!-- Eye open -->
               <svg
                 *ngIf="!showPassword"
                 width="22"
@@ -187,6 +201,7 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
+
                 <path
                   d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
                 />
@@ -196,8 +211,11 @@
                   cy="12"
                   r="2.5"
                 />
+
               </svg>
 
+
+              <!-- Eye closed -->
               <svg
                 *ngIf="showPassword"
                 width="22"
@@ -209,6 +227,7 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
+
                 <path d="M3 3l18 18" />
 
                 <path
@@ -218,6 +237,7 @@
                 <path
                   d="M6.2 6.7C3.5 8.5 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"
                 />
+
               </svg>
 
             </button>
@@ -230,7 +250,7 @@
         <!-- TERMS -->
         <p class="terms-text">
 
-          By creating an account you agree to our
+          By creating a merchant account you agree to our
 
           <a href="javascript:void(0)">
             Terms of Service
@@ -254,7 +274,7 @@
         </div>
 
 
-        <!-- CREATE ACCOUNT -->
+        <!-- CREATE MERCHANT ACCOUNT -->
         <button
           type="submit"
           class="signup-button"
@@ -262,7 +282,7 @@
         >
 
           <span *ngIf="!loading">
-            Create my account
+            Create merchant account
           </span>
 
           <span *ngIf="loading">
@@ -274,7 +294,7 @@
       </form>
 
 
-      <!-- EXISTING ACCOUNT -->
+      <!-- LOGIN -->
       <div class="login-link">
 
         <span>

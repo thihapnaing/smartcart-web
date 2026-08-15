@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/auth/signup').then((m) => m.Signup),
   },
   {
+    path: 'merchant/signup',
+    loadComponent: () => import('./pages/merchant/merchant-signup').then((m) => m.MerchantSignup),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./layout/customer-layout/customer-layout').then((m) => m.CustomerLayout),
@@ -47,9 +51,12 @@ export const routes: Routes = [
       },
       {
         path: 'order-confirmation',
-        loadComponent: () => import('./pages/order-confirmation/order-confirmation').then(m => m.OrderConfirmationComponent)
-      }
-    ]
+        loadComponent: () =>
+          import('./pages/order-confirmation/order-confirmation').then(
+            (m) => m.OrderConfirmationComponent,
+          ),
+      },
+    ],
   },
   {
     path: 'merchant',
@@ -66,17 +73,20 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
-        loadComponent: () => import('./pages/merchant/orders/orders-list/orders-list').then(m => m.OrdersList)
+        loadComponent: () =>
+          import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
       },
       {
         path: 'products/new',
-        loadComponent: () => import('./pages/merchant/products/product-form/product-form').then(m => m.ProductForm)
+        loadComponent: () =>
+          import('./pages/merchant/products/product-form/product-form').then((m) => m.ProductForm),
       },
       {
-      path: 'products/:id/edit',
-      loadComponent: () => import('./pages/merchant/products/product-form/product-form').then(m => m.ProductForm)
-      }
-    ]
+        path: 'products/:id/edit',
+        loadComponent: () =>
+          import('./pages/merchant/products/product-form/product-form').then((m) => m.ProductForm),
+      },
+    ],
   },
   {
     path: 'admin/login',

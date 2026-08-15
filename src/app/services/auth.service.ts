@@ -45,6 +45,17 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/register`, data);
   }
 
+  registerMerchant(
+    data: { username: string; email: string; password: string }
+  ) {
+    console.log('AUTH SERVICE MERCHANT REGISTER CALLED');
+
+    return this.http.post<any>(
+      `${this.apiUrl}/merchant/register`,
+      data
+    );
+  }
+
   logout(): void {
     console.log('AUTH SERVICE LOGOUT CALLED');
 
