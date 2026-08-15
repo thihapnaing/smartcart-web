@@ -1,19 +1,16 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AdminAuthService } from '../admin/services/admin-auth';
 
 //Author: Junior
-
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('token');
+  const token = req.url.includes('/admin/')
+    ? inject(AdminAuthService).getToken()
+    : localStorage.getItem('token');
 
-  if (token) {
-    const authReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    return next(authReq);
+  if (!token) {
+    return next(req);
   }
 
-  return next(req);
+  return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));
 };

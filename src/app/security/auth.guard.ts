@@ -1,18 +1,7 @@
 //Author: Junior
 
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { createAuthGuard } from './auth-guard-factory';
 
-export const authGuard: CanActivateFn = () => {
-  const router = inject(Router);
-
-  const token = localStorage.getItem('token');
-
-  if (token) {
-    return true;
-  }
-
-  console.log('No authentication token. Redirecting to login.');
-
-  return router.createUrlTree(['/login']);
-};
+export const authGuard = createAuthGuard(
+  () => !!localStorage.getItem('token'),
+  '/login');
