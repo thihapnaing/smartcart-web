@@ -25,12 +25,12 @@ describe('OrderConfirmationComponent', () => {
         provideRouter([])
       ]
     }).compileComponents();
+
+    fixture = TestBed.createComponent(OrderConfirmationComponent);
+    component = fixture.componentInstance;
   });
 
   it('should create', () => {
-    fixture = TestBed.createComponent(OrderConfirmationComponent);
-    component = fixture.componentInstance;
-
     expect(component).toBeTruthy();
   });
 
@@ -56,27 +56,15 @@ describe('OrderConfirmationComponent', () => {
     expect(component['orders']()).toEqual([]);
   });
 
-  it('should return Credit Card for CREDIT_CARD', () => {
-    fixture = TestBed.createComponent(OrderConfirmationComponent);
-    component = fixture.componentInstance;
+  const paymentMethodCases: Array<[input: string, expected: string]> = [
+    ['CREDIT_CARD', 'Credit Card'],
+    ['PAY_NOW', 'PayNow'],
+    ['CASH', 'CASH'] // unknown method falls back to the original value
+  ];
 
-    expect(component.getPaymentMethodLabel('CREDIT_CARD'))
-      .toBe('Credit Card');
-  });
-
-  it('should return PayNow for PAY_NOW', () => {
-    fixture = TestBed.createComponent(OrderConfirmationComponent);
-    component = fixture.componentInstance;
-
-    expect(component.getPaymentMethodLabel('PAY_NOW'))
-      .toBe('PayNow');
-  });
-
-  it('should return the original method for an unknown payment method', () => {
-    fixture = TestBed.createComponent(OrderConfirmationComponent);
-    component = fixture.componentInstance;
-
-    expect(component.getPaymentMethodLabel('CASH'))
-      .toBe('CASH');
+  paymentMethodCases.forEach(([input, expected]) => {
+    it(`should return "${expected}" label for payment method "${input}"`, () => {
+      expect(component.getPaymentMethodLabel(input)).toBe(expected);
+    });
   });
 });
