@@ -45,14 +45,10 @@ export const routes: Routes = [
         canActivate: [authGuard],
       },
       {
-        path: 'order-confirmation/:orderId',
-        loadComponent: () =>
-          import('./pages/order-confirmation/order-confirmation').then(
-            (m) => m.OrderConfirmationComponent,
-          ),
-        canActivate: [authGuard],
-      },
-    ],
+        path: 'order-confirmation',
+        loadComponent: () => import('./pages/order-confirmation/order-confirmation').then(m => m.OrderConfirmationComponent)
+      }
+    ]
   },
   {
     path: 'merchant',
@@ -69,11 +65,17 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
-        loadComponent: () =>
-          import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
-        canActivate: [authGuard],
+        loadComponent: () => import('./pages/merchant/orders/orders-list/orders-list').then(m => m.OrdersList)
       },
-    ],
+      {
+        path: 'products/new',
+        loadComponent: () => import('./pages/merchant/products/product-form/product-form').then(m => m.ProductForm)
+      },
+      {
+      path: 'products/:id/edit',
+      loadComponent: () => import('./pages/merchant/products/product-form/product-form').then(m => m.ProductForm)
+      }
+    ]
   },
   {
     path: 'admin/login',
