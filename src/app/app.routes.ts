@@ -45,21 +45,10 @@ export const routes: Routes = [
         canActivate: [authGuard],
       },
       {
-<<<<<<< HEAD
         path: 'order-confirmation',
         loadComponent: () => import('./pages/order-confirmation/order-confirmation').then(m => m.OrderConfirmationComponent)
       }
     ]
-=======
-        path: 'order-confirmation/:orderId',
-        loadComponent: () =>
-          import('./pages/order-confirmation/order-confirmation').then(
-            (m) => m.OrderConfirmationComponent,
-          ),
-        canActivate: [authGuard],
-      },
-    ],
->>>>>>> 9569203726d8ae7dd9c7e1a1bd9ea28b1e3c81dd
   },
   {
     path: 'merchant',
@@ -76,7 +65,6 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
-<<<<<<< HEAD
         loadComponent: () => import('./pages/merchant/orders/orders-list/orders-list').then(m => m.OrdersList)
       },
       {
@@ -88,13 +76,6 @@ export const routes: Routes = [
       loadComponent: () => import('./pages/merchant/products/product-form/product-form').then(m => m.ProductForm)
       }
     ]
-=======
-        loadComponent: () =>
-          import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
-        canActivate: [authGuard],
-      },
-    ],
->>>>>>> 9569203726d8ae7dd9c7e1a1bd9ea28b1e3c81dd
   },
   {
     path: 'admin/login',
