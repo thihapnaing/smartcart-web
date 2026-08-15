@@ -7,12 +7,6 @@ import { PublicStatsService } from '../../../services/public-stats';
 import { PublicStats } from '../../../models/public-stats';
 
 // AUTHOR: Htet Nandar(Grace)
-/**
- * /admin/login - dark split-panel design matching the Figma admin reference. Calls the real
- * POST /api/auth/login via AdminAuthService; a successful login for a non-ADMIN account is
- * immediately logged back out client-side (see the role check in onSubmit()) rather than
- * landing in the admin UI shell just to have every subsequent API call rejected server-side.
- */
 @Component({
   selector: 'app-admin-login',
   standalone: true,

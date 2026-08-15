@@ -21,6 +21,7 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./pages/home/home').then((m) => m.Home),
+        canActivate: [authGuard],
       },
       {
         path: 'search',
@@ -93,13 +94,11 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('./admin/pages/admin-dashboard/admin-dashboard').then((m) => m.AdminDashboard),
-        canActivate: [authGuard],
       },
       {
         path: 'products',
         loadComponent: () =>
           import('./admin/pages/admin-products/admin-products').then((m) => m.AdminProducts),
-        canActivate: [authGuard],
       },
     ],
   },
