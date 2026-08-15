@@ -60,6 +60,13 @@
     <button type="button" class="clear-filters-btn" (click)="clearFilters()">Clear</button>
   </div>
 
+  @if (merchantIdFilter(); as mid) {
+    <div class="merchant-filter-banner">
+      <span>Showing products for <strong>{{ merchantNameFilter() || ('merchant #' + mid) }}</strong></span>
+      <button type="button" class="link-btn" (click)="clearMerchantFilter()">Clear</button>
+    </div>
+  }
+
   <p class="result-count">{{ filteredProducts().length }} listing{{ filteredProducts().length === 1 ? '' : 's' }}</p>
 
   @if (selectedCount() > 0) {
@@ -93,7 +100,6 @@
         <span class="col-merchant">Merchant</span>
         <span class="col-category">Category</span>
         <span class="col-gender">Gender</span>
-        <span class="col-price">Price</span>
         <span class="col-status">Status</span>
         <span class="col-listed">Listed</span>
         <span class="col-actions">Actions</span>
@@ -116,7 +122,6 @@
             <span class="pill">{{ p.categoryName }}</span>
           </span>
           <span class="col-gender" data-label="Gender">{{ p.gender === 'MEN' ? "Men's" : "Women's" }}</span>
-          <span class="col-price" data-label="Price">S${{ p.price }}</span>
           <span class="col-status" data-label="Status">
             <span class="status-badge" [class.active]="p.status === 'ACTIVE'" [class.inactive]="p.status === 'INACTIVE'">
               {{ p.status === 'ACTIVE' ? 'Active' : 'Inactive' }}

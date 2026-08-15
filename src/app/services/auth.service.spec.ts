@@ -1,107 +1,97 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-
 import { AuthService } from './auth.service';
-import { LoginRequest } from '../models/login-request';
+import { environment } from '../../environments/environment';
 import { LoginResponse } from '../models/login-response';
 
+// AUTHOR: Htet Nandar(Grace)
 describe('AuthService', () => {
   let service: AuthService;
-  let httpMock: HttpTestingController;
-  const apiUrl = 'http://localhost:8080/api/auth';
+  let httpTestingController: HttpTestingController;
+
+  const loginResponse: LoginResponse = {
+    token: 'fake.jwt.token',
+    userId: 2,
+    username: 'grace',
+    email: 'grace@smartcart.com',
+    role: 'CUSTOMER',
+  };
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [AuthService, provideHttpClient(), provideHttpClientTesting()],
-    });
-
-    service = TestBed.inject(AuthService);
-    httpMock = TestBed.inject(HttpTestingController);
-
-    // Clear browser storage before each test so leftover data from one
-    // test cannot accidentally affect the next test
     localStorage.clear();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(AuthService);
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    // Confirms that no requests were made that the test did not expect
-    httpMock.verify();
+    httpTestingController.verify();
+    localStorage.clear();
   });
 
   describe('login', () => {
-    it('sends a POST request to the login endpoint with the given credentials', () => {
-      const fakeRequest: LoginRequest = {
-        email: 'shannon@example.com',
-        password: 'password123',
-      } as LoginRequest;
+    it('posts credentials to /auth/login and returns the response', () => {
+      let actual: LoginResponse | undefined;
 
-      service.login(fakeRequest).subscribe();
+      service.login({ email: 'grace@smartcart.com', password: 'secret' }).subscribe((res) => (actual = res));
 
-      const req = httpMock.expectOne(`${apiUrl}/login`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual(fakeRequest);
+      const request = httpTestingController.expectOne(`${environment.apiUrl}/auth/login`);
+      expect(request.request.method).toBe('POST');
+      expect(request.request.body).toEqual({ email: 'grace@smartcart.com', password: 'secret' });
 
-      // Provide a fake server response so the request finishes
-      req.flush({
-        token: 'fake-token',
-        username: 'shannon',
-        email: 'shannon@example.com',
-        role: 'CUSTOMER',
-      } as LoginResponse);
+      request.flush(loginResponse);
+
+      expect(actual).toEqual(loginResponse);
     });
 
-    it('stores the token, username, email and role in local storage on a successful login', () => {
-      const fakeRequest: LoginRequest = {
-        email: 'shannon@example.com',
-        password: 'password123',
-      } as LoginRequest;
+    it('stores token/username/email/role in localStorage on success', () => {
+      service.login({ email: 'grace@smartcart.com', password: 'secret' }).subscribe();
 
-      const fakeResponse: LoginResponse = {
-        token: 'fake-token',
-        username: 'shannon',
-        email: 'shannon@example.com',
-        role: 'CUSTOMER',
-      } as LoginResponse;
+      httpTestingController.expectOne(`${environment.apiUrl}/auth/login`).flush(loginResponse);
 
-      service.login(fakeRequest).subscribe();
-
-      const req = httpMock.expectOne(`${apiUrl}/login`);
-      req.flush(fakeResponse);
-
-      expect(localStorage.getItem('token')).toBe('fake-token');
-      expect(localStorage.getItem('username')).toBe('shannon');
-      expect(localStorage.getItem('email')).toBe('shannon@example.com');
+      expect(localStorage.getItem('token')).toBe('fake.jwt.token');
+      expect(localStorage.getItem('username')).toBe('grace');
+      expect(localStorage.getItem('email')).toBe('grace@smartcart.com');
       expect(localStorage.getItem('role')).toBe('CUSTOMER');
+    });
+
+    it('propagates an error response without writing anything to localStorage', () => {
+      let error: unknown;
+
+      service.login({ email: 'grace@smartcart.com', password: 'wrong' }).subscribe({ error: (e) => (error = e) });
+
+      httpTestingController
+        .expectOne(`${environment.apiUrl}/auth/login`)
+        .flush('Invalid credentials', { status: 401, statusText: 'Unauthorized' });
+
+      expect(error).toBeTruthy();
+      expect(localStorage.getItem('token')).toBeNull();
     });
   });
 
   describe('register', () => {
-    it('sends a POST request to the register endpoint with the given details', () => {
-      const registrationData = {
-        username: 'newuser',
-        email: 'newuser@example.com',
-        password: 'password123',
-      };
+    it('posts the signup payload to /auth/register', () => {
+      const payload = { username: 'grace', email: 'grace@smartcart.com', password: 'secret1' };
 
-      service.register(registrationData).subscribe();
+      service.register(payload).subscribe();
 
-      const req = httpMock.expectOne(`${apiUrl}/register`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual(registrationData);
+      const request = httpTestingController.expectOne(`${environment.apiUrl}/auth/register`);
+      expect(request.request.method).toBe('POST');
+      expect(request.request.body).toEqual(payload);
 
-      req.flush({ success: true });
+      request.flush(loginResponse);
     });
   });
 
   describe('logout', () => {
-    it('removes token, user, username, email and role from local storage', () => {
-      // Fill storage with fake values first, so removal can actually be checked
-      localStorage.setItem('token', 'fake-token');
-      localStorage.setItem('user', 'fake-user');
-      localStorage.setItem('username', 'shannon');
-      localStorage.setItem('email', 'shannon@example.com');
+    it('clears token, user, username, email, and role from localStorage', () => {
+      localStorage.setItem('token', 'fake.jwt.token');
+      localStorage.setItem('user', '{"id":2}');
+      localStorage.setItem('username', 'grace');
+      localStorage.setItem('email', 'grace@smartcart.com');
       localStorage.setItem('role', 'CUSTOMER');
 
       service.logout();
@@ -115,11 +105,14 @@ describe('AuthService', () => {
   });
 
   describe('clearSession', () => {
-    it('removes token, username, email and role from local storage', () => {
-      localStorage.setItem('token', 'fake-token');
-      localStorage.setItem('username', 'shannon');
-      localStorage.setItem('email', 'shannon@example.com');
+    it('clears token/username/email/role but leaves the "user" key untouched', () => {
+      // Unlike logout(), clearSession() intentionally doesn't remove "user" - see the service:
+      // it clears one fewer key. This test locks in that difference.
+      localStorage.setItem('token', 'fake.jwt.token');
+      localStorage.setItem('username', 'grace');
+      localStorage.setItem('email', 'grace@smartcart.com');
       localStorage.setItem('role', 'CUSTOMER');
+      localStorage.setItem('user', '{"id":2}');
 
       service.clearSession();
 
@@ -127,49 +120,36 @@ describe('AuthService', () => {
       expect(localStorage.getItem('username')).toBeNull();
       expect(localStorage.getItem('email')).toBeNull();
       expect(localStorage.getItem('role')).toBeNull();
+      expect(localStorage.getItem('user')).toBe('{"id":2}');
     });
   });
 
   describe('isLoggedIn', () => {
-    it('returns true when a token exists in local storage', () => {
-      localStorage.setItem('token', 'fake-token');
-      expect(service.isLoggedIn()).toBe(true);
-    });
-
-    it('returns false when no token exists in local storage', () => {
+    it('is false when there is no token', () => {
       expect(service.isLoggedIn()).toBe(false);
     });
-  });
 
-  describe('getUsername', () => {
-    it('returns the stored username when one exists', () => {
-      localStorage.setItem('username', 'shannon');
-      expect(service.getUsername()).toBe('shannon');
-    });
+    it('is true once a token is stored', () => {
+      localStorage.setItem('token', 'fake.jwt.token');
 
-    it('returns an empty string when no username is stored', () => {
-      expect(service.getUsername()).toBe('');
+      expect(service.isLoggedIn()).toBe(true);
     });
   });
 
-  describe('getEmail', () => {
-    it('returns the stored email when one exists', () => {
-      localStorage.setItem('email', 'shannon@example.com');
-      expect(service.getEmail()).toBe('shannon@example.com');
-    });
-
-    it('returns an empty string when no email is stored', () => {
-      expect(service.getEmail()).toBe('');
-    });
-  });
-
-  describe('getRole', () => {
-    it('returns the stored role when one exists', () => {
+  describe('getUsername / getEmail / getRole', () => {
+    it('return the stored values', () => {
+      localStorage.setItem('username', 'grace');
+      localStorage.setItem('email', 'grace@smartcart.com');
       localStorage.setItem('role', 'CUSTOMER');
+
+      expect(service.getUsername()).toBe('grace');
+      expect(service.getEmail()).toBe('grace@smartcart.com');
       expect(service.getRole()).toBe('CUSTOMER');
     });
 
-    it('returns an empty string when no role is stored', () => {
+    it('return an empty string when nothing is stored', () => {
+      expect(service.getUsername()).toBe('');
+      expect(service.getEmail()).toBe('');
       expect(service.getRole()).toBe('');
     });
   });

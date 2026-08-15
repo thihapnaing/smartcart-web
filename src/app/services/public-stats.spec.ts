@@ -1,58 +1,39 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-
 import { PublicStatsService } from './public-stats';
-import { PublicStats } from '../models/public-stats';
 import { environment } from '../../environments/environment';
+import { PublicStats } from '../models/public-stats';
 
 describe('PublicStatsService', () => {
   let service: PublicStatsService;
-  let httpMock: HttpTestingController;
-
-  // Built the same way the service itself builds it, so this stays correct
-  // even if environment.apiUrl changes later
-  const apiBase = `${environment.apiUrl}/public`;
+  let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [PublicStatsService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     });
 
-    // Creating the service here also runs its constructor,
-    // which is one of the two functions this file needs covered
     service = TestBed.inject(PublicStatsService);
-    httpMock = TestBed.inject(HttpTestingController);
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    // Confirms no requests were made that the test did not expect
-    httpMock.verify();
+    httpTestingController.verify();
   });
 
   describe('getStats', () => {
-    it('sends a GET request to the public stats endpoint', () => {
-      service.getStats().subscribe();
+    it('sends a GET to /public/stats and returns the response', () => {
+      const fakeStats: PublicStats = { activeListings: 42, activeMerchants: 5, totalRevenue: 1234.56 };
 
-      const req = httpMock.expectOne(`${apiBase}/stats`);
-      expect(req.request.method).toBe('GET');
+      let result: PublicStats | undefined;
+      service.getStats().subscribe((stats) => (result = stats));
 
-      req.flush({} as PublicStats);
-    });
+      const request = httpTestingController.expectOne(`${environment.apiUrl}/public/stats`);
+      expect(request.request.method).toBe('GET');
+      request.flush(fakeStats);
 
-    it('returns the stats data received from the backend', () => {
-      const fakeStats = {} as PublicStats;
-      let receivedStats: PublicStats | undefined;
-
-      service.getStats().subscribe((stats) => {
-        receivedStats = stats;
-      });
-
-      const req = httpMock.expectOne(`${apiBase}/stats`);
-      req.flush(fakeStats);
-
-      expect(receivedStats).toEqual(fakeStats);
+      expect(result).toEqual(fakeStats);
     });
   });
 });

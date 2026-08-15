@@ -1,0 +1,98 @@
+/* Card Container matching SmartCart's warm aesthetic */
+.lookbook-card {
+  background-color: #fdfbf7;
+  border: 1px solid #eaddd3;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(59, 47, 47, 0.04);
+  color: #3b2f2f;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.lookbook-card:hover {
+  box-shadow: 0 6px 20px rgba(59, 47, 47, 0.08);
+}
+
+/* Badge Styling */
+.trend-badge {
+  background-color: #d4a373;
+  color: #2c221e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4em 0.8em;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+/* Injected HTML Typography */
+::ng-deep .lookbook-content h3 {
+  color: #2c221e;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+::ng-deep .lookbook-content h4 {
+  color: #4a3b32;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px dashed #eaddd3;
+  padding-bottom: 0.4rem;
+}
+
+::ng-deep .lookbook-content p {
+  color: #6c5a4c;
+  line-height: 1.65;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+/* Outfits List Items */
+::ng-deep .lookbook-content ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-bottom: 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+::ng-deep .lookbook-content li {
+  background-color: #ffffff;
+  border: 1px solid #f0e6df;
+  padding: 0.85rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #4a3b32;
+}
+
+::ng-deep .lookbook-content li strong {
+  color: #2c221e;
+}
+
+/* Total Price Highlight */
+::ng-deep .lookbook-content h4:last-of-type {
+  color: #b07d4f;
+  font-weight: 700;
+}
+
+/* Styling ONLY inside this component's lookbook wrapper */
+:host ::ng-deep .lookbook-content h3 {
+  color: #2c221e;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+:host ::ng-deep .lookbook-content li {
+  background-color: #ffffff;
+  border: 1px solid #f0e6df;
+  padding: 0.85rem 1.1rem;
+  border-radius: 10px;
+}

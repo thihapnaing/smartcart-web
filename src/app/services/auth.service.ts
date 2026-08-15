@@ -4,6 +4,8 @@ import { Observable, tap } from 'rxjs';
 
 import { LoginRequest } from '../models/login-request';
 import { LoginResponse } from '../models/login-response';
+import { AuthStore } from '../security/auth-store';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +15,12 @@ import { LoginResponse } from '../models/login-response';
 export class AuthService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:8080/api/auth';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
+
+  // Unprefixed - localStorage['token'], localStorage['username'], etc, same keys this service
+  // has always used. See AdminAuthService for the sessionStorage + 'smartcart_admin' prefixed
+  // counterpart - AuthStore is what the two now share instead of duplicating this logic.
+  private readonly store = new AuthStore(localStorage, '');
 
   login(request: LoginRequest): Observable<LoginResponse> {
     console.log('AUTH SERVICE LOGIN CALLED');
@@ -24,10 +31,10 @@ export class AuthService {
       tap((response) => {
         console.log('LOGIN RESPONSE:', response);
 
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('username', response.username);
-        localStorage.setItem('email', response.email);
-        localStorage.setItem('role', response.role);
+        this.store.set('token', response.token);
+        this.store.set('username', response.username);
+        this.store.set('email', response.email);
+        this.store.set('role', response.role);
       }),
     );
   }
@@ -41,35 +48,28 @@ export class AuthService {
   logout(): void {
     console.log('AUTH SERVICE LOGOUT CALLED');
 
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('username');
-    localStorage.removeItem('email');
-    localStorage.removeItem('role');
+    this.store.clear(['token', 'user', 'username', 'email', 'role']);
 
     console.log('Local authentication data cleared');
   }
 
   clearSession(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('email');
-    localStorage.removeItem('role');
+    this.store.clear(['token', 'username', 'email', 'role']);
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    return !!this.store.get('token');
   }
 
   getUsername(): string {
-    return localStorage.getItem('username') || '';
+    return this.store.get('username') || '';
   }
 
   getEmail(): string {
-    return localStorage.getItem('email') || '';
+    return this.store.get('email') || '';
   }
 
   getRole(): string {
-    return localStorage.getItem('role') || '';
+    return this.store.get('role') || '';
   }
 }
