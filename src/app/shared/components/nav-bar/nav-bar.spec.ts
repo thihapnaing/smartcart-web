@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { signal } from '@angular/core';
+import { of, throwError, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { NavBar } from './nav-bar';
 import { CartService } from '../../../services/cart';
@@ -13,6 +14,7 @@ describe('NavBar', () => {
   let component: NavBar;
   let router: Router;
   let productService: { detectImageSearchLabel: ReturnType<typeof vi.fn> };
+  let cartItemCount: ReturnType<typeof signal<number>>;
 
   const imageFile = () => new File(['fake-bytes'], 'shirt.png', { type: 'image/png' });
 
@@ -26,13 +28,19 @@ describe('NavBar', () => {
     });
 
   beforeEach(async () => {
+    localStorage.clear();
     productService = { detectImageSearchLabel: vi.fn() };
+    cartItemCount = signal(0);
 
     await TestBed.configureTestingModule({
       imports: [NavBar],
       providers: [
-        provideRouter([]),
-        { provide: CartService, useValue: { itemCount: () => 0 } },
+        // A wildcard route (rather than []) so that real routerLink clicks in the "DOM
+        // interactions" tests below (brand, nav links, cart icon) resolve instead of throwing
+        // NG04002 "Cannot match any routes" - nothing here ever renders a <router-outlet>, so
+        // what the route points to doesn't matter.
+        provideRouter([{ path: '**', component: NavBar }]),
+        { provide: CartService, useValue: { itemCount: cartItemCount } },
         { provide: ProductService, useValue: productService },
       ],
     }).compileComponents();
@@ -41,6 +49,10 @@ describe('NavBar', () => {
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it('should create', () => {
@@ -230,6 +242,265 @@ describe('NavBar', () => {
 
       expect(component.imageSearchLoading()).toBe(false);
       expect(component.imageSearchError()).toBe('Image search failed. Please try again.');
+    });
+  });
+
+  // These drive the actual rendered template (clicks, keyboard events, ngModel, file input
+  // change events) instead of calling component methods directly, so the click/keydown/change
+  // listeners Angular generates from nav-bar.html - and the *ngIf branches they gate - are the
+  // ones under test here, not just the plain TS methods behind them.
+  describe('DOM interactions', () => {
+    const openMenu = () => {
+      (fixture.nativeElement.querySelector('.menu-toggle') as HTMLButtonElement).click();
+      fixture.detectChanges();
+    };
+
+    const openImageSearch = () => {
+      (fixture.nativeElement.querySelector('.nav-search-camera') as HTMLButtonElement).click();
+      fixture.detectChanges();
+    };
+
+    const uploadFile = async (file: File) => {
+      const input = fixture.nativeElement.querySelector('input[type="file"]') as HTMLInputElement;
+      Object.defineProperty(input, 'files', { value: [file], configurable: true });
+      input.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      await waitForFileReader();
+      fixture.detectChanges();
+    };
+
+    it('clicking the menu toggle opens and closes the collapsible nav and swaps the icon', () => {
+      const toggle = fixture.nativeElement.querySelector('.menu-toggle') as HTMLButtonElement;
+      const collapsible = fixture.nativeElement.querySelector('.nav-collapsible') as HTMLElement;
+      expect(collapsible.classList.contains('open')).toBe(false);
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
+
+      toggle.click();
+      fixture.detectChanges();
+
+      expect(component.menuOpen).toBe(true);
+      expect(collapsible.classList.contains('open')).toBe(true);
+      expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+      toggle.click();
+      fixture.detectChanges();
+
+      expect(component.menuOpen).toBe(false);
+      expect(collapsible.classList.contains('open')).toBe(false);
+    });
+
+    it('clicking the brand link closes the menu', () => {
+      openMenu();
+      expect(component.menuOpen).toBe(true);
+
+      (fixture.nativeElement.querySelector('.brand') as HTMLElement).click();
+      fixture.detectChanges();
+
+      expect(component.menuOpen).toBe(false);
+    });
+
+    it('clicking a nav link closes the menu', () => {
+      openMenu();
+
+      (fixture.nativeElement.querySelector('.nav-link') as HTMLElement).click();
+      fixture.detectChanges();
+
+      expect(component.menuOpen).toBe(false);
+    });
+
+    it('pressing Enter in the search box navigates to /search with the trimmed keyword', () => {
+      vi.spyOn(router, 'navigate').mockResolvedValue(true);
+      const input = fixture.nativeElement.querySelector('#nav-search-input') as HTMLInputElement;
+
+      input.value = '  tee  ';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
+      fixture.detectChanges();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/search'], { queryParams: { keyword: 'tee' } });
+      // Component state, not input.value: reading the DOM value back after ngModel writes it
+      // has proven unreliable in this test environment (see the similar note in
+      // chat-widget.spec.ts) - component.searchKeyword is what onSearch() actually clears.
+      expect(component.searchKeyword).toBe('');
+    });
+
+    it('shows the cart badge only when itemCount is greater than 0', () => {
+      expect(fixture.nativeElement.querySelector('.cart-badge')).toBeNull();
+
+      cartItemCount.set(3);
+      fixture.detectChanges();
+
+      const badge = fixture.nativeElement.querySelector('.cart-badge');
+      expect(badge).toBeTruthy();
+      expect(badge.textContent).toContain('3');
+    });
+
+    it('clicking the cart icon closes the menu', () => {
+      openMenu();
+
+      (fixture.nativeElement.querySelector('.cart-btn') as HTMLElement).click();
+      fixture.detectChanges();
+
+      expect(component.menuOpen).toBe(false);
+    });
+
+    describe('account menu', () => {
+      const openAccountMenu = () => {
+        (fixture.nativeElement.querySelector('.account-container .icon-btn') as HTMLButtonElement).click();
+        fixture.detectChanges();
+      };
+
+      it('opening it while logged out shows the sign-in view, and Sign In navigates to /login', () => {
+        vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+        openAccountMenu();
+
+        expect(component.accountMenuOpen).toBe(true);
+        expect(fixture.nativeElement.querySelector('.not-logged-in')).toBeTruthy();
+        expect(fixture.nativeElement.querySelector('.logged-in')).toBeNull();
+
+        (fixture.nativeElement.querySelector('.account-signin') as HTMLButtonElement).click();
+        fixture.detectChanges();
+
+        expect(router.navigate).toHaveBeenCalledWith(['/login']);
+        expect(component.accountMenuOpen).toBe(false);
+      });
+
+      it('opening it while logged in shows the username/email, and Logout clears the session and navigates to /login', () => {
+        localStorage.setItem('token', 'fake-token');
+        localStorage.setItem('username', 'grace');
+        localStorage.setItem('email', 'grace@example.com');
+        vi.spyOn(component.authService, 'logout');
+        vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+        openAccountMenu();
+
+        const panel = fixture.nativeElement.querySelector('.account-menu') as HTMLElement;
+        expect(panel.querySelector('.not-logged-in')).toBeNull();
+        expect(panel.querySelector('.account-username')?.textContent).toContain('grace');
+        expect(panel.querySelector('.logged-in-label')?.textContent).toContain('grace@example.com');
+
+        (fixture.nativeElement.querySelector('.account-logout') as HTMLButtonElement).click();
+        fixture.detectChanges();
+
+        expect(component.authService.logout).toHaveBeenCalled();
+        expect(router.navigate).toHaveBeenCalledWith(['/login']);
+      });
+    });
+
+    describe('image search dialog', () => {
+      it('the camera button opens the dialog, and clicking outside it (but not inside) closes it', () => {
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeNull();
+
+        openImageSearch();
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeTruthy();
+
+        (fixture.nativeElement.querySelector('.image-search-dialog') as HTMLElement).click();
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeTruthy();
+
+        (fixture.nativeElement.querySelector('.image-search-overlay') as HTMLElement).click();
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeNull();
+      });
+
+      it('pressing Escape on the overlay or the dialog closes it', () => {
+        openImageSearch();
+        fixture.nativeElement
+          .querySelector('.image-search-overlay')
+          .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeNull();
+
+        openImageSearch();
+        fixture.nativeElement
+          .querySelector('.image-search-dialog')
+          .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeNull();
+      });
+
+      it('the close (x) button closes the dialog', () => {
+        openImageSearch();
+
+        (fixture.nativeElement.querySelector('.image-search-dialog__close') as HTMLButtonElement).click();
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeNull();
+      });
+
+      it('the Cancel button closes the dialog', () => {
+        openImageSearch();
+
+        (fixture.nativeElement.querySelector('.image-search-dialog__actions button') as HTMLButtonElement).click();
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeNull();
+      });
+
+      it('selecting a non-image file via the real file input shows the error message', async () => {
+        openImageSearch();
+
+        await uploadFile(new File(['x'], 'doc.pdf', { type: 'application/pdf' }));
+
+        const error = fixture.nativeElement.querySelector('.image-search-error');
+        expect(error?.textContent).toContain('Please select a valid image file.');
+      });
+
+      it('selecting a valid image via the real file input shows the preview, and Remove photo clears it', async () => {
+        openImageSearch();
+        expect(fixture.nativeElement.querySelector('.image-search-upload')).toBeTruthy();
+
+        await uploadFile(imageFile());
+
+        expect(fixture.nativeElement.querySelector('.image-search-upload')).toBeNull();
+        const preview = fixture.nativeElement.querySelector('.image-search-preview');
+        expect(preview).toBeTruthy();
+
+        (preview.querySelector('button') as HTMLButtonElement).click();
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.querySelector('.image-search-preview')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.image-search-upload')).toBeTruthy();
+      });
+
+      it('the Search button is disabled until a preview exists, shows Searching... while in flight, then navigates on success', async () => {
+        openImageSearch();
+        const searchBtn = () => fixture.nativeElement.querySelector('.image-search-dialog__actions button:last-child') as HTMLButtonElement;
+        expect(searchBtn().disabled).toBe(true);
+
+        await uploadFile(imageFile());
+        expect(searchBtn().disabled).toBe(false);
+
+        const response$ = new Subject<ImageSearchResponse>();
+        productService.detectImageSearchLabel.mockReturnValue(response$);
+        vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+        searchBtn().click();
+        fixture.detectChanges();
+
+        expect(searchBtn().disabled).toBe(true);
+        expect(searchBtn().textContent).toContain('Searching...');
+
+        const fakeProducts: ProductSearchResult[] = [{ id: 1, name: 'Blue Shirt' } as ProductSearchResult];
+        response$.next({
+          prediction: 'shirt',
+          searchLabel: 'blue shirt',
+          gender: 'MEN',
+          color: 'blue',
+          category: 'Tops',
+          products: fakeProducts,
+        } as ImageSearchResponse);
+        response$.complete();
+        fixture.detectChanges();
+
+        expect(router.navigate).toHaveBeenCalledWith(
+          ['/search'],
+          expect.objectContaining({ state: expect.objectContaining({ imageSearchResults: fakeProducts }) })
+        );
+        expect(fixture.nativeElement.querySelector('.image-search-overlay')).toBeNull();
+      });
     });
   });
 });
