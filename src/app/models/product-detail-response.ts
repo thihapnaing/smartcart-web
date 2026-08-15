@@ -11,5 +11,6 @@ export interface ProductDetailResponse {
     categoryName: string;
     shopName: string;
     status: ProductStatus;
+    color: string,
     variants: ProductVariantDetail[];
 }

@@ -28,7 +28,7 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/checkout/checkout').then(m => m.CheckoutComponent)
       },
       {
-        path: 'order-confirmation/:orderId',
+        path: 'order-confirmation',
         loadComponent: () => import('./pages/order-confirmation/order-confirmation').then(m => m.OrderConfirmationComponent)
       }
     ]
@@ -41,10 +41,18 @@ export const routes: Routes = [
         path: 'products',
         loadComponent: () => import('./pages/merchant/products/products-list/products-list').then(m => m.ProductsList)
       },
-    {
+      {
         path: 'orders',
         loadComponent: () => import('./pages/merchant/orders/orders-list/orders-list').then(m => m.OrdersList)
-}
+      },
+      {
+        path: 'products/new',
+        loadComponent: () => import('./pages/merchant/products/product-form/product-form').then(m => m.ProductForm)
+      },
+      {
+      path: 'products/:id/edit',
+      loadComponent: () => import('./pages/merchant/products/product-form/product-form').then(m => m.ProductForm)
+      }
     ]
   },
   {

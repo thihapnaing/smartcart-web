@@ -9,4 +9,5 @@ export interface CartItemDetail {
     subtotal: number;
     gender: string;
     categoryName: string;
+    shopName: string;
 }
