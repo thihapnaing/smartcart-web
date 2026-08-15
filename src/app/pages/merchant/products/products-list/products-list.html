@@ -1,1 +1,116 @@
-<p>products-list works!</p>
+<div class="page-header">
+  <div class="header-contents">
+    <h1>Products</h1>
+    <p>Your catalog — {{ activeCount() }} active, {{ inactiveCount() }} inactive</p>
+  </div>
+  <a routerLink="/merchant/products/new" class="btn btn--primary addProductBtn">+ Add New Product</a>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'all'" (click)="setTab('all')">
+    All <span class="count-pill">{{ totalCount() }}</span>
+  </button>
+  <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'active'" (click)="setTab('active')">
+    Active <span class="count-pill">{{ activeCount() }}</span>
+  </button>
+  <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'inactive'" (click)="setTab('inactive')">
+    Inactive <span class="count-pill">{{ inactiveCount() }}</span>
+  </button>
+</div>
+<div class="filters-row">
+  <div class="form-field">
+    <input
+        id="product-search"
+        type="text"
+        placeholder="Search products..."
+        aria-label="Search products"
+        (input)="onSearchInput($event)"
+    />
+  </div>
+
+  <select
+    id="category-filter"
+    class="sort-select"
+    aria-label="Filter by category"
+    (change)="onCategoryChange($event)">
+    <option value="">All Categories</option>
+    <option value="Tops">Tops</option>
+    <option value="Bottoms">Bottoms</option>
+    <option value="Shoes">Shoes</option>
+   </select>
+
+  <select
+    id="gender-filter"
+    class="sort-select"
+    aria-label="Filter by gender"
+    (change)="onGenderChange($event)">
+    <option value="">All Genders</option>
+    <option value="MEN">Men</option>
+    <option value="WOMEN">Women</option>
+  </select>
+</div>
+
+<div class="card">
+  <table class="product-table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of filteredProducts(); track product.id) {
+        <tr>
+          <td>
+            <div class="product-cell">
+              <img [src]="product.imageUrl" [alt]="product.name" class="product-cell__img" />
+              <div>
+                <div class="product-cell__name">{{ product.name }}</div>
+                <div class="product-cell__gender">{{ product.gender === 'MEN' ? 'Men' : 'Women' }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="category-badge">{{ product.categoryName }}</span></td>
+          <td>${{ product.price.toFixed(2) }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--active]="product.status === 'ACTIVE'">
+              {{ product.status === 'ACTIVE' ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td>
+            <div class="actions-cell">
+                <a [routerLink]="['/merchant/products', product.id, 'edit']" class="icon-btn" title="Edit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                    <path d="m15 5 4 4"/>
+                    </svg>
+                </a>
+                @if (product.status === 'ACTIVE') {
+                    <button class="icon-btn" (click)="onDeactivate(product.id)" title="Deactivate">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="m4.9 4.9 14.2 14.2"/>
+                    </svg>
+                    </button>
+                } @else {
+                    <button class="icon-btn" (click)="onActivate(product.id)" title="Activate">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.801 10A10 10 0 1 1 17 3.335"/>
+                        <path d="m9 11 3 3L22 4"/>
+                    </svg>
+                    </button>
+                }
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="empty-state">No products found.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

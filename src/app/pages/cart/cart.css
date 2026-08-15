@@ -1,0 +1,12 @@
+.cart-item__row {
+  display: flex;
+  gap: 1rem;
+}
+.cart-item__shop {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
