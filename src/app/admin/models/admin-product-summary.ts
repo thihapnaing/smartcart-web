@@ -8,4 +8,5 @@ export interface AdminProductSummary {
   gender: 'MEN' | 'WOMEN';
   status: 'ACTIVE' | 'INACTIVE';
   createdAt: string;
+  merchantId: number;
 }

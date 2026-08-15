@@ -1,4 +1,4 @@
-.admin-products {
+.admin-merchants {
   min-height: 100vh;
   background: var(--admin-bg);
   color: var(--admin-fg);
@@ -13,7 +13,7 @@
   color: var(--admin-accent);
   margin-bottom: 0.5rem;
 }
-.admin-products h1 {
+.admin-merchants h1 {
   font-family: var(--font-body);
   font-size: 2rem;
   font-weight: 700;
@@ -23,7 +23,7 @@
 .subtitle {
   color: var(--admin-fg-muted);
   font-size: 0.92rem;
-  margin: 0 0 1.75rem;
+  margin: 0 0 1.25rem;
 }
 
 /* Filters */
@@ -54,20 +54,18 @@
   text-transform: uppercase;
   color: var(--admin-fg-muted);
 }
-.filter-field select,
-.filter-field input[type="date"] {
+.filter-field select {
   padding: 0.55rem 0.75rem;
   border-radius: 8px;
   background: var(--admin-surface-2);
   border: 1px solid var(--admin-border);
   color: var(--admin-fg);
   font-size: 0.85rem;
-  min-width: 130px;
+  min-width: 150px;
   outline: none;
   color-scheme: light;
 }
-.filter-field select:focus,
-.filter-field input[type="date"]:focus {
+.filter-field select:focus {
   border-color: var(--admin-accent);
 }
 
@@ -91,92 +89,10 @@
 }
 .search-box input::placeholder { color: var(--admin-fg-muted); }
 
-.clear-filters-btn {
-  padding: 0.55rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--admin-border);
-  background: transparent;
-  color: var(--admin-fg-muted);
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.clear-filters-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--admin-fg);
-}
-
 .result-count {
   color: var(--admin-fg-muted);
   font-size: 0.85rem;
   margin: 0 0 0.75rem;
-}
-
-.merchant-filter-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.1rem;
-  background: var(--admin-accent-soft);
-  border: 1px solid var(--admin-border);
-  border-radius: var(--admin-radius);
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-  color: var(--admin-fg);
-}
-
-.bulk-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.1rem;
-  background: var(--admin-accent-soft);
-  border: 1px solid var(--admin-border);
-  border-radius: var(--admin-radius);
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--admin-fg);
-}
-.bulk-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-.link-btn {
-  background: none;
-  border: none;
-  color: var(--admin-fg-muted);
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: underline;
-}
-.bulk-deactivate-btn {
-  padding: 0.5rem 1.1rem;
-  border: none;
-  border-radius: 8px;
-  background: var(--admin-danger);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-.bulk-deactivate-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.bulk-activate-btn {
-  padding: 0.5rem 1.1rem;
-  border: none;
-  border-radius: 8px;
-  background: var(--admin-success);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-.bulk-activate-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .status-text {
@@ -186,7 +102,7 @@
 }
 
 /* Table */
-.listings-table {
+.merchants-table {
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius-lg);
   overflow: hidden;
@@ -194,8 +110,9 @@
 }
 
 .table-row {
+  position: relative;
   display: grid;
-  grid-template-columns: 20px 2.2fr 1.1fr 1fr 0.8fr 0.85fr 0.95fr 1fr;
+  grid-template-columns: 2fr 0.7fr 0.9fr 0.9fr 1.4fr;
   align-items: center;
   gap: 0.85rem;
   padding: 0.75rem 1.25rem;
@@ -214,75 +131,86 @@
 .table-row:not(.table-row--head):hover {
   background: var(--admin-surface-2);
 }
-.table-row.selected {
-  background: var(--admin-accent-soft);
+
+/* Invisible button stretched over the whole row - the real, keyboard-and-screen-reader
+   accessible way to make a table row clickable (Sonar S6819: use a native <button>, not a
+   role="button" div). Sits at z-index 0 so it never sits on top of the real action buttons -
+   see .col-actions below, which is explicitly raised above it. */
+.row-open-btn {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  z-index: 0;
 }
-.table-row.inactive:not(.table-row--head) {
-  opacity: 0.6;
+.row-open-btn:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: -2px;
 }
 
-.product-cell {
+.merchant-cell {
   display: flex;
-  align-items: center;
-  gap: 0.7rem;
+  flex-direction: column;
+  gap: 0.15rem;
   min-width: 0;
 }
-.product-cell img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-.product-name {
-  font-size: 0.88rem;
+.merchant-username {
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--admin-fg);
+}
+.merchant-email {
+  font-size: 0.8rem;
+  color: var(--admin-fg-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 /* Scoped to data rows only - the header row reuses these same classes on its own
-   spans, and this rule's font-size would otherwise override table-row--head's uniform
-   header styling for just these columns (same issue fixed in admin-merchants.css). */
-.table-row:not(.table-row--head) .col-merchant,
-.table-row:not(.table-row--head) .col-gender,
-.table-row:not(.table-row--head) .col-listed {
+   spans, and this rule's font-size/color would otherwise override table-row--head's
+   uniform header styling for just those two columns (Products/Joined ending up
+   larger than Merchant/Status/Actions). */
+.table-row:not(.table-row--head) .col-listings,
+.table-row:not(.table-row--head) .col-joined {
   font-size: 0.85rem;
   color: var(--admin-fg-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pill {
-  display: inline-block;
-  padding: 0.22rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--admin-fg-muted);
-  font-size: 0.75rem;
-  white-space: nowrap;
 }
 
 .status-badge {
+  display: inline-block;
   padding: 0.28rem 0.7rem;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
 }
-.status-badge.active {
+.status-badge.status-active {
   background: var(--admin-success-soft);
   color: var(--admin-success);
 }
-.status-badge.inactive {
+.status-badge.status-suspended {
   background: var(--admin-danger-soft);
   color: var(--admin-danger);
 }
+.status-badge.status-inactive {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--admin-fg-muted);
+}
 
-.toggle-btn {
+.col-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.action-btn {
   padding: 0.4rem 0.85rem;
   border: 1px solid var(--admin-accent);
   border-radius: 8px;
@@ -294,19 +222,19 @@
   white-space: nowrap;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.toggle-btn:hover:not(:disabled) {
+.action-btn:hover:not(:disabled) {
   background: var(--admin-accent);
   color: #fff;
 }
-.toggle-btn.deactivate {
+.action-btn.negative {
   border-color: var(--admin-danger);
   color: var(--admin-danger);
 }
-.toggle-btn.deactivate:hover:not(:disabled) {
+.action-btn.negative:hover:not(:disabled) {
   background: var(--admin-danger);
   color: #fff;
 }
-.toggle-btn:disabled {
+.action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -337,43 +265,23 @@
   cursor: not-allowed;
 }
 
-input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--admin-accent);
-  flex-shrink: 0;
-}
-
 @media (max-width: 1100px) {
-  .admin-products { padding: 2rem 1.5rem 4rem; }
-  .table-row {
-    /* 6 visible columns once gender/listed drop off below: checkbox, product,
-       merchant, category, status, actions - was left mismatched with 5 tracks before. */
-    grid-template-columns: 20px 2fr 1fr 1fr 0.9fr 1fr;
-  }
-  .col-gender, .col-listed {
-    display: none;
-  }
+  .admin-merchants { padding: 2rem 1.5rem 4rem; }
 }
 
 @media (max-width: 860px) {
-  .admin-products { padding: 1.5rem 1.25rem 3rem; }
+  .admin-merchants { padding: 1.5rem 1.25rem 3rem; }
   .filters-panel { gap: 0.85rem; }
   .filter-field { flex: 1 1 45%; min-width: 0; }
   .filter-field--search { flex: 1 1 100%; }
-  .filter-field select,
-  .filter-field input[type="date"] { min-width: 0; width: 100%; }
-  .clear-filters-btn { flex: 1 1 100%; }
-  .bulk-bar { flex-wrap: wrap; gap: 0.6rem; }
+  .filter-field select { min-width: 0; width: 100%; }
   .pagination { flex-wrap: wrap; }
 }
 
 /* Below this width the grid table stops working as a table - switch each row to a stacked
-   card instead, with a data-label attribute (set in the template) driving a label next to
-   each value so the data is still identifiable without column headers. */
+   card instead, same pattern as admin-products.css. */
 @media (max-width: 640px) {
-  .listings-table {
+  .merchants-table {
     border: none;
     background: transparent;
     overflow: visible;
@@ -383,8 +291,7 @@ input[type="checkbox"] {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
-    position: relative;
-    padding: 1rem 1rem 1rem 1.1rem;
+    padding: 1rem 1.1rem;
     margin-bottom: 0.85rem;
     border: 1px solid var(--admin-border);
     border-radius: var(--admin-radius-lg);
@@ -392,23 +299,13 @@ input[type="checkbox"] {
   }
   .table-row:last-child { margin-bottom: 0; }
 
-  .table-row input[type="checkbox"] {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-  }
-
-  .col-product { padding-right: 2rem; }
-
-  .col-merchant, .col-category, .col-gender, .col-status, .col-listed {
+  .col-listings, .col-joined, .col-status {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    white-space: normal;
   }
-  .col-merchant::before, .col-category::before, .col-gender::before,
-  .col-status::before, .col-listed::before {
+  .col-listings::before, .col-joined::before, .col-status::before {
     content: attr(data-label);
     font-size: 0.68rem;
     font-weight: 700;
@@ -418,9 +315,120 @@ input[type="checkbox"] {
   }
 
   .col-actions { width: 100%; margin-top: 0.3rem; }
-  .col-actions .toggle-btn { width: 100%; padding: 0.6rem; }
+  .col-actions .action-btn { flex: 1; padding: 0.6rem; }
 
-  /* Must come after .table-row (display: flex) above - same specificity, so source order
-     decides, and this needs to win to actually hide the header row on mobile. */
   .table-row--head { display: none; }
+}
+
+/* Detail modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 100;
+}
+
+.modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+  padding: 1.75rem;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--admin-fg-muted);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.modal-close-btn:hover {
+  background: var(--admin-surface-2);
+  color: var(--admin-fg);
+}
+
+.modal-username {
+  font-family: var(--font-body);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0.6rem 0 0.15rem;
+  color: var(--admin-fg);
+}
+.modal-email {
+  color: var(--admin-fg-muted);
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem;
+}
+
+.modal-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem 1.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--admin-border);
+  border-bottom: 1px solid var(--admin-border);
+  margin-bottom: 1.25rem;
+}
+.modal-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.modal-stat-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-fg-muted);
+}
+.modal-stat-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--admin-fg);
+}
+.modal-stat-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--admin-accent);
+  text-decoration: underline;
+  text-decoration-color: var(--admin-accent-soft);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.15s ease, opacity 0.15s ease;
+}
+.modal-stat-link:hover {
+  text-decoration-color: var(--admin-accent);
+  opacity: 0.85;
+}
+.modal-stat-link-icon {
+  flex-shrink: 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.modal-actions .action-btn {
+  flex: 1;
+  padding: 0.6rem;
 }
