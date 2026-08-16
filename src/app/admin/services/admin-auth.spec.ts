@@ -35,6 +35,20 @@ describe('AdminAuthService', () => {
     expect(service.isLoggedIn()).toBe(false);
   });
 
+  it('starts with no username when there is no stored session', () => {
+    expect(service.username()).toBeNull();
+  });
+
+  it('picks up a stored username from sessionStorage on construction', () => {
+    sessionStorage.setItem('smartcart_admin_username', 'grace_admin');
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    const freshService = TestBed.inject(AdminAuthService);
+
+    expect(freshService.username()).toBe('grace_admin');
+  });
+
   it('picks up an existing ADMIN session from sessionStorage on construction', () => {
     sessionStorage.setItem('smartcart_admin_token', 'fake.jwt.token');
     sessionStorage.setItem('smartcart_admin_role', 'ADMIN');
@@ -82,6 +96,8 @@ describe('AdminAuthService', () => {
       expect(service.isLoggedIn()).toBe(true);
       expect(sessionStorage.getItem('smartcart_admin_token')).toBe('fake.jwt.token');
       expect(sessionStorage.getItem('smartcart_admin_role')).toBe('ADMIN');
+      expect(sessionStorage.getItem('smartcart_admin_username')).toBe('admin');
+      expect(service.username()).toBe('admin');
     });
 
     it('stores the token/role but does not mark the session as logged in for a non-ADMIN response', () => {
@@ -109,6 +125,40 @@ describe('AdminAuthService', () => {
     });
   });
 
+  describe('changePassword', () => {
+    it('posts to /auth/change-password with an explicit Authorization header using the admin token', () => {
+      service.login('admin@smartcart.com', 'secret').subscribe();
+      httpTestingController.expectOne(`${environment.apiUrl}/auth/login`).flush(adminResponse);
+
+      let actual: { message: string } | undefined;
+      service.changePassword('newpassword123', 'newpassword123').subscribe((res) => (actual = res));
+
+      const request = httpTestingController.expectOne(`${environment.apiUrl}/auth/change-password`);
+      expect(request.request.method).toBe('POST');
+      expect(request.request.body).toEqual({
+        newPassword: 'newpassword123',
+        confirmPassword: 'newpassword123',
+      });
+      expect(request.request.headers.get('Authorization')).toBe('Bearer fake.jwt.token');
+
+      request.flush({ message: 'Password changed successfully' });
+
+      expect(actual).toEqual({ message: 'Password changed successfully' });
+    });
+
+    it('propagates an error response', () => {
+      let error: unknown;
+
+      service.changePassword('newpassword123', 'somethingElse123').subscribe({ error: (e) => (error = e) });
+
+      httpTestingController
+        .expectOne(`${environment.apiUrl}/auth/change-password`)
+        .flush('Passwords do not match', { status: 400, statusText: 'Bad Request' });
+
+      expect(error).toBeTruthy();
+    });
+  });
+
   describe('logout', () => {
     it('clears the stored session and sets isLoggedIn to false', () => {
       service.login('admin@smartcart.com', 'secret').subscribe();
@@ -119,6 +169,8 @@ describe('AdminAuthService', () => {
       expect(service.isLoggedIn()).toBe(false);
       expect(sessionStorage.getItem('smartcart_admin_token')).toBeNull();
       expect(sessionStorage.getItem('smartcart_admin_role')).toBeNull();
+      expect(sessionStorage.getItem('smartcart_admin_username')).toBeNull();
+      expect(service.username()).toBeNull();
     });
   });
 

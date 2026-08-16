@@ -195,7 +195,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 20px 2.2fr 1.1fr 1fr 0.8fr 0.85fr 0.95fr 1fr;
+  grid-template-columns: 20px 2.2fr 1.1fr 1fr 0.8fr 0.85fr 1fr 0.95fr 1fr;
   align-items: center;
   gap: 0.85rem;
   padding: 0.75rem 1.25rem;
@@ -248,6 +248,7 @@
    header styling for just these columns (same issue fixed in admin-merchants.css). */
 .table-row:not(.table-row--head) .col-merchant,
 .table-row:not(.table-row--head) .col-gender,
+.table-row:not(.table-row--head) .col-modified,
 .table-row:not(.table-row--head) .col-listed {
   font-size: 0.85rem;
   color: var(--admin-fg-muted);
@@ -348,11 +349,11 @@ input[type="checkbox"] {
 @media (max-width: 1100px) {
   .admin-products { padding: 2rem 1.5rem 4rem; }
   .table-row {
-    /* 6 visible columns once gender/listed drop off below: checkbox, product,
+    /* 6 visible columns once gender/listed/modified drop off below: checkbox, product,
        merchant, category, status, actions - was left mismatched with 5 tracks before. */
     grid-template-columns: 20px 2fr 1fr 1fr 0.9fr 1fr;
   }
-  .col-gender, .col-listed {
+  .col-gender, .col-listed, .col-modified {
     display: none;
   }
 }
@@ -400,7 +401,7 @@ input[type="checkbox"] {
 
   .col-product { padding-right: 2rem; }
 
-  .col-merchant, .col-category, .col-gender, .col-status, .col-listed {
+  .col-merchant, .col-category, .col-gender, .col-status, .col-modified, .col-listed {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -408,7 +409,7 @@ input[type="checkbox"] {
     white-space: normal;
   }
   .col-merchant::before, .col-category::before, .col-gender::before,
-  .col-status::before, .col-listed::before {
+  .col-status::before, .col-modified::before, .col-listed::before {
     content: attr(data-label);
     font-size: 0.68rem;
     font-weight: 700;

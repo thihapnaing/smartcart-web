@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import { HttpEvent, HttpHandlerFn, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
@@ -38,6 +38,24 @@ describe('authInterceptor', () => {
 
     return forwarded!;
   };
+
+  describe('a request that already carries an Authorization header', () => {
+    it('leaves it untouched instead of overwriting it based on the URL heuristic', () => {
+      localStorage.setItem('token', 'customer.jwt.token');
+      const req = new HttpRequest('GET', '/api/auth/change-password', null, {
+        headers: new HttpHeaders({ Authorization: 'Bearer admin.jwt.token' }),
+      });
+      let forwarded: HttpRequest<unknown> | undefined;
+      const next: HttpHandlerFn = (r) => {
+        forwarded = r;
+        return of({} as HttpEvent<unknown>);
+      };
+
+      TestBed.runInInjectionContext(() => authInterceptor(req, next));
+
+      expect(forwarded!.headers.get('Authorization')).toBe('Bearer admin.jwt.token');
+    });
+  });
 
   describe('non-admin URLs', () => {
     it('attaches the customer/merchant token from localStorage', () => {

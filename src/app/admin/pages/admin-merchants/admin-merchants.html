@@ -46,6 +46,7 @@
         <span class="col-listings">Products</span>
         <span class="col-joined">Joined</span>
         <span class="col-status">Status</span>
+        <span class="col-modified">Modified By</span>
         <span class="col-actions">Actions</span>
       </div>
 
@@ -64,6 +65,7 @@
               {{ m.status | titlecase }}
             </span>
           </span>
+          <span class="col-modified" data-label="Modified By">{{ m.lastModifiedByAdminUsername || '—' }}</span>
           <span class="col-actions">
             @for (action of nextActions(m.status); track action.status) {
               <button
@@ -106,6 +108,9 @@
         <span class="status-badge" [class]="'status-' + m.status.toLowerCase()">
           {{ m.status | titlecase }}
         </span>
+        @if (m.lastModifiedByAdminUsername) {
+          <span class="last-modified-by">by {{ m.lastModifiedByAdminUsername }}</span>
+        }
         <h2 class="modal-username">{{ m.username }}</h2>
         <p class="modal-email">{{ m.email }}</p>
 

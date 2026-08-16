@@ -64,6 +64,13 @@ export class AdminLogin implements OnInit {
           return;
         }
 
+        if (response.mustChangePassword) {
+          // Still on the fixed temporary password from POST /api/admin/admins - force a real
+          // one before letting them anywhere near the dashboard.
+          this.router.navigate(['/admin/change-password']);
+          return;
+        }
+
         this.router.navigate(['/admin/dashboard']);
       },
       error: (err) => {

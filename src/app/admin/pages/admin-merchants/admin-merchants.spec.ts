@@ -23,6 +23,8 @@ describe('AdminMerchants', () => {
     status: 'ACTIVE',
     createdAt: '2026-01-10T00:00:00Z',
     listingCount: 3,
+    lastModifiedByAdminUsername: null,
+    lastModifiedAt: null,
     ...overrides,
   });
 
@@ -323,6 +325,26 @@ describe('AdminMerchants', () => {
       fixture.detectChanges();
     };
 
+    it('shows who last changed the status in the row\'s own column and under the badge in the modal', () => {
+      adminMerchantService.getAllMerchants.mockReturnValue(of([
+        merchant({ id: 1, username: 'shopA', status: 'SUSPENDED', lastModifiedByAdminUsername: 'grace_admin' }),
+        merchant({ id: 2, username: 'shopB', status: 'ACTIVE', lastModifiedByAdminUsername: null }),
+      ]));
+      adminMerchantService.getMerchantDetail.mockReturnValue(
+        of(merchantDetail({ id: 1, status: 'SUSPENDED', lastModifiedByAdminUsername: 'grace_admin' })),
+      );
+      setup();
+      fixture.detectChanges();
+
+      const rows = fixture.nativeElement.querySelectorAll('.table-row:not(.table-row--head)') as NodeListOf<HTMLElement>;
+      expect(rows[0].querySelector('.col-modified')?.textContent).toContain('grace_admin');
+      expect(rows[1].querySelector('.col-modified')?.textContent).toContain('—');
+
+      openFirstRow();
+      const panel = fixture.nativeElement.querySelector('.modal-panel') as HTMLElement;
+      expect(panel.querySelector('.last-modified-by')?.textContent).toContain('grace_admin');
+    });
+
     it('clicking a row opens the detail modal with the merchant summary and fetched detail', () => {
       expect(fixture.nativeElement.querySelector('.modal-backdrop')).toBeNull();
 
@@ -417,7 +439,7 @@ describe('AdminMerchants', () => {
 
       expect(component.searchTerm()).toBe('shopb');
       const rows = fixture.nativeElement.querySelectorAll('.table-row:not(.table-row--head)');
-      expect(rows.length).toBe(1);
+      expect(rows).toHaveLength(1);
       expect(rows[0].textContent).toContain('shopB');
     });
 
@@ -429,7 +451,7 @@ describe('AdminMerchants', () => {
 
       expect(component.selectedStatus()).toBe('SUSPENDED');
       const rows = fixture.nativeElement.querySelectorAll('.table-row:not(.table-row--head)');
-      expect(rows.length).toBe(1);
+      expect(rows).toHaveLength(1);
       expect(rows[0].textContent).toContain('shopC');
     });
 
