@@ -69,22 +69,25 @@ export const routes: Routes = [
           import('./pages/merchant/products/products-list/products-list').then(
             (m) => m.ProductsList,
           ),
-        canActivate: [authGuard],
+          canActivate: [authGuard],
       },
       {
         path: 'orders',
         loadComponent: () =>
           import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
+          canActivate: [authGuard],
       },
       {
         path: 'products/new',
         loadComponent: () =>
           import('./pages/merchant/products/product-form/product-form').then((m) => m.ProductForm),
+          canActivate: [authGuard],
       },
       {
         path: 'products/:id/edit',
         loadComponent: () =>
           import('./pages/merchant/products/product-form/product-form').then((m) => m.ProductForm),
+          canActivate: [authGuard],
       },
     ],
   },

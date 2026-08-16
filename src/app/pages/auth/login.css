@@ -213,13 +213,60 @@
 }
 
 .error-message {
-  padding: 12px 15px;
-  margin-bottom: 16px;
-  border-radius: 12px;
-  color: #b94040;
-  background: #b9404015;
-  border: 1px solid #b9404033;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  box-sizing: border-box;
+
+  margin: 15px 0;
+  padding: 14px 16px;
+
+  border: 1px solid #e5a5a5;
+  border-radius: 10px;
+
+  background: #fff1ef;
+  color: #a33a2b;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+
+  border-radius: 50%;
+
+  background: #a33a2b;
+  color: white;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* ERROR ANIMATION */
+
+@keyframes errorFadeIn {
+
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
 }
 
 .submit-button {
