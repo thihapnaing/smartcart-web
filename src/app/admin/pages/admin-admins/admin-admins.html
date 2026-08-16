@@ -1,0 +1,119 @@
+<div class="admin-admins">
+  <span class="eyebrow">ACCOUNTS</span>
+  <h1>Admins</h1>
+  <p class="subtitle">Invite new admin accounts and see who still needs to finish setup</p>
+
+  <div class="filters-panel">
+    <div class="filter-field filter-field--search">
+      <label for="admin-search">Search</label>
+      <div class="search-box">
+        <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          id="admin-search"
+          type="text"
+          placeholder="Username or email…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)" />
+      </div>
+    </div>
+
+    <button type="button" class="add-admin-btn" (click)="openAddModal()">+ Add Admin</button>
+  </div>
+
+  <p class="result-count">
+    {{ filteredAdmins().length }} admin{{ filteredAdmins().length === 1 ? '' : 's' }}
+  </p>
+
+  @if (loading()) {
+    <p class="status-text">Loading admins…</p>
+  } @else if (filteredAdmins().length === 0) {
+    <p class="status-text">No admins match your search.</p>
+  } @else {
+    <div class="admins-table">
+      <div class="table-row table-row--head">
+        <span class="col-admin">Admin</span>
+        <span class="col-joined">Joined</span>
+        <span class="col-setup">Setup</span>
+      </div>
+
+      @for (a of filteredAdmins(); track a.id) {
+        <div class="table-row">
+          <span class="col-admin admin-cell" data-label="Admin">
+            <span class="admin-username">{{ a.username }}</span>
+            <span class="admin-email">{{ a.email }}</span>
+          </span>
+          <span class="col-joined" data-label="Joined">{{ a.createdAt | date:'yyyy-MM-dd' }}</span>
+          <span class="col-setup" data-label="Setup">
+            <span class="status-badge" [class.status-pending]="a.mustChangePassword" [class.status-active]="!a.mustChangePassword">
+              {{ a.mustChangePassword ? 'Pending setup' : 'Active' }}
+            </span>
+          </span>
+        </div>
+      }
+    </div>
+  }
+
+  @if (showAddModal()) {
+    <div class="modal-backdrop" (click)="closeAddModal()" (keydown.escape)="closeAddModal()">
+      <div class="modal-panel" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+        <button type="button" class="modal-close-btn" (click)="closeAddModal()" aria-label="Close">
+          &times;
+        </button>
+
+        @if (createdAdmin(); as created) {
+          <h2 class="modal-title">Admin account created</h2>
+          <p class="modal-subtitle">
+            Share this temporary password with {{ created.username }} - it's shown here only once.
+          </p>
+
+          <div class="temp-password-panel">
+            <span class="temp-password-label">Temporary password</span>
+            <span class="temp-password-value">{{ created.temporaryPassword }}</span>
+          </div>
+
+          <p class="modal-hint">They'll be asked to set a new password the first time they log in.</p>
+
+          <button type="button" class="submit-btn" (click)="closeAddModal()">Done</button>
+        } @else {
+          <h2 class="modal-title">Add Admin</h2>
+          <p class="modal-subtitle">
+            They'll start on a temporary password and must set their own on first login.
+          </p>
+
+          <form (ngSubmit)="onCreateSubmit()">
+            <div class="form-field">
+              <label for="new-admin-username">Username</label>
+              <input
+                id="new-admin-username"
+                type="text"
+                [(ngModel)]="newUsername"
+                name="newUsername"
+                autocomplete="off" />
+            </div>
+
+            <div class="form-field">
+              <label for="new-admin-email">Email</label>
+              <input
+                id="new-admin-email"
+                type="email"
+                [(ngModel)]="newEmail"
+                name="newEmail"
+                autocomplete="off" />
+            </div>
+
+            @if (createError()) {
+              <p class="form-error">{{ createError() }}</p>
+            }
+
+            <button type="submit" class="submit-btn" [disabled]="creating()">
+              {{ creating() ? 'Creating…' : 'Create Admin' }}
+            </button>
+          </form>
+        }
+      </div>
+    </div>
+  }
+</div>

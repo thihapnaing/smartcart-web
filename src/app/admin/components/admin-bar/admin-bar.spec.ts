@@ -30,6 +30,23 @@ describe('AdminBar', () => {
     expect(component).toBeTruthy();
   });
 
+  it('shows the signed-in admin\'s username and initial when set', () => {
+    component.adminAuth.username.set('grace_admin');
+    fixture.detectChanges();
+
+    const chip = fixture.nativeElement.querySelector('.admin-chip') as HTMLElement;
+    expect(chip.textContent).toContain('grace_admin');
+    expect(chip.querySelector('.admin-chip-avatar')?.textContent).toBe('G');
+  });
+
+  it('falls back to a generic "Admin" chip when no username is known', () => {
+    fixture.detectChanges();
+
+    const chip = fixture.nativeElement.querySelector('.admin-chip') as HTMLElement;
+    expect(chip.textContent).toContain('Admin');
+    expect(chip.querySelector('.admin-chip-avatar')?.textContent).toBe('A');
+  });
+
   it('signOut() logs the admin out and navigates to /admin/login', () => {
     vi.spyOn(component.adminAuth, 'logout');
     vi.spyOn(router, 'navigate').mockResolvedValue(true);

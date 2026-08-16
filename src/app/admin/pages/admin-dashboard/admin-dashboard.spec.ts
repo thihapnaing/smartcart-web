@@ -152,6 +152,8 @@ describe('AdminDashboard', () => {
           status: 'ACTIVE',
           createdAt: new Date(Date.now() - 60 * 1000).toISOString(),
           merchantId: 10,
+          lastModifiedByAdminUsername: null,
+          lastModifiedAt: null,
         },
         {
           id: 2,
@@ -164,6 +166,8 @@ describe('AdminDashboard', () => {
           status: 'INACTIVE',
           createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
           merchantId: 20,
+          lastModifiedByAdminUsername: null,
+          lastModifiedAt: null,
         },
       ],
     };
@@ -174,15 +178,17 @@ describe('AdminDashboard', () => {
       fixture.detectChanges();
 
       const rows = fixture.nativeElement.querySelectorAll('.activity-row');
-      expect(rows.length).toBe(2);
+      expect(rows).toHaveLength(2);
       expect(rows[0].textContent).toContain('Blue Tee');
       expect(rows[0].querySelector('.status-badge').classList.contains('status-badge--active')).toBe(true);
       expect(rows[1].textContent).toContain('Red Dress');
-      expect(rows[1].querySelector('.status-badge').classList.contains('status-badge--inactive')).toBe(true);
+      expect(
+        rows[1].querySelector('.status-badge').classList.contains('status-badge--inactive'),
+      ).toBe(true);
       expect(fixture.nativeElement.querySelector('.recent-activity .status-text')).toBeNull();
 
       const tiles = fixture.nativeElement.querySelectorAll('.gender-tile');
-      expect(tiles.length).toBe(2);
+      expect(tiles).toHaveLength(2);
       expect(tiles[0].classList.contains('gender-tile--men')).toBe(true);
       expect(tiles[0].textContent).toContain("Men's");
       expect(tiles[1].classList.contains('gender-tile--women')).toBe(true);

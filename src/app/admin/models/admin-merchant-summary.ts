@@ -1,6 +1,8 @@
 // AUTHOR: Htet Nandar(Grace)
 export type MerchantStatus = 'ACTIVE' | 'SUSPENDED' | 'INACTIVE';
 
+// lastModifiedByAdminUsername/lastModifiedAt are null until the first admin-driven status
+// change (suspend/reinstate) - see the backend's User.lastModifiedByAdmin.
 export interface AdminMerchantSummary {
   id: number;
   username: string;
@@ -8,6 +10,8 @@ export interface AdminMerchantSummary {
   status: MerchantStatus;
   createdAt: string;
   listingCount: number;
+  lastModifiedByAdminUsername: string | null;
+  lastModifiedAt: string | null;
 }
 
 // Everything AdminMerchantSummary has, plus order activity and revenue - only fetched when the
