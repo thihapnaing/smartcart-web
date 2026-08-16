@@ -127,6 +127,18 @@ describe('AdminLogin', () => {
       expect(router.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
     });
 
+    it('redirects to the change-password page instead of the dashboard when mustChangePassword is true', () => {
+      vi.spyOn(adminAuth, 'login').mockReturnValue(of({ ...adminResponse, mustChangePassword: true }));
+      vi.spyOn(router, 'navigate').mockResolvedValue(true);
+      component.email = 'newadmin@smartcart.com';
+      component.password = '123456';
+
+      component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/admin/change-password']);
+      expect(router.navigate).not.toHaveBeenCalledWith(['/admin/dashboard']);
+    });
+
     it('logs out and shows an error when the account does not have ADMIN role', () => {
       vi.spyOn(adminAuth, 'login').mockReturnValue(of({ ...adminResponse, role: 'CUSTOMER' }));
       vi.spyOn(adminAuth, 'logout');

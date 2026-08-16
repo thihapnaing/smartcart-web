@@ -1,7 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ChangePasswordRequest } from '../../models/change-password-request';
 import { LoginRequest } from '../../models/login-request';
 import { LoginResponse } from '../../models/login-response';
 import { AuthStore } from '../../security/auth-store';
@@ -35,6 +36,17 @@ export class AdminAuthService {
         this.isLoggedIn.set(response.role === AdminAuthService.ADMIN_ROLE);
       }),
     );
+  }
+
+  // AUTHOR: Htet Nandar (Grace)
+  // POST /api/auth/change-password has no '/admin/' in its URL, so the shared authInterceptor's
+  // URL-based heuristic would reach for the customer/merchant localStorage token instead of the
+  // admin one it actually needs here - setting the Authorization header explicitly sidesteps
+  // that (the interceptor leaves an already-set header alone).
+  changePassword(newPassword: string, confirmPassword: string): Observable<{ message: string }> {
+    const request: ChangePasswordRequest = { newPassword, confirmPassword };
+    const headers = new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` });
+    return this.http.post<{ message: string }>(`${this.apiBase}/change-password`, request, { headers });
   }
 
   logout(): void {

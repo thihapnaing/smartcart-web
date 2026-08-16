@@ -81,6 +81,17 @@ export const routes: Routes = [
     loadComponent: () => import('./admin/pages/admin-login/admin-login').then((m) => m.AdminLogin),
   },
   {
+    // Forced first-login step for an admin-invited account (see AdminLogin's redirect when
+    // the login response's mustChangePassword is true). Outside the AdminLayout children below
+    // like admin/login - no sidebar until a real password is set.
+    path: 'admin/change-password',
+    loadComponent: () =>
+      import('./admin/pages/admin-change-password/admin-change-password').then(
+        (m) => m.AdminChangePassword,
+      ),
+    canActivate: [adminAuthGuard],
+  },
+  {
     path: 'admin',
     component: AdminLayout,
     canActivate: [adminAuthGuard],

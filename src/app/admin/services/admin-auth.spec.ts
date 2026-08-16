@@ -109,6 +109,40 @@ describe('AdminAuthService', () => {
     });
   });
 
+  describe('changePassword', () => {
+    it('posts to /auth/change-password with an explicit Authorization header using the admin token', () => {
+      service.login('admin@smartcart.com', 'secret').subscribe();
+      httpTestingController.expectOne(`${environment.apiUrl}/auth/login`).flush(adminResponse);
+
+      let actual: { message: string } | undefined;
+      service.changePassword('newpassword123', 'newpassword123').subscribe((res) => (actual = res));
+
+      const request = httpTestingController.expectOne(`${environment.apiUrl}/auth/change-password`);
+      expect(request.request.method).toBe('POST');
+      expect(request.request.body).toEqual({
+        newPassword: 'newpassword123',
+        confirmPassword: 'newpassword123',
+      });
+      expect(request.request.headers.get('Authorization')).toBe('Bearer fake.jwt.token');
+
+      request.flush({ message: 'Password changed successfully' });
+
+      expect(actual).toEqual({ message: 'Password changed successfully' });
+    });
+
+    it('propagates an error response', () => {
+      let error: unknown;
+
+      service.changePassword('newpassword123', 'somethingElse123').subscribe({ error: (e) => (error = e) });
+
+      httpTestingController
+        .expectOne(`${environment.apiUrl}/auth/change-password`)
+        .flush('Passwords do not match', { status: 400, statusText: 'Bad Request' });
+
+      expect(error).toBeTruthy();
+    });
+  });
+
   describe('logout', () => {
     it('clears the stored session and sets isLoggedIn to false', () => {
       service.login('admin@smartcart.com', 'secret').subscribe();
