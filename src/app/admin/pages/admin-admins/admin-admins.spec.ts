@@ -219,7 +219,7 @@ describe('AdminAdmins', () => {
 
       expect(component.searchTerm()).toBe('second');
       const rows = fixture.nativeElement.querySelectorAll('.table-row:not(.table-row--head)');
-      expect(rows.length).toBe(1);
+      expect(rows()).toHaveLength(1);
       expect(rows[0].textContent).toContain('secondadmin');
     });
 
@@ -261,12 +261,16 @@ describe('AdminAdmins', () => {
       expect(fixture.nativeElement.querySelector('.modal-backdrop')).toBeNull();
     });
 
-    it('submitting the form with real ngModel-bound inputs creates the admin and shows the temporary password', () => {
+    it('submitting the form with real ngModel-bound inputs creates the admin and shows the temporary password', async () => {
       const created = admin({ id: 3, username: 'newadmin', email: 'newadmin@smartcart.demo', mustChangePassword: true, temporaryPassword: '123456' });
       adminAccountService.createAdmin.mockReturnValue(of(created));
 
       component.openAddModal();
       fixture.detectChanges();
+      // Template-driven [(ngModel)] registers its control with the parent NgForm via a
+      // queued microtask (NgForm.addControl isn't called synchronously from ngOnInit) -
+      // without this, dispatching 'input' below can race ahead of that registration.
+      await fixture.whenStable();
 
       const usernameInput = fixture.nativeElement.querySelector('#new-admin-username') as HTMLInputElement;
       usernameInput.value = 'newadmin';

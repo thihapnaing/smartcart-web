@@ -448,16 +448,19 @@ describe('AdminProducts', () => {
 
     const rows = () => fixture.nativeElement.querySelectorAll('.table-row:not(.table-row--head)') as NodeListOf<HTMLElement>;
 
-    it('shows who last changed the status in its own Modified By column, and blank when unset', () => {
+    it('shows who last changed the status in its own Modified By column, and a dash when unset', () => {
       adminProductService.getAllProducts.mockReturnValue(of([
         product({ id: 1, status: 'INACTIVE', lastModifiedByAdminUsername: 'grace_admin' }),
         product({ id: 2, status: 'ACTIVE', lastModifiedByAdminUsername: null }),
       ]));
+      // Re-run setup() - the describe's beforeEach already created a fixture and fired
+      // ngOnInit against the original sampleProducts mock, and ngOnInit doesn't re-run on a
+      // second detectChanges(). A fresh fixture is the only way to pick up the new mock.
       setup();
       fixture.detectChanges();
 
       expect(rows()[0].querySelector('.col-modified')?.textContent).toContain('grace_admin');
-      expect(rows()[1].querySelector('.col-modified')?.textContent?.trim()).toBe('');
+      expect(rows()[1].querySelector('.col-modified')?.textContent?.trim()).toBe('—');
     });
 
     it('typing in the search box filters the table via the real ngModel binding', () => {
@@ -467,7 +470,7 @@ describe('AdminProducts', () => {
       fixture.detectChanges();
 
       expect(component.searchTerm()).toBe('blue');
-      expect(rows).toHaveLength(1);
+      expect(rows()).toHaveLength(1);
       expect(rows()[0].textContent).toContain('Blue Tee');
     });
 
@@ -477,7 +480,7 @@ describe('AdminProducts', () => {
       categorySelect.dispatchEvent(new Event('change'));
       fixture.detectChanges();
       expect(component.selectedCategory()).toBe('Shoes');
-      expect(rows).toHaveLength(1);
+      expect(rows()).toHaveLength(1);
 
       component.clearFilters();
       fixture.detectChanges();
@@ -487,7 +490,7 @@ describe('AdminProducts', () => {
       genderSelect.dispatchEvent(new Event('change'));
       fixture.detectChanges();
       expect(component.selectedGender()).toBe('WOMEN');
-      expect(rows).toHaveLength(1);
+      expect(rows()).toHaveLength(1);
 
       component.clearFilters();
       fixture.detectChanges();
