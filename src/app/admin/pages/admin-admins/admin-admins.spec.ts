@@ -219,7 +219,7 @@ describe('AdminAdmins', () => {
 
       expect(component.searchTerm()).toBe('second');
       const rows = fixture.nativeElement.querySelectorAll('.table-row:not(.table-row--head)');
-      expect(rows()).toHaveLength(1);
+      expect(rows).toHaveLength(1);
       expect(rows[0].textContent).toContain('secondadmin');
     });
 
