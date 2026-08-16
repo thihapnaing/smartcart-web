@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
+//Author: Junior
+
 @Component({
   selector: 'app-signup',
   standalone: true,
