@@ -1,34 +1,27 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { OrderService } from '../../services/order';
+import { RouterLink } from '@angular/router';
 import { CheckoutResponse } from '../../models/checkout-response';
 
 @Component({
   selector: 'app-order-confirmation',
   imports: [RouterLink, DecimalPipe],
   templateUrl: './order-confirmation.html',
+  styleUrl: './order-confirmation.css',
 })
 export class OrderConfirmationComponent implements OnInit {
-  private readonly route = inject(ActivatedRoute);
-  private readonly orderService = inject(OrderService);
+  protected readonly orders = signal<CheckoutResponse[]>([]);
 
-  order = signal<CheckoutResponse | null>(null);
+  ngOnInit(): void {
+    const stateOrders = (history.state as { orders?: CheckoutResponse[] })?.orders;
 
-  ngOnInit():void {
-    const orderId = Number(this.route.snapshot.params['orderId']);
-    this.orderService.getOrderDetail(orderId).subscribe({
-      next: (response) => {
-        this.order.set(response);
-      },
-      error: (err) => {
-        console.error('Order cannot be retrieved', err);
-      }
-    })
+    if (stateOrders) {
+      this.orders.set(stateOrders);
+    }
   }
 
   getPaymentMethodLabel(method: string): string {
-    switch(method) {
+    switch (method) {
       case 'CREDIT_CARD':
         return 'Credit Card';
       case 'PAY_NOW':

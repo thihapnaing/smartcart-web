@@ -31,7 +31,7 @@ export class ProductDetail implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly productService: ProductService,
-    private readonly cartService: CartService
+    private readonly cartService: CartService,
   ) {}
 
   // Author: Htet Nandar (Grace)
@@ -41,7 +41,7 @@ export class ProductDetail implements OnInit {
   // recreated just because the :id param changed. Subscribing to paramMap instead reacts
   // to every param change, not just the first one.
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       const id = Number(params.get('id'));
       this.loadProduct(id);
     });
@@ -57,12 +57,12 @@ export class ProductDetail implements OnInit {
     this.justAdded.set(false);
     this.priceAlertSet.set(false);
 
-    this.productService.getProductById(id).subscribe(data => {
+    this.productService.getProductById(id).subscribe((data) => {
       this.product.set(data);
 
       // Pre-selects the smallest size that still has stock, so the quantity
       // box and stock count are visible as soon as the page opens.
-      const firstAvailable = this.sortedVariants().find(variant => variant.stock > 0);
+      const firstAvailable = this.sortedVariants().find((variant) => variant.stock > 0);
       if (firstAvailable) {
         this.selectedVariant.set(firstAvailable);
       }
@@ -100,10 +100,24 @@ export class ProductDetail implements OnInit {
   }
 
   // Turns the raw gender value ('MEN' / 'WOMEN') into display text ('Men' / 'Women').
+  //edited by Shannon
   genderLabel(): string {
     const p = this.product();
     if (!p) return '';
-    return p.gender === 'MEN' ? 'Men' : 'Women';
+
+    const gender = String(p.gender ?? '')
+      .trim()
+      .toUpperCase();
+
+    // Male → Men
+    if (gender === 'MEN' || gender === 'MALE') {
+      return 'Men';
+    }
+    // Female → Women
+    if (gender === 'WOMEN' || gender === 'FEMALE') {
+      return 'Women';
+    }
+    return '';
   }
 
   selectVariant(variant: ProductVariantDetail): void {
@@ -150,7 +164,7 @@ export class ProductDetail implements OnInit {
         // The flash message reverts to the normal button text after 1.4 seconds.
         setTimeout(() => this.justAdded.set(false), 1400);
       },
-      error: () => this.addedMessage.set('Something went wrong. Please try again.')
+      error: () => this.addedMessage.set('Something went wrong. Please try again.'),
     });
   }
 
@@ -163,7 +177,7 @@ export class ProductDetail implements OnInit {
     }
     this.cartService.addToCart(variant.productVariantId, this.quantity()).subscribe({
       next: () => this.router.navigate(['/checkout']),
-      error: () => this.addedMessage.set('Something went wrong. Please try again.')
+      error: () => this.addedMessage.set('Something went wrong. Please try again.'),
     });
   }
 

@@ -42,6 +42,19 @@
     </div>
   </section>
 
+  <!--    LOOKBOOK SECTION HERE   -->
+  @if (lookbookHtml()) {
+    <div class="lookbook-section mb-5">
+      <div class="lookbook-card p-4 p-md-5">
+        <div class="d-flex align-items-center mb-2">
+          <span class="badge trend-badge">✨ Outfit of the Week</span>
+        </div>
+
+        <!-- Injected AI HTML content styled by home.css -->
+        <div class="lookbook-content mt-2" [innerHTML]="lookbookHtml()"></div>
+      </div>
+    </div>
+  }
   <!-- ========================================== -->
   <!--    AI RECOMMENDATION SECTION STARTS HERE   -->
   <!-- ========================================== -->
@@ -120,7 +133,7 @@
             <div class="product-card__info">
               <div class="product-card__meta">{{ product.shopName }}</div>
               <div class="product-card__name">{{ product.name }}</div>
-              <div class="product-card__price">S${{ product.price | number:'1.2-2'}}</div>
+              <div class="product-card__price">S${{ product.price | number: '1.2-2' }}</div>
             </div>
           </a>
         }

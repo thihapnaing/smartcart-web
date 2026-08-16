@@ -3,6 +3,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../../services/auth.service'; //Junior
 import { CartService } from '../../../services/cart';
 import { ProductService } from '../../../services/product';
 import { ImageSearchResponse } from '../../../models/image-search-response'; //Junior
@@ -24,6 +25,13 @@ export class NavBar {
   menuOpen = false;
 
   searchKeyword = '';
+  username = '';
+  email = '';
+  accountMenuOpen = false;
+
+  get isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
+  }
 
   //Junior
   imageSearchOpen = signal(false);
@@ -37,7 +45,22 @@ export class NavBar {
     public cartService: CartService,
     private readonly router: Router,
     private readonly productService: ProductService, //Junior
+    public readonly authService: AuthService, //Junior
   ) {}
+
+  ngOnInit(): void {
+    this.username = this.authService.getUsername();
+    this.email = localStorage.getItem('email') || '';
+  }
+
+  toggleAccountMenu(): void {
+    this.accountMenuOpen = !this.accountMenuOpen;
+
+    if (this.accountMenuOpen) {
+      this.username = this.authService.getUsername();
+      this.email = localStorage.getItem('email') || '';
+    }
+  }
 
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
@@ -118,127 +141,90 @@ export class NavBar {
   }
 
   onImageSearch(): void {
-
     if (!this.selectedImageFile) {
-      this.imageSearchError.set(
-        'Please select an image first.'
-      );
+      this.imageSearchError.set('Please select an image first.');
       return;
     }
 
     this.imageSearchLoading.set(true);
     this.imageSearchError.set('');
 
-    this.productService
-      .detectImageSearchLabel(
-        this.selectedImageFile
-      )
-      .subscribe({
+    this.productService.detectImageSearchLabel(this.selectedImageFile).subscribe({
+      next: (response: ImageSearchResponse) => {
+        console.log('========== IMAGE SEARCH RESPONSE ==========');
 
-        next: (response: ImageSearchResponse) => {
+        console.log('Prediction:', response.prediction);
 
-          console.log(
-            '========== IMAGE SEARCH RESPONSE =========='
-          );
+        console.log('Search label:', response.searchLabel);
 
-          console.log(
-            'Prediction:',
-            response.prediction
-          );
+        console.log('Gender:', response.gender);
 
-          console.log(
-            'Search label:',
-            response.searchLabel
-          );
+        console.log('Color:', response.color);
 
-          console.log(
-            'Gender:',
-            response.gender
-          );
+        console.log('Category:', response.category);
 
-          console.log(
-            'Color:',
-            response.color
-          );
+        console.log('Products:', response.products);
 
-          console.log(
-            'Category:',
-            response.category
-          );
+        this.imageSearchLoading.set(false);
 
-          console.log(
-            'Products:',
-            response.products
-          );
+        if (!response.products || response.products.length === 0) {
+          this.imageSearchError.set('No matching products found.');
 
-          this.imageSearchLoading.set(false);
+          return;
+        }
 
-          if (
-            !response.products ||
-            response.products.length === 0
-          ) {
+        // Close popup.
+        this.imageSearchOpen.set(false);
+        this.clearSelectedImage();
 
-            this.imageSearchError.set(
-              'No matching products found.'
-            );
+        // Pass complete AI response to SearchResults.
+        this.router
+          .navigate(['/search'], {
+            state: {
+              imageSearchResults: response.products,
 
-            return;
-          }
+              imageSearchPrediction: response.prediction,
 
-          // Close popup.
-          this.imageSearchOpen.set(false);
-          this.clearSelectedImage();
+              imageSearchLabel: response.searchLabel,
 
-          // Pass complete AI response to SearchResults.
-          this.router.navigate(
-            ['/search'],
-            {
-              state: {
-                imageSearchResults:
-                response.products,
+              imageSearchGender: response.gender,
 
-                imageSearchPrediction:
-                response.prediction,
+              imageSearchColor: response.color,
 
-                imageSearchLabel:
-                response.searchLabel,
-
-                imageSearchGender:
-                response.gender,
-
-                imageSearchColor:
-                response.color,
-
-                imageSearchCategory:
-                response.category
-              },
-              onSameUrlNavigation: 'reload'
-            }
-          ).then((success) => {
-
-            console.log(
-              'Navigation completed to /search:',
-              success
-            );
-
+              imageSearchCategory: response.category,
+            },
+            onSameUrlNavigation: 'reload',
+          })
+          .then((success) => {
+            console.log('Navigation completed to /search:', success);
           });
 
-          this.closeMenu();
-        },
+        this.closeMenu();
+      },
 
-        error: (error) => {
+      error: (error) => {
+        console.error('Image search failed:', error);
 
-          console.error(
-            'Image search failed:',
-            error
-          );
+        this.imageSearchLoading.set(false);
 
-          this.imageSearchLoading.set(false);
+        this.imageSearchError.set('Image search failed. Please try again.');
+      },
+    });
+  }
 
-          this.imageSearchError.set(
-            'Image search failed. Please try again.'
-          );
-        }
-      });
+  goToLogin(): void {
+    this.accountMenuOpen = false;
+    this.router.navigate(['/login']);
+  }
+
+  logout(): void {
+    console.log('LOGOUT BUTTON CLICKED');
+
+    this.authService.logout();
+
+    console.log('Logout successful');
+
+    this.router.navigate(['/login']);
+    this.closeMenu();
   }
 }

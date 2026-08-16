@@ -1,83 +1,91 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
-import { vi } from 'vitest';
+import { provideRouter } from '@angular/router';
 
 import { OrderConfirmationComponent } from './order-confirmation';
-import { OrderService } from '../../services/order';
 
 describe('OrderConfirmationComponent', () => {
   let component: OrderConfirmationComponent;
   let fixture: ComponentFixture<OrderConfirmationComponent>;
 
-  const orderService = {
-    getOrderDetail: vi.fn()
-  };
+  // A full order with delivery details and one item filled in,
+  // matching everything the template reads from "order" and "order.cartItemDetails".
+  const orders = [
+    {
+      orderId: 1,
+      orderNumber: 'ORD-001',
+      orderDate: '2026-08-15',
+      totalAmount: 50,
+      paymentMethod: 'CREDIT_CARD',
+      deliveryDetails: {
+        firstName: 'Jane',
+        lastName: 'Tan',
+        shippingAddress: '123 Orchard Road, #01-01, Singapore 238888',
+        phoneNumber: '91234567'
+      },
+      cartItemDetails: [
+        {
+          cartItemId: 1,
+          shopName: 'SmartCart Official',
+          imageUrl: 'https://example.com/image.jpg',
+          productName: 'Classic White Tee',
+          size: 'M',
+          quantity: 2,
+          subtotal: 50
+        }
+      ]
+    }
+  ];
 
   beforeEach(async () => {
-    vi.clearAllMocks();
-
-    orderService.getOrderDetail.mockReturnValue(
-      of({
-        orderId: 1,
-        cartItemDetails: [],
-        totalAmount: 100,
-        orderStatus: 'PAID',
-        paymentMethod: 'PAY_NOW',
-        deliveryDetails: {
-          firstName: 'John',
-          lastName: 'Tan',
-          shippingAddress: '123 Orchard Road',
-          phoneNumber: '91234567'
-        }
-      } as any)
-    );
-
     await TestBed.configureTestingModule({
       imports: [OrderConfirmationComponent],
       providers: [
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              params: {
-                orderId: '1'
-              }
-            }
-          }
-        },
-        {
-          provide: OrderService,
-          useValue: orderService
-        }
+        provideRouter([])
       ]
     }).compileComponents();
+  });
+
+  it('should create', () => {
+    fixture = TestBed.createComponent(OrderConfirmationComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component).toBeTruthy();
+  });
+
+  it('should show the loading message when no orders are provided in history state', () => {
+    window.history.replaceState({}, '');
 
     fixture = TestBed.createComponent(OrderConfirmationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    expect(component['orders']()).toEqual([]);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should load orders from history state and render the full order details', () => {
+    window.history.replaceState({ orders }, '');
+
+    fixture = TestBed.createComponent(OrderConfirmationComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component['orders']()).toEqual(orders);
   });
 
-  it('should call getOrderDetail on init', () => {
-    expect(orderService.getOrderDetail).toHaveBeenCalledWith(1);
-  });
+  const paymentMethodCases: Array<[input: string, expected: string]> = [
+    ['CREDIT_CARD', 'Credit Card'],
+    ['PAY_NOW', 'PayNow'],
+    ['CASH', 'CASH'] // unknown method falls back to the original value
+  ];
 
-  it('should return Credit Card label', () => {
-    expect(component.getPaymentMethodLabel('CREDIT_CARD'))
-      .toBe('Credit Card');
-  });
+  paymentMethodCases.forEach(([input, expected]) => {
+    it(`should return "${expected}" label for payment method "${input}"`, () => {
+      fixture = TestBed.createComponent(OrderConfirmationComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
 
-  it('should return PayNow label', () => {
-    expect(component.getPaymentMethodLabel('PAY_NOW'))
-      .toBe('PayNow');
-  });
-
-  it('should return unknown payment method unchanged', () => {
-    expect(component.getPaymentMethodLabel('BANK_TRANSFER'))
-      .toBe('BANK_TRANSFER');
+      expect(component.getPaymentMethodLabel(input)).toBe(expected);
+    });
   });
 });

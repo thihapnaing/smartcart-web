@@ -1,8 +1,22 @@
 import { Routes } from '@angular/router';
 import { adminAuthGuard } from './admin/guards/admin-auth-guard';
 import { AdminLayout } from './layout/admin-layout/admin-layout';
+import { authGuard } from './security/auth.guard';
 
 export const routes: Routes = [
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/auth/login').then((m) => m.Login),
+  },
+
+  {
+    path: 'signup',
+    loadComponent: () => import('./pages/auth/signup').then((m) => m.Signup),
+  },
+  {
+    path: 'merchant/signup',
+    loadComponent: () => import('./pages/merchant/merchant-signup').then((m) => m.MerchantSignup),
+  },
   {
     path: '',
     loadComponent: () =>
@@ -11,27 +25,32 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./pages/home/home').then((m) => m.Home),
+        canActivate: [authGuard],
       },
       {
         path: 'search',
         loadComponent: () =>
           import('./pages/search-results/search-results').then((m) => m.SearchResults),
+        canActivate: [authGuard],
       },
       {
         path: 'products/:id',
         loadComponent: () =>
           import('./pages/product-detail/product-detail').then((m) => m.ProductDetail),
+        canActivate: [authGuard],
       },
       {
         path: 'cart',
         loadComponent: () => import('./pages/cart/cart').then((m) => m.CartComponent),
+        canActivate: [authGuard],
       },
       {
         path: 'checkout',
         loadComponent: () => import('./pages/checkout/checkout').then((m) => m.CheckoutComponent),
+        canActivate: [authGuard],
       },
       {
-        path: 'order-confirmation/:orderId',
+        path: 'order-confirmation',
         loadComponent: () =>
           import('./pages/order-confirmation/order-confirmation').then(
             (m) => m.OrderConfirmationComponent,
@@ -50,6 +69,7 @@ export const routes: Routes = [
           import('./pages/merchant/products/products-list/products-list').then(
             (m) => m.ProductsList,
           ),
+        canActivate: [authGuard],
       },
       {
         path: 'orders',
@@ -57,11 +77,19 @@ export const routes: Routes = [
           import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
       },
       {
-        path: 'delivery',
+        path: 'orders',
         loadComponent: () =>
-          import('./pages/merchant/orders/delivery-list/delivery-list').then(
-            (m) => m.DeliveryList,
-          ),
+          import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
+      },
+      {
+        path: 'products/new',
+        loadComponent: () =>
+          import('./pages/merchant/products/product-form/product-form').then((m) => m.ProductForm),
+      },
+      {
+        path: 'products/:id/edit',
+        loadComponent: () =>
+          import('./pages/merchant/products/product-form/product-form').then((m) => m.ProductForm),
       },
     ],
   },
@@ -88,6 +116,11 @@ export const routes: Routes = [
         path: 'products',
         loadComponent: () =>
           import('./admin/pages/admin-products/admin-products').then((m) => m.AdminProducts),
+      },
+      {
+        path: 'merchants',
+        loadComponent: () =>
+          import('./admin/pages/admin-merchants/admin-merchants').then((m) => m.AdminMerchants),
       },
     ],
   },

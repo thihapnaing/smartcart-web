@@ -8,32 +8,29 @@
         } @else {
             <div class="flex gap-6">
                 <div class="flex flex-col gap-4" style="flex: 2;">
-                    @for(item of cartService.items(); track item.cartItemId) {
-                        <div class="cart-item">
-                            <img class="cart-item__image" [src]="item.imageUrl" [alt]="item.productName">
-                            <div class="cart-item__body">
-                                <p class="cart-item__meta">{{item.gender}} &middot; {{item.categoryName | uppercase }}</p>
-                                <p class="cart-item__name">{{item.productName}}</p>
-                                <p class="cart-item__meta">Size: {{item.size}}</p>
-                                <div class="flex justify-between items-center" style="margin-top: 10px">
-                                    <div class="qty-stepper">
-                                        <button class="qty-stepper__btn"
-                                                (click)="changeQuantity(item, -1)">
-                                                -
-                                        </button>
-                                        <span class="qty-stepper__val">{{item.quantity}}</span>
-                                        <button class="qty-stepper__btn"
-                                                (click)="changeQuantity(item, 1)">
-                                        +
-                                    </button>
-                                    </div>
-                                    <div>
-                                        <p class="cart-item__price">S${{item.subtotal | number: '1.2-2'}}</p>
-                                    </div>
-                                </div>
-                            </div>
+                @for (item of cartService.items(); track item.cartItemId) {
+                <div class="cart-item">
+                    <div class="cart-item__row">
+                    <img class="cart-item__image" [src]="item.imageUrl" [alt]="item.productName">
+                    <div class="cart-item__body">
+                        <p class="cart-item__shop">{{ item.shopName }}</p>
+                        <p class="cart-item__meta">{{ item.gender }} &middot; {{ item.categoryName | uppercase }}</p>
+                        <p class="cart-item__name">{{ item.productName }}</p>
+                        <p class="cart-item__meta">Size: {{ item.size }}</p>
+                        <div class="flex justify-between items-center" style="margin-top: 10px">
+                        <div class="qty-stepper">
+                            <button class="qty-stepper__btn" (click)="changeQuantity(item, -1)">-</button>
+                            <span class="qty-stepper__val">{{ item.quantity }}</span>
+                            <button class="qty-stepper__btn" (click)="changeQuantity(item, 1)">+</button>
                         </div>
-                    }
+                        <div>
+                            <p class="cart-item__price">S${{ item.subtotal | number: '1.2-2' }}</p>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                }
                 </div>
                 <div class="order-summary" style="flex: 1;">
                     <div class="section__header">

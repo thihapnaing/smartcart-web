@@ -1,28 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AdminLogin } from './admin-login';
 import { AdminAuthService } from '../../services/admin-auth';
-import { AdminDashboardService } from '../../services/admin-dashboard';
-import { AdminDashboardStats } from '../../models/admin-dashboard-stats';
+import { PublicStatsService } from '../../../services/public-stats';
+import { PublicStats } from '../../../models/public-stats';
+import { LoginResponse } from '../../../models/login-response';
 
 describe('AdminLogin', () => {
   let fixture: ComponentFixture<AdminLogin>;
   let component: AdminLogin;
   let adminAuth: AdminAuthService;
-  let adminDashboardService: { getStats: ReturnType<typeof vi.fn> };
+  let publicStatsService: { getStats: ReturnType<typeof vi.fn> };
   let router: Router;
 
-  const baseStats: AdminDashboardStats = {
+  const baseStats: PublicStats = {
     totalRevenue: 1234.56,
     activeListings: 10,
-    inactiveListings: 2,
-    newListingsThisWeek: 3,
     activeMerchants: 4,
-    categoryBreakdown: [],
-    genderSplit: [],
-    recentListings: [],
+  };
+
+  const adminResponse: LoginResponse = {
+    token: 'fake.jwt.token',
+    userId: 4,
+    username: 'admin',
+    email: 'admin@smartcart.com',
+    role: 'ADMIN',
   };
 
   const setup = () => {
@@ -32,11 +38,16 @@ describe('AdminLogin', () => {
 
   beforeEach(async () => {
     sessionStorage.clear();
-    adminDashboardService = { getStats: vi.fn().mockReturnValue(of(baseStats)) };
+    publicStatsService = { getStats: vi.fn().mockReturnValue(of(baseStats)) };
 
     await TestBed.configureTestingModule({
       imports: [AdminLogin],
-      providers: [provideRouter([]), { provide: AdminDashboardService, useValue: adminDashboardService }],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: PublicStatsService, useValue: publicStatsService },
+      ],
     }).compileComponents();
 
     adminAuth = TestBed.inject(AdminAuthService);
@@ -67,7 +78,7 @@ describe('AdminLogin', () => {
     });
 
     it('falls back to null stats (and the dash) when the stats request fails', () => {
-      adminDashboardService.getStats.mockReturnValue(throwError(() => new Error('boom')));
+      publicStatsService.getStats.mockReturnValue(throwError(() => new Error('boom')));
       setup();
       fixture.detectChanges();
 
@@ -102,18 +113,54 @@ describe('AdminLogin', () => {
       expect(component.error()).toBe('Enter both email and password to continue.');
     });
 
-    it('logs in and navigates to the dashboard when both fields are filled', () => {
-      vi.spyOn(adminAuth, 'login');
+    it('logs in and navigates to the dashboard when the account has ADMIN role', () => {
+      vi.spyOn(adminAuth, 'login').mockReturnValue(of(adminResponse));
       vi.spyOn(router, 'navigate').mockResolvedValue(true);
       component.email = 'admin@smartcart.com';
       component.password = 'secret';
 
       component.onSubmit();
 
+      expect(adminAuth.login).toHaveBeenCalledWith('admin@smartcart.com', 'secret');
       expect(component.error()).toBe('');
-      expect(component.submitting()).toBe(true);
-      expect(adminAuth.login).toHaveBeenCalled();
+      expect(component.submitting()).toBe(false);
       expect(router.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
+    });
+
+    it('logs out and shows an error when the account does not have ADMIN role', () => {
+      vi.spyOn(adminAuth, 'login').mockReturnValue(of({ ...adminResponse, role: 'CUSTOMER' }));
+      vi.spyOn(adminAuth, 'logout');
+      vi.spyOn(router, 'navigate').mockResolvedValue(true);
+      component.email = 'customer@smartcart.com';
+      component.password = 'secret';
+
+      component.onSubmit();
+
+      expect(adminAuth.logout).toHaveBeenCalled();
+      expect(component.error()).toBe('This account does not have admin access.');
+      expect(component.submitting()).toBe(false);
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it('shows the backend error message when the login request fails', () => {
+      vi.spyOn(adminAuth, 'login').mockReturnValue(throwError(() => ({ error: 'Invalid credentials' })));
+      component.email = 'admin@smartcart.com';
+      component.password = 'wrong';
+
+      component.onSubmit();
+
+      expect(component.error()).toBe('Invalid credentials');
+      expect(component.submitting()).toBe(false);
+    });
+
+    it('falls back to a generic error message when the failure has no message', () => {
+      vi.spyOn(adminAuth, 'login').mockReturnValue(throwError(() => ({})));
+      component.email = 'admin@smartcart.com';
+      component.password = 'wrong';
+
+      component.onSubmit();
+
+      expect(component.error()).toBe('Invalid email or password.');
     });
   });
 });

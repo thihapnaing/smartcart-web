@@ -10,5 +10,6 @@ export interface ProductRequest {
     categoryId: number;
     status: ProductStatus;
     imageUrl: string;
+    color: string;
     variants: VariantRequest[];
 }

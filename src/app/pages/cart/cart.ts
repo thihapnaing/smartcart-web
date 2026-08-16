@@ -8,6 +8,7 @@ import { CartItemDetail } from '../../models/cart-item-detail';
   selector: 'app-cart',
   imports: [UpperCasePipe, DecimalPipe],
   templateUrl: './cart.html',
+  styleUrl: './cart.css',
 })
 export class CartComponent implements OnInit {
   private readonly router = inject(Router);

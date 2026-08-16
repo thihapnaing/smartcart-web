@@ -90,3 +90,24 @@
 .error-message {
   color: #b23c3c;
 }
+
+.mark-packed-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #2a1e15;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mark-packed-button:hover {
+  background-color: #4a3826;
+}
+
+.mark-packed-button:disabled {
+  background-color: #cfc3b4;
+  color: #4a3826;
+  cursor: not-allowed;
+}

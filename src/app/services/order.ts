@@ -11,9 +11,9 @@ import { environment } from '../../environments/environment'
 export class OrderService {
     private readonly http = inject(HttpClient);
 
-    checkout(request: CheckoutRequest): Observable<CheckoutResponse> {
+    checkout(request: CheckoutRequest): Observable<CheckoutResponse[]> {
         const url = `${environment.apiUrl}/orders/checkout`;
-        return this.http.post<CheckoutResponse>(url, request);
+        return this.http.post<CheckoutResponse[]>(url, request);
     }
 
     getOrderDetail(orderId: number): Observable<CheckoutResponse> {

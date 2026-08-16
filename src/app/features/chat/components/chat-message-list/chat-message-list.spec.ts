@@ -76,10 +76,21 @@ describe('ChatMessageList', () => {
       senderRole: 'assistant',
       content: "Here's your order",
       createdAt: '2026-01-01T00:00:00Z',
-      orders: [{ orderId: 101, totalAmount: 45.5, status: 'DELIVERED', orderDate: '2026-08-01' }],
+      orders: [
+        {
+          orderId: 101,
+          orderNumber: 'SC-000101',
+          totalAmount: 45.5,
+          status: 'DELIVERED',
+          orderDate: '2026-08-01',
+          items: null,
+        },
+      ],
     };
     component.messages = [message];
     fixture.detectChanges();
+
+    httpTestingController.expectOne(`${environment.apiUrl}/cart`).flush({ cartItemDetails: [], cartTotal: 0 });
 
     expect(fixture.nativeElement.querySelectorAll('app-order-mini-card').length).toBe(1);
   });
