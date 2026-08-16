@@ -156,12 +156,17 @@
         </div>
 
 
-        <!-- ERROR -->
+        <!-- ERROR MESSAGE -->
         <div
-          class="error-message"
           *ngIf="error"
+          class="error-message"
+          role="alert"
         >
-          {{ error }}
+          <span class="error-icon">!</span>
+
+          <span>
+    {{ error }}
+  </span>
         </div>
 
 

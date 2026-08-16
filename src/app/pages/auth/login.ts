@@ -1,9 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
+
+//Author: Junior
 
 @Component({
   selector: 'app-login',
@@ -15,6 +17,7 @@ import { AuthService } from '../../services/auth.service';
 export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   email = '';
   password = '';
@@ -25,18 +28,24 @@ export class Login {
 
   login(): void {
     console.log('LOGIN BUTTON CLICKED');
+
     this.error = '';
 
+    // VALIDATE EMAIL
     if (!this.email.trim()) {
       this.error = 'Please enter your email.';
+
       return;
     }
 
+    // VALIDATE PASSWORD
     if (!this.password) {
       this.error = 'Please enter your password.';
+
       return;
     }
 
+    // START LOGIN
     this.loading = true;
 
     console.log('Sending login request:', {
@@ -49,26 +58,57 @@ export class Login {
         password: this.password,
       })
       .subscribe({
-        next: () => {
+        // LOGIN SUCCESS
+        next: (response) => {
           this.loading = false;
 
-          this.router.navigate(['/']);
+          console.log('Login response:', response);
+
+          console.log('User role:', response.role);
+
+          // CUSTOMER
+          if (response.role === 'CUSTOMER') {
+            console.log('Customer login → Home');
+
+            this.router.navigate(['/']);
+          }
+
+          // MERCHANT
+          else if (response.role === 'MERCHANT') {
+            console.log('Merchant login → Merchant Dashboard');
+
+            this.router.navigate(['/merchant']);
+          }
+
+          // UNKNOWN ROLE
+          else {
+            console.error('Unknown user role:', response.role);
+
+            this.error = 'Invalid user role.';
+          }
         },
 
+        // LOGIN ERROR
         error: (error) => {
-          console.error('Login failed:', error);
+          console.error('LOGIN FAILED:', error);
 
           this.loading = false;
 
           if (error.status === 401) {
             this.error = 'Invalid email or password.';
           } else {
-            this.error = 'Unable to login. Please try again.';
+            this.error = error?.error?.message || 'Unable to login. Please try again.';
           }
+
+          console.log('LOGIN ERROR TO DISPLAY:', this.error);
+
+          // Force Angular to update the page
+          this.cdr.detectChanges();
         },
       });
   }
 
+  // TOGGLE PASSWORD SHOW
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
