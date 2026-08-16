@@ -35,6 +35,20 @@ describe('AdminAuthService', () => {
     expect(service.isLoggedIn()).toBe(false);
   });
 
+  it('starts with no username when there is no stored session', () => {
+    expect(service.username()).toBeNull();
+  });
+
+  it('picks up a stored username from sessionStorage on construction', () => {
+    sessionStorage.setItem('smartcart_admin_username', 'grace_admin');
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    const freshService = TestBed.inject(AdminAuthService);
+
+    expect(freshService.username()).toBe('grace_admin');
+  });
+
   it('picks up an existing ADMIN session from sessionStorage on construction', () => {
     sessionStorage.setItem('smartcart_admin_token', 'fake.jwt.token');
     sessionStorage.setItem('smartcart_admin_role', 'ADMIN');
@@ -82,6 +96,8 @@ describe('AdminAuthService', () => {
       expect(service.isLoggedIn()).toBe(true);
       expect(sessionStorage.getItem('smartcart_admin_token')).toBe('fake.jwt.token');
       expect(sessionStorage.getItem('smartcart_admin_role')).toBe('ADMIN');
+      expect(sessionStorage.getItem('smartcart_admin_username')).toBe('admin');
+      expect(service.username()).toBe('admin');
     });
 
     it('stores the token/role but does not mark the session as logged in for a non-ADMIN response', () => {
@@ -153,6 +169,8 @@ describe('AdminAuthService', () => {
       expect(service.isLoggedIn()).toBe(false);
       expect(sessionStorage.getItem('smartcart_admin_token')).toBeNull();
       expect(sessionStorage.getItem('smartcart_admin_role')).toBeNull();
+      expect(sessionStorage.getItem('smartcart_admin_username')).toBeNull();
+      expect(service.username()).toBeNull();
     });
   });
 

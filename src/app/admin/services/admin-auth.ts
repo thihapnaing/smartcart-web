@@ -27,18 +27,23 @@ export class AdminAuthService {
     !!this.store.get('token') && this.store.get('role') === AdminAuthService.ADMIN_ROLE,
   );
 
+  // Who's actually signed in, for the admin-bar chip - persisted alongside token/role so a
+  // page refresh doesn't lose it (initialized from sessionStorage, not just set on login).
+  readonly username = signal(this.store.get('username'));
+
   login(email: string, password: string): Observable<LoginResponse> {
     const request: LoginRequest = { email, password };
     return this.http.post<LoginResponse>(`${this.apiBase}/login`, request).pipe(
       tap((response) => {
         this.store.set('token', response.token);
         this.store.set('role', response.role);
+        this.store.set('username', response.username);
         this.isLoggedIn.set(response.role === AdminAuthService.ADMIN_ROLE);
+        this.username.set(response.username);
       }),
     );
   }
 
-  // AUTHOR: Htet Nandar (Grace)
   // POST /api/auth/change-password has no '/admin/' in its URL, so the shared authInterceptor's
   // URL-based heuristic would reach for the customer/merchant localStorage token instead of the
   // admin one it actually needs here - setting the Authorization header explicitly sidesteps
@@ -50,8 +55,9 @@ export class AdminAuthService {
   }
 
   logout(): void {
-    this.store.clear(['token', 'role']);
+    this.store.clear(['token', 'role', 'username']);
     this.isLoggedIn.set(false);
+    this.username.set(null);
   }
 
   getToken(): string | null {
