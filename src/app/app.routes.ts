@@ -77,9 +77,11 @@ export const routes: Routes = [
           import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
       },
       {
-        path: 'orders',
+        path: 'delivery',
         loadComponent: () =>
-          import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
+          import('./pages/merchant/orders/delivery-list/delivery-list').then(
+            (m) => m.DeliveryList,
+          ),
       },
       {
         path: 'products/new',
