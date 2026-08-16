@@ -112,6 +112,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/pages/admin-products/admin-products').then((m) => m.AdminProducts),
       },
+      {
+        path: 'merchants',
+        loadComponent: () =>
+          import('./admin/pages/admin-merchants/admin-merchants').then((m) => m.AdminMerchants),
+      },
     ],
   },
 ];

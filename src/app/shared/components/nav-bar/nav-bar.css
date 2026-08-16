@@ -470,6 +470,9 @@
 .account-username {
   color: #4b3428;
   font-weight: 600;
+  font-size: 18px;
+  line-height: 1.3;
+  margin: 0;
 }
 
 .account-email {
@@ -531,14 +534,6 @@
   width: 100%;
 }
 
-.account-username {
-  font-size: 18px;
-  line-height: 1.3;
-  color: #4b3428;
-  font-weight: 600;
-  margin: 0;
-}
-
 .logged-in-label {
   font-size: 18px;
   line-height: 1.3;
@@ -551,14 +546,7 @@
   /* Keep email inside popup */
   width: 100%;
   overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.account-separator {
-  height: 1px;
-  width: 100%;
-  background: #d8d2cc;
-  margin: 0 0 14px 0;
+  word-break: break-all;
 }
 
 .account-logout {

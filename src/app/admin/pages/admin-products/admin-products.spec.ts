@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AdminProducts } from './admin-products';
@@ -12,6 +13,8 @@ describe('AdminProducts', () => {
     getAllProducts: ReturnType<typeof vi.fn>;
     updateStatus: ReturnType<typeof vi.fn>;
   };
+  let router: { navigate: ReturnType<typeof vi.fn> };
+  let activatedRoute: { snapshot: { queryParamMap: ReturnType<typeof convertToParamMap> } };
 
   const product = (overrides: Partial<AdminProductSummary>): AdminProductSummary => ({
     id: 1,
@@ -23,13 +26,14 @@ describe('AdminProducts', () => {
     gender: 'MEN',
     status: 'ACTIVE',
     createdAt: '2026-01-10T00:00:00Z',
+    merchantId: 10,
     ...overrides,
   });
 
   const sampleProducts: AdminProductSummary[] = [
-    product({ id: 1, name: 'Blue Tee', shopName: 'ShopA', categoryName: 'Tops', gender: 'MEN', status: 'ACTIVE', createdAt: '2026-01-10T00:00:00Z' }),
-    product({ id: 2, name: 'Red Dress', shopName: 'ShopB', categoryName: 'Dresses', gender: 'WOMEN', status: 'INACTIVE', createdAt: '2026-02-15T00:00:00Z' }),
-    product({ id: 3, name: 'Green Shoes', shopName: 'ShopA', categoryName: 'Shoes', gender: 'MEN', status: 'ACTIVE', createdAt: '2026-03-20T00:00:00Z' }),
+    product({ id: 1, name: 'Blue Tee', shopName: 'ShopA', merchantId: 10, categoryName: 'Tops', gender: 'MEN', status: 'ACTIVE', createdAt: '2026-01-10T00:00:00Z' }),
+    product({ id: 2, name: 'Red Dress', shopName: 'ShopB', merchantId: 20, categoryName: 'Dresses', gender: 'WOMEN', status: 'INACTIVE', createdAt: '2026-02-15T00:00:00Z' }),
+    product({ id: 3, name: 'Green Shoes', shopName: 'ShopA', merchantId: 10, categoryName: 'Shoes', gender: 'MEN', status: 'ACTIVE', createdAt: '2026-03-20T00:00:00Z' }),
   ];
 
   const setup = () => {
@@ -42,10 +46,16 @@ describe('AdminProducts', () => {
       getAllProducts: vi.fn().mockReturnValue(of(sampleProducts)),
       updateStatus: vi.fn(),
     };
+    router = { navigate: vi.fn() };
+    activatedRoute = { snapshot: { queryParamMap: convertToParamMap({}) } };
 
     await TestBed.configureTestingModule({
       imports: [AdminProducts],
-      providers: [{ provide: AdminProductService, useValue: adminProductService }],
+      providers: [
+        { provide: AdminProductService, useValue: adminProductService },
+        { provide: ActivatedRoute, useValue: activatedRoute },
+        { provide: Router, useValue: router },
+      ],
     }).compileComponents();
   });
 
@@ -375,6 +385,260 @@ describe('AdminProducts', () => {
       component.bulkDeactivate();
 
       expect(component.bulkUpdating()).toBe(false);
+    });
+  });
+
+  describe('merchant filter (arriving from a merchant\'s detail modal)', () => {
+    it('defaults to no merchant filter when the query params are absent', () => {
+      setup();
+      fixture.detectChanges();
+
+      expect(component.merchantIdFilter()).toBeNull();
+      expect(component.merchantNameFilter()).toBeNull();
+      expect(component.filteredProducts().map((p) => p.id)).toEqual([1, 2, 3]);
+    });
+
+    it('reads merchantId/merchantName from the query params on init and filters to that merchant', () => {
+      activatedRoute.snapshot.queryParamMap = convertToParamMap({ merchantId: '10', merchantName: 'ShopA' });
+
+      setup();
+      fixture.detectChanges();
+
+      expect(component.merchantIdFilter()).toBe(10);
+      expect(component.merchantNameFilter()).toBe('ShopA');
+      expect(component.filteredProducts().map((p) => p.id)).toEqual([1, 3]);
+    });
+
+    it('combines the merchant filter with the other filters using AND semantics', () => {
+      activatedRoute.snapshot.queryParamMap = convertToParamMap({ merchantId: '10' });
+
+      setup();
+      fixture.detectChanges();
+      component.selectedCategory.set('Shoes');
+
+      expect(component.filteredProducts().map((p) => p.id)).toEqual([3]);
+    });
+
+    it('clearMerchantFilter resets the filter, resets the page, and strips the query params from the URL', () => {
+      activatedRoute.snapshot.queryParamMap = convertToParamMap({ merchantId: '10', merchantName: 'ShopA' });
+      setup();
+      fixture.detectChanges();
+      component.currentPage.set(2);
+
+      component.clearMerchantFilter();
+
+      expect(component.merchantIdFilter()).toBeNull();
+      expect(component.merchantNameFilter()).toBeNull();
+      expect(component.currentPage()).toBe(1);
+      expect(router.navigate).toHaveBeenCalledWith([], { relativeTo: activatedRoute, queryParams: {} });
+    });
+  });
+
+  // These drive the actual rendered template (clicks, change events, ngModel) instead of
+  // calling component methods directly, so the click/change listeners Angular generates from
+  // admin-products.html - and the @if/@for branches they gate - are the ones under test here,
+  // not just the plain TS methods behind them.
+  describe('DOM interactions', () => {
+    beforeEach(() => {
+      setup();
+      fixture.detectChanges();
+    });
+
+    const rows = () => fixture.nativeElement.querySelectorAll('.table-row:not(.table-row--head)') as NodeListOf<HTMLElement>;
+
+    it('typing in the search box filters the table via the real ngModel binding', () => {
+      const input = fixture.nativeElement.querySelector('#product-search') as HTMLInputElement;
+      input.value = 'blue';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(component.searchTerm()).toBe('blue');
+      expect(rows().length).toBe(1);
+      expect(rows()[0].textContent).toContain('Blue Tee');
+    });
+
+    it('changing the category/gender/status selects filters the table via the real ngModel binding', () => {
+      const categorySelect = fixture.nativeElement.querySelector('#product-category') as HTMLSelectElement;
+      categorySelect.value = 'Shoes';
+      categorySelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      expect(component.selectedCategory()).toBe('Shoes');
+      expect(rows().length).toBe(1);
+
+      component.clearFilters();
+      fixture.detectChanges();
+
+      const genderSelect = fixture.nativeElement.querySelector('#product-gender') as HTMLSelectElement;
+      genderSelect.value = 'WOMEN';
+      genderSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      expect(component.selectedGender()).toBe('WOMEN');
+      expect(rows().length).toBe(1);
+
+      component.clearFilters();
+      fixture.detectChanges();
+
+      const statusSelect = fixture.nativeElement.querySelector('#product-status') as HTMLSelectElement;
+      statusSelect.value = 'INACTIVE';
+      statusSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      expect(component.selectedStatus()).toBe('INACTIVE');
+      expect(rows().length).toBe(1);
+    });
+
+    it('changing the date range inputs filters the table via the real ngModel binding', () => {
+      const from = fixture.nativeElement.querySelector('#listed-from') as HTMLInputElement;
+      from.value = '2026-02-15';
+      from.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(component.dateFrom()).toBe('2026-02-15');
+      expect(rows().length).toBe(2);
+
+      const to = fixture.nativeElement.querySelector('#listed-to') as HTMLInputElement;
+      to.value = '2026-02-15';
+      to.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(component.dateTo()).toBe('2026-02-15');
+      expect(rows().length).toBe(1);
+    });
+
+    it('clicking Clear resets every filter', () => {
+      component.searchTerm.set('tee');
+      fixture.detectChanges();
+
+      (fixture.nativeElement.querySelector('.clear-filters-btn') as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(component.searchTerm()).toBe('');
+      expect(rows().length).toBe(3);
+    });
+
+    it('clicking the merchant filter banner Clear button removes the filter', () => {
+      component.merchantIdFilter.set(10);
+      component.merchantNameFilter.set('ShopA');
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('.merchant-filter-banner')).toBeTruthy();
+
+      (fixture.nativeElement.querySelector('.merchant-filter-banner .link-btn') as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(component.merchantIdFilter()).toBeNull();
+      expect(fixture.nativeElement.querySelector('.merchant-filter-banner')).toBeNull();
+    });
+
+    it('clicking a row toggle button (de)activates that product', () => {
+      adminProductService.updateStatus.mockReturnValue(of(product({ id: 1, status: 'INACTIVE' })));
+
+      const toggleBtn = rows()[0].querySelector('.toggle-btn') as HTMLButtonElement;
+      expect(toggleBtn.textContent).toContain('Deactivate');
+      toggleBtn.click();
+      fixture.detectChanges();
+
+      expect(adminProductService.updateStatus).toHaveBeenCalledWith(1, 'INACTIVE');
+    });
+
+    it('selecting rows via checkboxes shows the bulk bar and clicking a row checkbox toggles selection', () => {
+      expect(fixture.nativeElement.querySelector('.bulk-bar')).toBeNull();
+
+      const firstCheckbox = rows()[0].querySelector('input[type="checkbox"]') as HTMLInputElement;
+      firstCheckbox.click();
+      fixture.detectChanges();
+
+      expect(component.selectedIds().has(1)).toBe(true);
+      const bulkBar = fixture.nativeElement.querySelector('.bulk-bar');
+      expect(bulkBar).toBeTruthy();
+      expect(bulkBar.textContent).toContain('1 selected');
+
+      firstCheckbox.click();
+      fixture.detectChanges();
+      expect(component.selectedIds().has(1)).toBe(false);
+      expect(fixture.nativeElement.querySelector('.bulk-bar')).toBeNull();
+    });
+
+    it('the select-all checkbox selects and clears every row on the page', () => {
+      const selectAll = fixture.nativeElement.querySelector('#select-all-products') as HTMLInputElement;
+      expect(selectAll.checked).toBe(false);
+
+      selectAll.click();
+      fixture.detectChanges();
+
+      expect(component.selectedCount()).toBe(3);
+      expect(selectAll.checked).toBe(true);
+
+      selectAll.click();
+      fixture.detectChanges();
+
+      expect(component.selectedCount()).toBe(0);
+    });
+
+    it('clicking Clear in the bulk bar clears the selection', () => {
+      component.toggleSelect(1);
+      fixture.detectChanges();
+
+      (fixture.nativeElement.querySelector('.bulk-bar .link-btn') as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(component.selectedCount()).toBe(0);
+      expect(fixture.nativeElement.querySelector('.bulk-bar')).toBeNull();
+    });
+
+    it('the bulk bar shows Deactivate when the selection has an ACTIVE product, and clicking it bulk-deactivates', () => {
+      adminProductService.updateStatus.mockImplementation((id: number) => of(product({ id, status: 'INACTIVE' })));
+      component.toggleSelect(1); // ACTIVE
+
+      fixture.detectChanges();
+      const bulkBtn = fixture.nativeElement.querySelector('.bulk-deactivate-btn') as HTMLButtonElement;
+      expect(bulkBtn).toBeTruthy();
+
+      bulkBtn.click();
+      fixture.detectChanges();
+
+      expect(adminProductService.updateStatus).toHaveBeenCalledWith(1, 'INACTIVE');
+      expect(component.selectedCount()).toBe(0);
+    });
+
+    it('the bulk bar shows Activate when the whole selection is INACTIVE, and clicking it bulk-activates', () => {
+      adminProductService.updateStatus.mockReturnValue(of(product({ id: 2, status: 'ACTIVE' })));
+      component.toggleSelect(2); // INACTIVE
+
+      fixture.detectChanges();
+      const bulkBtn = fixture.nativeElement.querySelector('.bulk-activate-btn') as HTMLButtonElement;
+      expect(bulkBtn).toBeTruthy();
+
+      bulkBtn.click();
+      fixture.detectChanges();
+
+      expect(adminProductService.updateStatus).toHaveBeenCalledWith(2, 'ACTIVE');
+    });
+  });
+
+  describe('DOM interactions - pagination', () => {
+    beforeEach(() => {
+      // pageSize is a plain field, not a signal - see the note in the non-DOM pagination
+      // describe above: it must be set before the first detectChanges().
+      setup();
+      component.pageSize = 2;
+      fixture.detectChanges();
+    });
+
+    it('clicking pagination buttons navigates between pages', () => {
+      const pageBtns = () => Array.from(fixture.nativeElement.querySelectorAll('.pagination .page-btn')) as HTMLButtonElement[];
+      // Prev, 1, 2, Next
+      expect(pageBtns()).toHaveLength(4);
+
+      pageBtns()[2].click(); // page "2"
+      fixture.detectChanges();
+      expect(component.currentPage()).toBe(2);
+
+      pageBtns()[0].click(); // Prev
+      fixture.detectChanges();
+      expect(component.currentPage()).toBe(1);
+
+      pageBtns()[3].click(); // Next
+      fixture.detectChanges();
+      expect(component.currentPage()).toBe(2);
     });
   });
 });
