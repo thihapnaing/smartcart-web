@@ -101,6 +101,7 @@
         <span class="col-category">Category</span>
         <span class="col-gender">Gender</span>
         <span class="col-status">Status</span>
+        <span class="col-modified">Modified By</span>
         <span class="col-listed">Listed</span>
         <span class="col-actions">Actions</span>
       </div>
@@ -127,6 +128,7 @@
               {{ p.status === 'ACTIVE' ? 'Active' : 'Inactive' }}
             </span>
           </span>
+          <span class="col-modified" data-label="Modified By">{{ p.lastModifiedByAdminUsername || '—' }}</span>
           <span class="col-listed" data-label="Listed">{{ p.createdAt | date:'yyyy-MM-dd' }}</span>
           <span class="col-actions">
             <button

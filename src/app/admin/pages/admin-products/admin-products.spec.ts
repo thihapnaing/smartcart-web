@@ -27,6 +27,8 @@ describe('AdminProducts', () => {
     status: 'ACTIVE',
     createdAt: '2026-01-10T00:00:00Z',
     merchantId: 10,
+    lastModifiedByAdminUsername: null,
+    lastModifiedAt: null,
     ...overrides,
   });
 
@@ -446,6 +448,18 @@ describe('AdminProducts', () => {
 
     const rows = () => fixture.nativeElement.querySelectorAll('.table-row:not(.table-row--head)') as NodeListOf<HTMLElement>;
 
+    it('shows who last changed the status in its own Modified By column, and blank when unset', () => {
+      adminProductService.getAllProducts.mockReturnValue(of([
+        product({ id: 1, status: 'INACTIVE', lastModifiedByAdminUsername: 'grace_admin' }),
+        product({ id: 2, status: 'ACTIVE', lastModifiedByAdminUsername: null }),
+      ]));
+      setup();
+      fixture.detectChanges();
+
+      expect(rows()[0].querySelector('.col-modified')?.textContent).toContain('grace_admin');
+      expect(rows()[1].querySelector('.col-modified')?.textContent?.trim()).toBe('');
+    });
+
     it('typing in the search box filters the table via the real ngModel binding', () => {
       const input = fixture.nativeElement.querySelector('#product-search') as HTMLInputElement;
       input.value = 'blue';
@@ -453,7 +467,7 @@ describe('AdminProducts', () => {
       fixture.detectChanges();
 
       expect(component.searchTerm()).toBe('blue');
-      expect(rows().length).toBe(1);
+      expect(rows).toHaveLength(1);
       expect(rows()[0].textContent).toContain('Blue Tee');
     });
 
@@ -463,7 +477,7 @@ describe('AdminProducts', () => {
       categorySelect.dispatchEvent(new Event('change'));
       fixture.detectChanges();
       expect(component.selectedCategory()).toBe('Shoes');
-      expect(rows().length).toBe(1);
+      expect(rows).toHaveLength(1);
 
       component.clearFilters();
       fixture.detectChanges();
@@ -473,7 +487,7 @@ describe('AdminProducts', () => {
       genderSelect.dispatchEvent(new Event('change'));
       fixture.detectChanges();
       expect(component.selectedGender()).toBe('WOMEN');
-      expect(rows().length).toBe(1);
+      expect(rows).toHaveLength(1);
 
       component.clearFilters();
       fixture.detectChanges();
@@ -483,7 +497,7 @@ describe('AdminProducts', () => {
       statusSelect.dispatchEvent(new Event('change'));
       fixture.detectChanges();
       expect(component.selectedStatus()).toBe('INACTIVE');
-      expect(rows().length).toBe(1);
+      expect(rows()).toHaveLength(1);
     });
 
     it('changing the date range inputs filters the table via the real ngModel binding', () => {
@@ -493,7 +507,7 @@ describe('AdminProducts', () => {
       fixture.detectChanges();
 
       expect(component.dateFrom()).toBe('2026-02-15');
-      expect(rows().length).toBe(2);
+      expect(rows()).toHaveLength(2);
 
       const to = fixture.nativeElement.querySelector('#listed-to') as HTMLInputElement;
       to.value = '2026-02-15';
@@ -501,7 +515,7 @@ describe('AdminProducts', () => {
       fixture.detectChanges();
 
       expect(component.dateTo()).toBe('2026-02-15');
-      expect(rows().length).toBe(1);
+      expect(rows()).toHaveLength(1);
     });
 
     it('clicking Clear resets every filter', () => {
@@ -512,7 +526,7 @@ describe('AdminProducts', () => {
       fixture.detectChanges();
 
       expect(component.searchTerm()).toBe('');
-      expect(rows().length).toBe(3);
+      expect(rows()).toHaveLength(3);
     });
 
     it('clicking the merchant filter banner Clear button removes the filter', () => {
