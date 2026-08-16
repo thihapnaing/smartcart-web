@@ -52,35 +52,32 @@ export class SearchResults implements OnInit {
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe(() => {
         console.log('========== NAVIGATION END ==========');
+
         console.log('Current URL:', this.router.url);
+
         console.log('Current history state:', history.state);
 
         this.handleImageSearchState(history.state);
       });
 
     this.route.queryParamMap.subscribe((params) => {
-      // Read each possible piece of information from the address.
-      // If a piece is missing, params.get(...) gives back null.
       const keyword = params.get('keyword');
       const gender = params.get('gender');
       const category = params.get('category');
 
       console.log('========== QUERY PARAM SEARCH ==========');
-
       console.log('keyword:', keyword);
       console.log('gender:', gender);
       console.log('category:', category);
 
-      //check image search
-      this.pageTitle.set(this.buildPageTitle(keyword, gender, category));
-      this.loadProducts(keyword, gender, category);
-
-      if (history.state?.imageSearchResults) {
-        console.log('Image search detected - skipping normal product search.');
+      //check image search mode
+      if (this.imageSearchMode()) {
+        console.log('Image search mode active - skipping normal product search.');
 
         return;
       }
 
+      //normal search
       this.imageSearchMode.set(false);
 
       this.pageTitle.set(this.buildPageTitle(keyword, gender, category));

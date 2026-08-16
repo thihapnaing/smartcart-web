@@ -18,7 +18,7 @@ import { ProductService } from './product';
 import { environment } from '../../environments/environment';
 import { ProductSearchResult } from '../models/product-search-result';
 import { ProductDetailResponse } from '../models/product-detail-response';
-import { ImageSearchLabel } from '../models/image-search-label';
+import { ImageSearchResponse } from '../models/image-search-response';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -47,17 +47,42 @@ describe('ProductService', () => {
     it('calls the browse endpoint with no filters when none are given', () => {
       const sampleResults: ProductSearchResult[] = [];
 
-      service.browse().subscribe(result => {
+      service.browse().subscribe((result) => {
         expect(result).toEqual(sampleResults);
       });
 
       // req.url is the address only; query filters live separately on
       // req.params, which is why both are checked here.
       const req = httpMock.expectOne(
-        request => request.url === `${apiBase}/browse` && request.params.keys().length === 0
+        (request) => request.url === `${apiBase}/browse` && request.params.keys().length === 0,
       );
       expect(req.request.method).toBe('GET');
       req.flush(sampleResults);
+    });
+
+    it('should browse products using keyword', () => {
+      const products = [
+        {
+          id: 1,
+          name: 'Green Shirt',
+        },
+      ] as ProductSearchResult[];
+
+      service
+        .browse({
+          keyword: 'shirt',
+        })
+        .subscribe((response) => {
+          expect(response).toEqual(products);
+        });
+
+      const request = httpMock.expectOne(`${environment.apiUrl}/products/browse?keyword=shirt`);
+
+      expect(request.request.method).toBe('GET');
+
+      expect(request.request.params.get('keyword')).toBe('shirt');
+
+      request.flush(products);
     });
 
     it('sends keyword, category, gender, newestFirst, and limit as query filters when given', () => {
@@ -134,19 +159,75 @@ describe('ProductService', () => {
   });
 
   describe('detectImageSearchLabel', () => {
+
     it('sends the file as form data to the image search endpoint', () => {
-      const file = new File(['fake-image-bytes'], 'shoe.jpg', { type: 'image/jpeg' });
-      const sampleLabel = {} as ImageSearchLabel;
 
-      service.detectImageSearchLabel(file).subscribe(result => {
-        expect(result).toEqual(sampleLabel);
-      });
+      const file = new File(
+        ['fake-image-bytes'],
+        'shoe.jpg',
+        {
+          type: 'image/jpeg',
+        }
+      );
 
-      const req = httpMock.expectOne(`${apiBase}/search/image`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toBeInstanceOf(FormData);
-      expect((req.request.body as FormData).get('image')).toBe(file);
-      req.flush(sampleLabel);
+      const sampleResponse =
+        {} as ImageSearchResponse;
+
+
+      service
+        .detectImageSearchLabel(file)
+        .subscribe(result => {
+
+          expect(result).toEqual(
+            sampleResponse
+          );
+
+        });
+
+
+      const req =
+        httpMock.expectOne(
+          `${apiBase}/search/image`
+        );
+
+
+      expect(
+        req.request.method
+      ).toBe('POST');
+
+
+      expect(
+        req.request.body
+      ).toBeInstanceOf(FormData);
+
+
+      const formData =
+        req.request.body as FormData;
+
+
+      const uploadedFile =
+        formData.get('image') as File;
+
+
+      expect(
+        uploadedFile
+      ).toBeTruthy();
+
+
+      expect(
+        uploadedFile.name
+      ).toBe('shoe.jpg');
+
+
+      expect(
+        uploadedFile.type
+      ).toBe('image/jpeg');
+
+
+      req.flush(
+        sampleResponse
+      );
+
     });
   });
 });
