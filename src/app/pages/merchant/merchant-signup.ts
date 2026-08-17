@@ -1,14 +1,14 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-merchant-signup',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './merchant-signup.html',
   styleUrl: './merchant-signup.css',
 })
@@ -150,9 +150,17 @@ export class MerchantSignup {
       return;
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const atIndex = email.indexOf('@');
+    const dotIndex = email.lastIndexOf('.');
+    const hasSpace = email.includes(' ');
 
-    if (!emailPattern.test(email)) {
+    const validEmail =
+      atIndex > 0 &&
+      dotIndex > atIndex + 1 &&
+      dotIndex < email.length - 1 &&
+      !hasSpace;
+
+    if (!validEmail) {
       this.errorMessage = 'Please enter a valid email address.';
 
       this.cdr.detectChanges();
@@ -196,7 +204,7 @@ export class MerchantSignup {
       return;
     }
 
-    if (!/[0-9]/.test(this.password)) {
+    if (!/\d/.test(this.password)) {
       this.errorMessage = 'Password must contain at least one number.';
 
       this.cdr.detectChanges();
@@ -702,31 +710,20 @@ export class MerchantSignup {
     // =======================================================
 
     this.authService
-      .createMerchantProfile(
+      .createMerchantProfile({
         userId,
-
-        this.businessName.trim(),
-
-        this.uen.trim(),
-
-        this.businessType,
-
-        this.businessAddress.trim(),
-
-        this.postalCode.trim(),
-
-        this.contactNumber.trim(),
-
-        this.productCategory,
-
-        this.businessDescription.trim(),
-
-        this.pickupAvailable,
-
-        this.logoFile,
-
-        this.businessDocument,
-      )
+        businessName: this.businessName.trim(),
+        uen: this.uen.trim(),
+        businessType: this.businessType,
+        businessAddress: this.businessAddress.trim(),
+        postalCode: this.postalCode.trim(),
+        contactNumber: this.contactNumber.trim(),
+        productCategory: this.productCategory,
+        businessDescription: this.businessDescription.trim(),
+        pickupAvailable: this.pickupAvailable,
+        logoFile: this.logoFile,
+        registrationDocument: this.businessDocument,
+      })
       .subscribe({
         // ===================================================
         // SUCCESS

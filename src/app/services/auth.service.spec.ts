@@ -1,14 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-
 import { provideHttpClient } from '@angular/common/http';
-
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { Router } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { AuthService } from './auth.service';
-
+import { AuthService, MerchantProfileData } from './auth.service';
 import { LoginRequest } from '../models/login-request';
 import { LoginResponse } from '../models/login-response';
-
 import { environment } from '../../environments/environment';
 
 //Author: Htet Nandar
@@ -16,48 +14,87 @@ import { environment } from '../../environments/environment';
 
 describe('AuthService', () => {
   let service: AuthService;
-
   let httpMock: HttpTestingController;
+
+  let routerMock: {
+    navigate: ReturnType<typeof vi.fn>;
+  };
 
   const apiUrl = `${environment.apiUrl}/auth`;
 
-  // =======================================================
-  // TEST RESPONSES
-  // =======================================================
+  // =========================================================
+  // JWT HELPER
+  // =========================================================
+
+  function createJwt(expiresInSeconds: number, extraPayload: Record<string, unknown> = {}): string {
+    const header = {
+      alg: 'HS256',
+      typ: 'JWT',
+    };
+
+    const payload = {
+      sub: '1',
+      exp: Math.floor(Date.now() / 1000) + expiresInSeconds,
+      ...extraPayload,
+    };
+
+    const encode = (value: unknown): string => {
+      return btoa(JSON.stringify(value)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    };
+
+    return `${encode(header)}.${encode(payload)}.signature`;
+  }
+
+  function createExpiredJwt(): string {
+    return createJwt(-60);
+  }
+
+  // =========================================================
+  // TEST LOGIN RESPONSES
+  // =========================================================
+
+  const customerToken = createJwt(300);
 
   const customerLoginResponse: LoginResponse = {
-    token: 'customer-jwt-token',
-
+    token: customerToken,
     userId: 1,
-
     username: 'john',
-
     email: 'john@smartcart.com',
-
     role: 'CUSTOMER',
   };
 
+  const merchantToken = createJwt(300);
+
   const merchantLoginResponse: LoginResponse = {
-    token: 'merchant-jwt-token',
-
+    token: merchantToken,
     userId: 2,
-
     username: 'merchant01',
-
     email: 'merchant@example.com',
-
     role: 'MERCHANT',
   };
 
-  // =======================================================
+  // =========================================================
   // BEFORE EACH
-  // =======================================================
+  // =========================================================
 
   beforeEach(() => {
+    vi.useFakeTimers();
+
     localStorage.clear();
 
+    routerMock = {
+      navigate: vi.fn(),
+    };
+
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: Router,
+          useValue: routerMock,
+        },
+      ],
     });
 
     service = TestBed.inject(AuthService);
@@ -65,22 +102,28 @@ describe('AuthService', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  // =======================================================
+  // =========================================================
   // AFTER EACH
-  // =======================================================
+  // =========================================================
 
   afterEach(() => {
     httpMock.verify();
 
     localStorage.clear();
+
+    vi.clearAllTimers();
+
+    vi.useRealTimers();
   });
 
-  // =======================================================
+  // =========================================================
   // SERVICE
-  // =======================================================
+  // =========================================================
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  describe('service', () => {
+    it('should be created', () => {
+      expect(service).toBeTruthy();
+    });
   });
 
   // =========================================================
@@ -88,14 +131,26 @@ describe('AuthService', () => {
   // =========================================================
 
   describe('login', () => {
-    // =======================================================
-    // CUSTOMER LOGIN
-    // =======================================================
-
-    it('should login successfully as customer', () => {
+    it('should call the login endpoint', () => {
       const request: LoginRequest = {
         email: 'john@smartcart.com',
+        password: 'Password1',
+      };
 
+      service.login(request).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      expect(req.request.method).toBe('POST');
+
+      expect(req.request.body).toEqual(request);
+
+      req.flush(customerLoginResponse);
+    });
+
+    it('should return the login response', () => {
+      const request: LoginRequest = {
+        email: 'john@smartcart.com',
         password: 'Password1',
       };
 
@@ -106,24 +161,15 @@ describe('AuthService', () => {
       });
 
       const req = httpMock.expectOne(`${apiUrl}/login`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toEqual(request);
 
       req.flush(customerLoginResponse);
 
       expect(actualResponse).toEqual(customerLoginResponse);
     });
 
-    // =======================================================
-    // CUSTOMER LOGIN LOCAL STORAGE
-    // =======================================================
-
-    it('should store customer login information', () => {
+    it('should store token after successful login', () => {
       const request: LoginRequest = {
         email: 'john@smartcart.com',
-
         password: 'Password1',
       };
 
@@ -133,51 +179,12 @@ describe('AuthService', () => {
 
       req.flush(customerLoginResponse);
 
-      expect(localStorage.getItem('token')).toBe('customer-jwt-token');
-
-      expect(localStorage.getItem('username')).toBe('john');
-
-      expect(localStorage.getItem('email')).toBe('john@smartcart.com');
-
-      expect(localStorage.getItem('role')).toBe('CUSTOMER');
+      expect(localStorage.getItem('token')).toBe(customerToken);
     });
 
-    // =======================================================
-    // MERCHANT LOGIN
-    // =======================================================
-
-    it('should login successfully as merchant', () => {
+    it('should store username after successful login', () => {
       const request: LoginRequest = {
-        email: 'merchant@example.com',
-
-        password: 'Password1',
-      };
-
-      let actualResponse: LoginResponse | undefined;
-
-      service.login(request).subscribe((response) => {
-        actualResponse = response;
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/login`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toEqual(request);
-
-      req.flush(merchantLoginResponse);
-
-      expect(actualResponse).toEqual(merchantLoginResponse);
-    });
-
-    // =======================================================
-    // MERCHANT LOGIN LOCAL STORAGE
-    // =======================================================
-
-    it('should store merchant login information', () => {
-      const request: LoginRequest = {
-        email: 'merchant@example.com',
-
+        email: 'john@smartcart.com',
         password: 'Password1',
       };
 
@@ -185,35 +192,75 @@ describe('AuthService', () => {
 
       const req = httpMock.expectOne(`${apiUrl}/login`);
 
-      req.flush(merchantLoginResponse);
+      req.flush(customerLoginResponse);
 
-      expect(localStorage.getItem('token')).toBe('merchant-jwt-token');
-
-      expect(localStorage.getItem('username')).toBe('merchant01');
-
-      expect(localStorage.getItem('email')).toBe('merchant@example.com');
-
-      expect(localStorage.getItem('role')).toBe('MERCHANT');
+      expect(localStorage.getItem('username')).toBe('john');
     });
 
-    // =======================================================
-    // LOGIN ERROR
-    // =======================================================
+    it('should store email after successful login', () => {
+      const request: LoginRequest = {
+        email: 'john@smartcart.com',
+        password: 'Password1',
+      };
 
-    it('should propagate login error', () => {
+      service.login(request).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush(customerLoginResponse);
+
+      expect(localStorage.getItem('email')).toBe('john@smartcart.com');
+    });
+
+    it('should store role after successful login', () => {
+      const request: LoginRequest = {
+        email: 'john@smartcart.com',
+        password: 'Password1',
+      };
+
+      service.login(request).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush(customerLoginResponse);
+
+      expect(localStorage.getItem('role')).toBe('CUSTOMER');
+    });
+
+    it('should start the automatic logout timer after login', () => {
+      const request: LoginRequest = {
+        email: 'john@smartcart.com',
+        password: 'Password1',
+      };
+
+      service.login(request).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush(customerLoginResponse);
+
+      expect(localStorage.getItem('token')).toBe(customerToken);
+
+      vi.advanceTimersByTime(299_000);
+
+      expect(localStorage.getItem('token')).toBe(customerToken);
+
+      vi.advanceTimersByTime(2_000);
+
+      expect(localStorage.getItem('token')).toBeNull();
+
+      expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+    });
+
+    it('should propagate login errors', () => {
       const request: LoginRequest = {
         email: 'wrong@example.com',
-
         password: 'wrongpassword',
       };
 
-      let actualError: any = null;
+      let actualError: any;
 
       service.login(request).subscribe({
-        next: (response) => {
-          actualError = response;
-        },
-
         error: (error) => {
           actualError = error;
         },
@@ -224,11 +271,11 @@ describe('AuthService', () => {
       expect(req.request.method).toBe('POST');
 
       req.flush(
-        'Invalid email or password',
-
+        {
+          message: 'Invalid email or password',
+        },
         {
           status: 401,
-
           statusText: 'Unauthorized',
         },
       );
@@ -246,28 +293,18 @@ describe('AuthService', () => {
   // =========================================================
 
   describe('register', () => {
-    // =======================================================
-    // SUCCESS
-    // =======================================================
-
     it('should register a customer', () => {
       const data = {
         username: 'john',
-
         email: 'john@example.com',
-
         password: 'Password1',
       };
 
       const response: LoginResponse = {
-        token: 'customer-token',
-
+        token: createJwt(300),
         userId: 1,
-
         username: 'john',
-
         email: 'john@example.com',
-
         role: 'CUSTOMER',
       };
 
@@ -288,26 +325,16 @@ describe('AuthService', () => {
       expect(actualResponse).toEqual(response);
     });
 
-    // =======================================================
-    // ERROR
-    // =======================================================
-
-    it('should propagate customer registration error', () => {
+    it('should propagate registration errors', () => {
       const data = {
         username: 'john',
-
         email: 'john@example.com',
-
         password: 'Password1',
       };
 
-      let actualError: any = null;
+      let actualError: any;
 
       service.register(data).subscribe({
-        next: (response) => {
-          actualError = response;
-        },
-
         error: (error) => {
           actualError = error;
         },
@@ -316,11 +343,11 @@ describe('AuthService', () => {
       const req = httpMock.expectOne(`${apiUrl}/register`);
 
       req.flush(
-        'Email is already registered',
-
+        {
+          message: 'Email is already registered',
+        },
         {
           status: 400,
-
           statusText: 'Bad Request',
         },
       );
@@ -332,39 +359,23 @@ describe('AuthService', () => {
   });
 
   // =========================================================
-  // USER PROFILE WITH AVATAR
+  // CREATE USER PROFILE WITH AVATAR
   // =========================================================
 
   describe('createUserProfileWithAvatar', () => {
-    // =====================================================
-    // WITH AVATAR
-    // =====================================================
-
-    it('should create user profile with avatar', () => {
-      const avatarFile = new File(
-        ['fake-avatar'],
-
-        'avatar.jpg',
-
-        {
-          type: 'image/jpeg',
-        },
-      );
+    it('should create a user profile with avatar', () => {
+      const avatarFile = new File(['fake-avatar'], 'avatar.jpg', {
+        type: 'image/jpeg',
+      });
 
       service
         .createUserProfileWithAvatar(
           1,
-
           'John',
-
           'Tan',
-
           '12 Rainbow Street',
-
           '123456',
-
           '91234567',
-
           avatarFile,
         )
         .subscribe();
@@ -404,25 +415,15 @@ describe('AuthService', () => {
       });
     });
 
-    // =====================================================
-    // WITHOUT AVATAR
-    // =====================================================
-
-    it('should create user profile without avatar', () => {
+    it('should create a user profile without avatar', () => {
       service
         .createUserProfileWithAvatar(
           1,
-
           'John',
-
           'Tan',
-
           '12 Rainbow Street',
-
           '123456',
-
           '91234567',
-
           null,
         )
         .subscribe();
@@ -456,30 +457,23 @@ describe('AuthService', () => {
   });
 
   // =========================================================
-  // USER PROFILE JSON
+  // CREATE USER PROFILE
   // =========================================================
 
   describe('createUserProfile', () => {
-    it('should create user profile', () => {
+    it('should create a user profile', () => {
       const data = {
         userId: 1,
-
         firstName: 'John',
-
         lastName: 'Tan',
-
         address: '12 Rainbow Street',
-
         postalCode: '123456',
-
         phoneNumber: '91234567',
-
-        avatarUrl: 'upload/John-avatar.jpg',
+        avatarUrl: 'avatar.jpg',
       };
 
       const response = {
         id: 10,
-
         ...data,
       };
 
@@ -502,14 +496,334 @@ describe('AuthService', () => {
   });
 
   // =========================================================
+  // CHECK EMAIL
+  // =========================================================
+
+  describe('checkEmail', () => {
+    it('should call the check-email endpoint', () => {
+      const email = 'john@smartcart.com';
+
+      service.checkEmail(email).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/check-email`);
+
+      expect(req.request.method).toBe('POST');
+
+      expect(req.request.body).toEqual({
+        email,
+      });
+
+      req.flush({
+        message: 'Email address found',
+      });
+    });
+
+    it('should return the check-email response', () => {
+      const email = 'john@smartcart.com';
+
+      const response = {
+        message: 'Email address found',
+      };
+
+      let actualResponse: any;
+
+      service.checkEmail(email).subscribe((result) => {
+        actualResponse = result;
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/check-email`);
+
+      req.flush(response);
+
+      expect(actualResponse).toEqual(response);
+    });
+
+    it('should propagate check-email errors', () => {
+      const email = 'unknown@smartcart.com';
+
+      let actualError: any;
+
+      service.checkEmail(email).subscribe({
+        error: (error) => {
+          actualError = error;
+        },
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/check-email`);
+
+      req.flush(
+        {
+          message: 'Email address not found',
+        },
+        {
+          status: 404,
+          statusText: 'Not Found',
+        },
+      );
+
+      expect(actualError).toBeTruthy();
+
+      expect(actualError.status).toBe(404);
+    });
+  });
+
+  // =========================================================
+  // RESET PASSWORD
+  // =========================================================
+
+  describe('resetPassword', () => {
+    it('should call the reset-password endpoint', () => {
+      const data = {
+        email: 'john@smartcart.com',
+        newPassword: 'Password1',
+        confirmPassword: 'Password1',
+      };
+
+      service.resetPassword(data).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/reset-password`);
+
+      expect(req.request.method).toBe('POST');
+
+      expect(req.request.body).toEqual(data);
+
+      req.flush({
+        message: 'Password updated successfully.',
+      });
+    });
+
+    it('should return the reset-password response', () => {
+      const data = {
+        email: 'john@smartcart.com',
+        newPassword: 'Password1',
+        confirmPassword: 'Password1',
+      };
+
+      const response = {
+        message: 'Password updated successfully.',
+      };
+
+      let actualResponse: any;
+
+      service.resetPassword(data).subscribe((result) => {
+        actualResponse = result;
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/reset-password`);
+
+      req.flush(response);
+
+      expect(actualResponse).toEqual(response);
+    });
+
+    it('should propagate reset-password errors', () => {
+      const data = {
+        email: 'john@smartcart.com',
+        newPassword: 'Password1',
+        confirmPassword: 'WrongPassword1',
+      };
+
+      let actualError: any;
+
+      service.resetPassword(data).subscribe({
+        error: (error) => {
+          actualError = error;
+        },
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/reset-password`);
+
+      req.flush(
+        {
+          message: 'Passwords do not match',
+        },
+        {
+          status: 400,
+          statusText: 'Bad Request',
+        },
+      );
+
+      expect(actualError).toBeTruthy();
+
+      expect(actualError.status).toBe(400);
+    });
+  });
+
+  // =========================================================
+  // AUTOMATIC JWT LOGOUT
+  // =========================================================
+
+  describe('automatic JWT expiration', () => {
+    it('should logout immediately when JWT is already expired', () => {
+      const expiredToken = createExpiredJwt();
+
+      service
+        .login({
+          email: 'john@smartcart.com',
+          password: 'Password1',
+        })
+        .subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush({
+        ...customerLoginResponse,
+        token: expiredToken,
+      });
+
+      expect(localStorage.getItem('token')).toBeNull();
+
+      expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+    });
+
+    it('should automatically logout when JWT expires', () => {
+      const shortLivedToken = createJwt(5);
+
+      service
+        .login({
+          email: 'john@smartcart.com',
+          password: 'Password1',
+        })
+        .subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush({
+        ...customerLoginResponse,
+        token: shortLivedToken,
+      });
+
+      expect(localStorage.getItem('token')).toBe(shortLivedToken);
+
+      vi.advanceTimersByTime(4_000);
+
+      expect(localStorage.getItem('token')).toBe(shortLivedToken);
+
+      vi.advanceTimersByTime(2_000);
+
+      expect(localStorage.getItem('token')).toBeNull();
+
+      expect(localStorage.getItem('username')).toBeNull();
+
+      expect(localStorage.getItem('email')).toBeNull();
+
+      expect(localStorage.getItem('role')).toBeNull();
+
+      expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+    });
+
+    it('should cancel the previous logout timer when logging in again', () => {
+      const firstToken = createJwt(5);
+
+      const secondToken = createJwt(20);
+
+      service
+        .login({
+          email: 'first@smartcart.com',
+          password: 'Password1',
+        })
+        .subscribe();
+
+      let req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush({
+        ...customerLoginResponse,
+        token: firstToken,
+      });
+
+      vi.advanceTimersByTime(2_000);
+
+      service
+        .login({
+          email: 'second@smartcart.com',
+          password: 'Password1',
+        })
+        .subscribe();
+
+      req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush({
+        ...customerLoginResponse,
+        token: secondToken,
+        email: 'second@smartcart.com',
+      });
+
+      vi.advanceTimersByTime(4_000);
+
+      expect(localStorage.getItem('token')).toBe(secondToken);
+
+      expect(routerMock.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should not start a timer when JWT has no expiration', () => {
+      const header = btoa(
+        JSON.stringify({
+          alg: 'HS256',
+          typ: 'JWT',
+        }),
+      );
+
+      const payload = btoa(
+        JSON.stringify({
+          sub: '1',
+        }),
+      );
+
+      const token = `${header}.${payload}.signature`;
+
+      service
+        .login({
+          email: 'john@smartcart.com',
+          password: 'Password1',
+        })
+        .subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush({
+        ...customerLoginResponse,
+        token,
+      });
+
+      expect(localStorage.getItem('token')).toBe(token);
+
+      vi.advanceTimersByTime(60_000);
+
+      expect(localStorage.getItem('token')).toBe(token);
+
+      expect(routerMock.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should logout when JWT cannot be decoded', () => {
+      const invalidToken = 'invalid-token';
+
+      service
+        .login({
+          email: 'john@smartcart.com',
+          password: 'Password1',
+        })
+        .subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush({
+        ...customerLoginResponse,
+        token: invalidToken,
+      });
+
+      expect(localStorage.getItem('token')).toBeNull();
+    });
+  });
+
+  // =========================================================
   // LOGOUT
   // =========================================================
 
   describe('logout', () => {
-    it('should clear authentication information', () => {
-      localStorage.setItem('token', 'fake.jwt.token');
+    it('should clear all authentication data', () => {
+      localStorage.setItem('token', customerToken);
 
-      localStorage.setItem('user', '{"id":2}');
+      localStorage.setItem('user', '{"id":1}');
 
       localStorage.setItem('username', 'john');
 
@@ -517,7 +831,7 @@ describe('AuthService', () => {
 
       localStorage.setItem('role', 'CUSTOMER');
 
-      localStorage.setItem('pendingSignupUserId', '2');
+      localStorage.setItem('pendingSignupUserId', '1');
 
       service.logout();
 
@@ -533,6 +847,32 @@ describe('AuthService', () => {
 
       expect(localStorage.getItem('pendingSignupUserId')).toBeNull();
     });
+
+    it('should cancel the automatic logout timer', () => {
+      const token = createJwt(10);
+
+      service
+        .login({
+          email: 'john@smartcart.com',
+          password: 'Password1',
+        })
+        .subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/login`);
+
+      req.flush({
+        ...customerLoginResponse,
+        token,
+      });
+
+      service.logout();
+
+      vi.advanceTimersByTime(20_000);
+
+      expect(localStorage.getItem('token')).toBeNull();
+
+      expect(routerMock.navigate).not.toHaveBeenCalled();
+    });
   });
 
   // =========================================================
@@ -541,7 +881,7 @@ describe('AuthService', () => {
 
   describe('clearSession', () => {
     it('should clear token username email and role', () => {
-      localStorage.setItem('token', 'fake.jwt.token');
+      localStorage.setItem('token', customerToken);
 
       localStorage.setItem('username', 'john');
 
@@ -560,12 +900,12 @@ describe('AuthService', () => {
       expect(localStorage.getItem('role')).toBeNull();
     });
 
-    it('should not remove user key', () => {
-      localStorage.setItem('user', '{"id":2}');
+    it('should not clear unrelated local storage values', () => {
+      localStorage.setItem('user', '{"id":1}');
 
       service.clearSession();
 
-      expect(localStorage.getItem('user')).toBe('{"id":2}');
+      expect(localStorage.getItem('user')).toBe('{"id":1}');
     });
   });
 
@@ -574,16 +914,65 @@ describe('AuthService', () => {
   // =========================================================
 
   describe('isLoggedIn', () => {
-    it('should return false when token does not exist', () => {
+    it('should return false when no token exists', () => {
       localStorage.removeItem('token');
 
       expect(service.isLoggedIn()).toBe(false);
     });
 
-    it('should return true when token exists', () => {
-      localStorage.setItem('token', 'fake.jwt.token');
+    it('should return true when token exists and is not expired', () => {
+      const token = createJwt(300);
+
+      localStorage.setItem('token', token);
 
       expect(service.isLoggedIn()).toBe(true);
+    });
+
+    it('should return false when token is expired', () => {
+      const token = createExpiredJwt();
+
+      localStorage.setItem('token', token);
+
+      localStorage.setItem('username', 'john');
+
+      expect(service.isLoggedIn()).toBe(false);
+
+      expect(localStorage.getItem('token')).toBeNull();
+
+      expect(localStorage.getItem('username')).toBeNull();
+    });
+
+    it('should return false when JWT has no expiration', () => {
+      const header = btoa(
+        JSON.stringify({
+          alg: 'HS256',
+          typ: 'JWT',
+        }),
+      );
+
+      const payload = btoa(
+        JSON.stringify({
+          sub: '1',
+        }),
+      );
+
+      const token = `${header}.${payload}.signature`;
+
+      localStorage.setItem('token', token);
+
+      expect(service.isLoggedIn()).toBe(false);
+    });
+
+    it('should return false and logout when JWT is invalid', () => {
+      localStorage.setItem('token', 'not-a-valid-jwt');
+
+      localStorage.setItem('username', 'john');
+
+      expect(service.isLoggedIn()).toBe(false);
+
+      expect(localStorage.getItem('token')).toBeNull();
+
+      expect(localStorage.getItem('username')).toBeNull();
     });
   });
 
@@ -592,7 +981,7 @@ describe('AuthService', () => {
   // =========================================================
 
   describe('getUsername', () => {
-    it('should return stored username', () => {
+    it('should return the stored username', () => {
       localStorage.setItem('username', 'john');
 
       expect(service.getUsername()).toBe('john');
@@ -610,7 +999,7 @@ describe('AuthService', () => {
   // =========================================================
 
   describe('getEmail', () => {
-    it('should return stored email', () => {
+    it('should return the stored email', () => {
       localStorage.setItem('email', 'john@smartcart.com');
 
       expect(service.getEmail()).toBe('john@smartcart.com');
@@ -628,16 +1017,10 @@ describe('AuthService', () => {
   // =========================================================
 
   describe('getRole', () => {
-    it('should return CUSTOMER role', () => {
+    it('should return the stored role', () => {
       localStorage.setItem('role', 'CUSTOMER');
 
       expect(service.getRole()).toBe('CUSTOMER');
-    });
-
-    it('should return MERCHANT role', () => {
-      localStorage.setItem('role', 'MERCHANT');
-
-      expect(service.getRole()).toBe('MERCHANT');
     });
 
     it('should return empty string when role does not exist', () => {
@@ -652,28 +1035,18 @@ describe('AuthService', () => {
   // =========================================================
 
   describe('registerMerchant', () => {
-    // =====================================================
-    // SUCCESS
-    // =====================================================
-
     it('should register a merchant', () => {
       const request = {
         username: 'merchant01',
-
         email: 'merchant@example.com',
-
         password: 'Password1',
       };
 
       const response = {
-        token: 'merchant-token',
-
+        token: createJwt(300),
         userId: 2,
-
         username: 'merchant01',
-
         email: 'merchant@example.com',
-
         role: 'MERCHANT',
       };
 
@@ -694,26 +1067,16 @@ describe('AuthService', () => {
       expect(actualResponse).toEqual(response);
     });
 
-    // =====================================================
-    // ERROR
-    // =====================================================
-
-    it('should propagate merchant registration error', () => {
+    it('should propagate merchant registration errors', () => {
       const request = {
         username: 'merchant01',
-
         email: 'merchant@example.com',
-
         password: 'Password1',
       };
 
-      let actualError: any = null;
+      let actualError: any;
 
       service.registerMerchant(request).subscribe({
-        next: (response) => {
-          actualError = response;
-        },
-
         error: (error) => {
           actualError = error;
         },
@@ -722,11 +1085,11 @@ describe('AuthService', () => {
       const req = httpMock.expectOne(`${apiUrl}/merchant/register`);
 
       req.flush(
-        'Email is already registered',
-
+        {
+          message: 'Email already exists',
+        },
         {
           status: 400,
-
           statusText: 'Bad Request',
         },
       );
@@ -742,58 +1105,35 @@ describe('AuthService', () => {
   // =========================================================
 
   describe('createMerchantProfile', () => {
-    // =====================================================
-    // WITH LOGO + REGISTRATION DOCUMENT
-    // =====================================================
+    // =======================================================
+    // WITH LOGO
+    // =======================================================
 
     it('should create merchant profile with logo and registration document', () => {
-      const logoFile = new File(
-        ['fake-logo'],
+      const logoFile = new File(['fake-logo'], 'logo.png', {
+        type: 'image/png',
+      });
 
-        'logo.png',
+      const registrationDocument = new File(['fake-document'], 'registration.pdf', {
+        type: 'application/pdf',
+      });
 
-        {
-          type: 'image/png',
-        },
-      );
+      const data: MerchantProfileData = {
+        userId: 2,
+        businessName: 'SmartCart Fashion',
+        uen: '202612345A',
+        businessType: 'Retail',
+        businessAddress: '10 Orchard Road',
+        postalCode: '238840',
+        contactNumber: '91234567',
+        productCategory: 'Fashion',
+        businessDescription: 'Fashion products',
+        pickupAvailable: true,
+        logoFile,
+        registrationDocument,
+      };
 
-      const registrationDocument = new File(
-        ['fake-document'],
-
-        'registration.pdf',
-
-        {
-          type: 'application/pdf',
-        },
-      );
-
-      service
-        .createMerchantProfile(
-          2,
-
-          'SmartCart Fashion',
-
-          '202612345A',
-
-          'Retail',
-
-          '10 Orchard Road',
-
-          '238840',
-
-          '91234567',
-
-          'Fashion',
-
-          'Fashion products',
-
-          true,
-
-          logoFile,
-
-          registrationDocument,
-        )
-        .subscribe();
+      service.createMerchantProfile(data).subscribe();
 
       const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
 
@@ -803,9 +1143,9 @@ describe('AuthService', () => {
 
       const formData = req.request.body as FormData;
 
-      // -------------------------------------------------
+      // =================================================
       // TEXT FIELDS
-      // -------------------------------------------------
+      // =================================================
 
       expect(formData.get('userId')).toBe('2');
 
@@ -827,9 +1167,9 @@ describe('AuthService', () => {
 
       expect(formData.get('pickupAvailable')).toBe('true');
 
-      // -------------------------------------------------
+      // =================================================
       // LOGO
-      // -------------------------------------------------
+      // =================================================
 
       const uploadedLogo = formData.get('logo') as File;
 
@@ -841,9 +1181,9 @@ describe('AuthService', () => {
 
       expect(uploadedLogo.size).toBe(logoFile.size);
 
-      // -------------------------------------------------
+      // =================================================
       // REGISTRATION DOCUMENT
-      // -------------------------------------------------
+      // =================================================
 
       const uploadedRegistrationDocument = formData.get('registrationDocument') as File;
 
@@ -860,48 +1200,31 @@ describe('AuthService', () => {
       });
     });
 
-    // =====================================================
+    // =======================================================
     // WITHOUT LOGO
-    // =====================================================
+    // =======================================================
 
     it('should create merchant profile without logo', () => {
-      const registrationDocument = new File(
-        ['fake-document'],
+      const registrationDocument = new File(['fake-document'], 'registration.pdf', {
+        type: 'application/pdf',
+      });
 
-        'registration.pdf',
+      const data: MerchantProfileData = {
+        userId: 2,
+        businessName: 'SmartCart Fashion',
+        uen: '202612345A',
+        businessType: 'Retail',
+        businessAddress: '10 Orchard Road',
+        postalCode: '238840',
+        contactNumber: '91234567',
+        productCategory: 'Fashion',
+        businessDescription: 'Fashion products',
+        pickupAvailable: false,
+        logoFile: null,
+        registrationDocument,
+      };
 
-        {
-          type: 'application/pdf',
-        },
-      );
-
-      service
-        .createMerchantProfile(
-          2,
-
-          'SmartCart Fashion',
-
-          '202612345A',
-
-          'Retail',
-
-          '10 Orchard Road',
-
-          '238840',
-
-          '91234567',
-
-          'Fashion',
-
-          'Fashion products',
-
-          false,
-
-          null,
-
-          registrationDocument,
-        )
-        .subscribe();
+      service.createMerchantProfile(data).subscribe();
 
       const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
 
@@ -911,9 +1234,9 @@ describe('AuthService', () => {
 
       const formData = req.request.body as FormData;
 
-      // -------------------------------------------------
+      // =================================================
       // TEXT FIELDS
-      // -------------------------------------------------
+      // =================================================
 
       expect(formData.get('userId')).toBe('2');
 
@@ -935,15 +1258,15 @@ describe('AuthService', () => {
 
       expect(formData.get('pickupAvailable')).toBe('false');
 
-      // -------------------------------------------------
-      // LOGO SHOULD NOT EXIST
-      // -------------------------------------------------
+      // =================================================
+      // LOGO MUST NOT EXIST
+      // =================================================
 
       expect(formData.get('logo')).toBeNull();
 
-      // -------------------------------------------------
+      // =================================================
       // REGISTRATION DOCUMENT
-      // -------------------------------------------------
+      // =================================================
 
       const uploadedRegistrationDocument = formData.get('registrationDocument') as File;
 
@@ -958,6 +1281,57 @@ describe('AuthService', () => {
       req.flush({
         message: 'Merchant profile created',
       });
+    });
+
+    // =======================================================
+    // ERROR
+    // =======================================================
+
+    it('should propagate merchant profile errors', () => {
+      const registrationDocument = new File(['fake-document'], 'registration.pdf', {
+        type: 'application/pdf',
+      });
+
+      const data: MerchantProfileData = {
+        userId: 2,
+        businessName: 'SmartCart Fashion',
+        uen: '202612345A',
+        businessType: 'Retail',
+        businessAddress: '10 Orchard Road',
+        postalCode: '238840',
+        contactNumber: '91234567',
+        productCategory: 'Fashion',
+        businessDescription: 'Fashion products',
+        pickupAvailable: true,
+        logoFile: null,
+        registrationDocument,
+      };
+
+      let actualError: any;
+
+      service.createMerchantProfile(data).subscribe({
+        error: (error) => {
+          actualError = error;
+        },
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
+
+      expect(req.request.method).toBe('POST');
+
+      req.flush(
+        {
+          message: 'Unable to create merchant profile',
+        },
+        {
+          status: 400,
+          statusText: 'Bad Request',
+        },
+      );
+
+      expect(actualError).toBeTruthy();
+
+      expect(actualError.status).toBe(400);
     });
   });
 });

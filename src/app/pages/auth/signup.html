@@ -375,7 +375,7 @@
             <img
               *ngIf="avatarPreview"
               [src]="avatarPreview"
-              alt="Profile photo"
+              alt="User Profile"
             />
 
 
@@ -506,7 +506,7 @@
             type="text"
             [(ngModel)]="address"
             placeholder="23 Emerald Hill Road, #04-12"
-            autocomplete="street-address"
+            autocomplete="address-line1"
             [disabled]="loading"
           />
 
