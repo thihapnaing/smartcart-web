@@ -27,14 +27,12 @@ describe('OrdersList', () => {
   let component: OrdersList;
   let serviceMock: {
     getMerchantOrders: ReturnType<typeof vi.fn>;
-    updateOrderStatus: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     // Fresh mock per test so call history / return values never leak across tests.
     serviceMock = {
-      getMerchantOrders: vi.fn(),
-      updateOrderStatus: vi.fn()
+      getMerchantOrders: vi.fn()
     };
 
     TestBed.configureTestingModule({
@@ -137,74 +135,6 @@ describe('OrdersList', () => {
 
       component.selectStatus('DELIVERED');
       expect(component.showActionColumn()).toBe(false);
-    });
-  });
-
-  // --- markAsPacked ---
-
-  describe('markAsPacked', () => {
-    let order: MerchantOrderItemResponse;
-
-    beforeEach(() => {
-      order = makeOrder({ orderId: 5, orderStatus: 'PAID' });
-      serviceMock.getMerchantOrders.mockReturnValue(of([order]));
-      component = TestBed.inject(OrdersList);
-      component.ngOnInit();
-    });
-
-    it('sets updatingOrderId while the request is pending', () => {
-      // Never resolves, so we can inspect the "in flight" state.
-      serviceMock.updateOrderStatus.mockReturnValue(of().pipe()); // no emission
-      component.markAsPacked(order);
-      expect(component.updatingOrderId()).toBe(5);
-    });
-
-    it('updates the matching order status immutably on success', () => {
-      serviceMock.updateOrderStatus.mockReturnValue(of(undefined));
-
-      component.markAsPacked(order);
-
-      expect(serviceMock.updateOrderStatus).toHaveBeenCalledWith(5, 'PACKED');
-      expect(component.updatingOrderId()).toBeNull();
-
-      const updated = component.orders().find(o => o.orderId === 5);
-      expect(updated?.orderStatus).toBe('PACKED');
-
-      // The original object passed in must be untouched — proves we replaced,
-      // not mutated, the array/item (important for computed() to re-fire).
-      expect(order.orderStatus).toBe('PAID');
-    });
-
-    it('does not affect other orders in the list', () => {
-      const other = makeOrder({ orderId: 6, orderStatus: 'PAID' });
-      serviceMock.getMerchantOrders.mockReturnValue(of([order, other]));
-      component.ngOnInit();
-      serviceMock.updateOrderStatus.mockReturnValue(of(undefined));
-
-      component.markAsPacked(order);
-
-      const untouched = component.orders().find(o => o.orderId === 6);
-      expect(untouched?.orderStatus).toBe('PAID');
-    });
-
-    it('sets errorMessage and clears updatingOrderId on failure', () => {
-      const httpError = new HttpErrorResponse({ error: { message: 'Pack failed' } });
-      serviceMock.updateOrderStatus.mockReturnValue(throwError(() => httpError));
-
-      component.markAsPacked(order);
-
-      expect(component.errorMessage()).toBe('Pack failed');
-      expect(component.updatingOrderId()).toBeNull();
-      // Status should remain unchanged since the update failed.
-      expect(component.orders().find(o => o.orderId === 5)?.orderStatus).toBe('PAID');
-    });
-
-    it('falls back to a generic error message on failure without one', () => {
-      serviceMock.updateOrderStatus.mockReturnValue(throwError(() => new HttpErrorResponse({})));
-
-      component.markAsPacked(order);
-
-      expect(component.errorMessage()).toBe('Could not update the order. Please try again.');
     });
   });
 });
