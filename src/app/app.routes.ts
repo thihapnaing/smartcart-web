@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { adminAuthGuard } from './admin/guards/admin-auth-guard';
 import { AdminLayout } from './layout/admin-layout/admin-layout';
 import { authGuard } from './security/auth.guard';
+import { ForgotPassword } from './pages/auth/forgot-password';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,10 @@ export const routes: Routes = [
   {
     path: 'merchant/signup',
     loadComponent: () => import('./pages/merchant/merchant-signup').then((m) => m.MerchantSignup),
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPassword,
   },
   {
     path: '',
@@ -69,25 +74,25 @@ export const routes: Routes = [
           import('./pages/merchant/products/products-list/products-list').then(
             (m) => m.ProductsList,
           ),
-          canActivate: [authGuard],
+        canActivate: [authGuard],
       },
       {
         path: 'orders',
         loadComponent: () =>
           import('./pages/merchant/orders/orders-list/orders-list').then((m) => m.OrdersList),
-          canActivate: [authGuard],
+        canActivate: [authGuard],
       },
       {
         path: 'products/new',
         loadComponent: () =>
           import('./pages/merchant/products/product-form/product-form').then((m) => m.ProductForm),
-          canActivate: [authGuard],
+        canActivate: [authGuard],
       },
       {
         path: 'products/:id/edit',
         loadComponent: () =>
           import('./pages/merchant/products/product-form/product-form').then((m) => m.ProductForm),
-          canActivate: [authGuard],
+        canActivate: [authGuard],
       },
     ],
   },

@@ -8,19 +8,14 @@
 
     <div class="brand-content">
 
-      <!-- LOGO -->
       <div class="brand-logo">
-
         <div class="brand-icon">
           🛒
         </div>
 
         <span>SmartCart</span>
-
       </div>
 
-
-      <!-- BRAND MESSAGE -->
       <div class="brand-message">
 
         <h2>
@@ -34,8 +29,6 @@
           you offer.
         </p>
 
-
-        <!-- BADGES -->
         <div class="brand-badges">
 
           <span>
@@ -59,7 +52,6 @@
   </section>
 
 
-
   <!-- =========================================================
        RIGHT FORM PANEL
        ========================================================= -->
@@ -68,8 +60,7 @@
 
     <div class="form-container">
 
-
-      <!-- MOBILE LOGO -->
+      <!-- MOBILE BRAND -->
       <div class="mobile-brand">
 
         <div class="brand-icon">
@@ -81,7 +72,6 @@
         </span>
 
       </div>
-
 
 
       <!-- =====================================================
@@ -105,9 +95,8 @@
       </div>
 
 
-
       <!-- =====================================================
-           SIGN IN / SIGN UP TABS
+           AUTH TABS
            ===================================================== -->
 
       <div class="auth-tabs">
@@ -129,7 +118,6 @@
       </div>
 
 
-
       <!-- =====================================================
            SIGNUP FORM
            ===================================================== -->
@@ -140,9 +128,8 @@
         novalidate
       >
 
-
         <!-- ===================================================
-             STEP 1 - ACCOUNT INFORMATION
+             STEP 1
              =================================================== -->
 
         <ng-container *ngIf="signupStep === 1">
@@ -211,7 +198,11 @@
                 class="password-toggle"
                 (click)="togglePassword()"
                 [disabled]="loading"
-                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                [attr.aria-label]="
+                  showPassword
+                    ? 'Hide password'
+                    : 'Show password'
+                "
               >
                 {{ showPassword ? '🙈' : '👁' }}
               </button>
@@ -226,12 +217,7 @@
           </div>
 
 
-
-          <!-- =================================================
-               ERROR MESSAGE
-               IMPORTANT
-               ================================================= -->
-
+          <!-- ERROR -->
           <div
             *ngIf="errorMessage"
             class="signup-error"
@@ -247,7 +233,6 @@
             </span>
 
           </div>
-
 
 
           <!-- TERMS -->
@@ -274,8 +259,7 @@
           </p>
 
 
-
-          <!-- STEP 1 BUTTON -->
+          <!-- CONTINUE -->
           <button
             type="submit"
             class="signup-button"
@@ -295,13 +279,11 @@
         </ng-container>
 
 
-
         <!-- ===================================================
-             STEP 2 - BUSINESS INFORMATION
+             STEP 2
              =================================================== -->
 
         <ng-container *ngIf="signupStep === 2">
-
 
           <!-- BUSINESS NAME -->
           <div class="field">
@@ -515,7 +497,7 @@
           </div>
 
 
-          <!-- PICKUP AVAILABLE -->
+          <!-- PICKUP -->
           <div class="checkbox-field">
 
             <label class="checkbox-label">
@@ -536,14 +518,16 @@
           </div>
 
 
-
           <!-- =================================================
                BUSINESS LOGO
                ================================================= -->
 
           <div class="upload-section">
 
-            <label class="upload-label">
+            <label
+              class="upload-label"
+              for="logoFile"
+            >
               Business Logo
             </label>
 
@@ -566,7 +550,13 @@
               </span>
 
               <span class="upload-title">
-                {{ logoFile ? logoFile.name : 'Upload business logo' }}
+
+                {{
+                  logoFile
+                    ? logoFile.name
+                    : 'Upload business logo'
+                }}
+
               </span>
 
               <span class="upload-description">
@@ -592,14 +582,16 @@
           </div>
 
 
-
           <!-- =================================================
-               BUSINESS DOCUMENT
+               BUSINESS REGISTRATION DOCUMENT
                ================================================= -->
 
           <div class="upload-section">
 
-            <label class="upload-label">
+            <label
+              class="upload-label"
+              for="businessDocument"
+            >
               Business Registration Document
             </label>
 
@@ -622,11 +614,13 @@
               </span>
 
               <span class="upload-title">
+
                 {{
                   businessDocument
                     ? businessDocument.name
                     : 'Upload registration document'
                 }}
+
               </span>
 
               <span class="upload-description">
@@ -636,7 +630,6 @@
             </label>
 
           </div>
-
 
 
           <!-- =================================================
@@ -660,9 +653,8 @@
           </div>
 
 
-
           <!-- =================================================
-               STEP 2 BUTTONS
+               STEP BUTTONS
                ================================================= -->
 
           <div class="step-buttons">
@@ -675,7 +667,6 @@
             >
               ← Back
             </button>
-
 
             <button
               type="submit"
@@ -700,7 +691,6 @@
       </form>
 
 
-
       <!-- =====================================================
            LOGIN LINK
            ===================================================== -->
@@ -715,11 +705,9 @@
 
       </div>
 
-
     </div>
 
   </section>
-
 
 
   <!-- =========================================================

@@ -27,9 +27,9 @@ export interface ProductSearchResult {
   providedIn: 'root',
 })
 export class ImageSearchService {
-  private apiUrl = `${environment.apiUrl}/products/search/image`;
+  private readonly apiUrl = `${environment.apiUrl}/products/search/image`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   searchByImage(file: File): Observable<ProductSearchResult[]> {
     const formData = new FormData();
