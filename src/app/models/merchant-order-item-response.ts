@@ -7,6 +7,7 @@ export interface MerchantOrderItemResponse {
   subtotal: number;
   orderStatus: string;
   orderDate: string; 
+  deliveredAt: string | null;
   buyerFirstName: string;
   buyerLastName: string;
 }
