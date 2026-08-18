@@ -38,6 +38,11 @@ export class OrdersList implements OnInit {
 
   showActionColumn = computed(() => this.selectedStatus() === 'ALL' || this.selectedStatus() === 'PAID');
 
+  // Date column is hidden on the Packed and Picked up tabs, since the
+  // merchant is more interested in current status than the original
+  // order date once an order has reached that stage.
+  showDateColumn = computed(() => this.selectedStatus() !== 'PACKED' && this.selectedStatus() !== 'PICKED_UP');
+
   // Filter tabs shown at the top of the page. Each "value" matches the
   // backend's OrderStatus enum exactly (all capitals, underscore for
   // multi-word statuses).
@@ -75,5 +80,17 @@ export class OrdersList implements OnInit {
   // Runs when the merchant clicks a tab button.
   selectStatus(status: string): void {
     this.selectedStatus.set(status);
+  }
+
+  // Chooses which date belongs in the Date column for a single order row.
+  // PAID orders show the date the order was placed. DELIVERED orders show
+  // the date it actually arrived instead, since that becomes the more
+  // useful date once delivery has happened. Every other status falls back
+  // to the order date, since deliveredAt will not be set yet for those.
+  getDisplayDate(item: MerchantOrderItemResponse): string | null {
+    if (item.orderStatus === 'DELIVERED') {
+      return item.deliveredAt ?? item.orderDate;
+    }
+    return item.orderDate;
   }
 }

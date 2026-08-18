@@ -25,7 +25,7 @@
         <th>Size</th>
         <th>Qty</th>
         <th>Amount</th>
-        <th>Date</th>
+        <th *ngIf="showDateColumn()">Date</th>
         <th>Status</th>
         <th *ngIf="showActionColumn()">Action</th>
       </tr>
@@ -38,7 +38,7 @@
         <td>{{ item.size }}</td>
         <td>{{ item.quantity }}</td>
         <td>{{ item.subtotal | currency }}</td>
-        <td>{{ item.orderDate | date:'MMM d' }}</td>
+        <td *ngIf="showDateColumn()">{{ getDisplayDate(item) | date:'MMM d' }}</td>
         <td>
           <span class="status-badge" [ngClass]="item.orderStatus.toLowerCase()">
             {{ item.orderStatus.replace('_', ' ') | titlecase }}
