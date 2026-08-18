@@ -198,7 +198,7 @@
           return;
         }
 
-        const payload = JSON.parse(atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/')));
+        const payload = JSON.parse(atob(payloadBase64.replaceAll('-', '+').replaceAll('_', '/')));
 
         // -------------------------------------------------------
         // JWT EXPIRATION
