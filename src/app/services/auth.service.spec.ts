@@ -1,11 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 
-import { AuthService, MerchantProfileData } from './auth.service';
+import {
+  AuthService,
+  MerchantProfileData,
+} from './auth.service';
 import { environment } from '../../environments/environment';
 
 describe('AuthService', () => {
@@ -36,10 +42,16 @@ describe('AuthService', () => {
     return `${header}.${payload}.signature`;
   }
 
-  function createUrlSafeJwt(exp: number, extra: Record<string, unknown> = {}): string {
+  function createUrlSafeJwt(
+    exp: number,
+    extra: Record<string, unknown> = {},
+  ): string {
     const token = createJwt(exp, extra);
 
-    return token.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    return token
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
   }
 
   // ---------------------------------------------------------
@@ -98,7 +110,9 @@ describe('AuthService', () => {
   // =========================================================
 
   it('should login successfully and save JWT/user information', async () => {
-    const token = createJwt(Math.floor(Date.now() / 1000) + 300);
+    const token = createJwt(
+      Math.floor(Date.now() / 1000) + 300,
+    );
 
     const request = {
       email: 'junior@example.com',
@@ -164,7 +178,11 @@ describe('AuthService', () => {
   // =========================================================
 
   it('should create a user profile with an avatar', async () => {
-    const avatar = new File(['avatar-content'], 'avatar.png', { type: 'image/png' });
+    const avatar = new File(
+      ['avatar-content'],
+      'avatar.png',
+      { type: 'image/png' },
+    );
 
     const promise = firstValueFrom(
       service.createUserProfileWithAvatar(
@@ -178,7 +196,9 @@ describe('AuthService', () => {
       ),
     );
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/user-profile/with-avatar`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/user-profile/with-avatar`,
+    );
 
     expect(req.request.method).toBe('POST');
     expect(req.request.body instanceof FormData).toBe(true);
@@ -216,7 +236,9 @@ describe('AuthService', () => {
       ),
     );
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/user-profile/with-avatar`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/user-profile/with-avatar`,
+    );
 
     const formData = req.request.body as FormData;
 
@@ -267,7 +289,9 @@ describe('AuthService', () => {
   // =========================================================
 
   it('should check whether an email exists', async () => {
-    const promise = firstValueFrom(service.checkEmail('junior@example.com'));
+    const promise = firstValueFrom(
+      service.checkEmail('junior@example.com'),
+    );
 
     const req = httpMock.expectOne(`${apiUrl}/check-email`);
 
@@ -334,11 +358,17 @@ describe('AuthService', () => {
   // =========================================================
 
   it('should create a merchant profile with logo and registration document', async () => {
-    const logoFile = new File(['logo-content'], 'logo.png', { type: 'image/png' });
+    const logoFile = new File(
+      ['logo-content'],
+      'logo.png',
+      { type: 'image/png' },
+    );
 
-    const registrationDocument = new File(['registration-content'], 'registration.pdf', {
-      type: 'application/pdf',
-    });
+    const registrationDocument = new File(
+      ['registration-content'],
+      'registration.pdf',
+      { type: 'application/pdf' },
+    );
 
     const data: MerchantProfileData = {
       userId: 2,
@@ -357,7 +387,9 @@ describe('AuthService', () => {
 
     const promise = firstValueFrom(service.createMerchantProfile(data));
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/merchant/profile`,
+    );
 
     expect(req.request.method).toBe('POST');
     expect(req.request.body instanceof FormData).toBe(true);
@@ -372,7 +404,9 @@ describe('AuthService', () => {
     expect(formData.get('postalCode')).toBe('123456');
     expect(formData.get('contactNumber')).toBe('91234567');
     expect(formData.get('productCategory')).toBe('Fashion');
-    expect(formData.get('businessDescription')).toBe('Fashion retailer in Singapore.');
+    expect(formData.get('businessDescription')).toBe(
+      'Fashion retailer in Singapore.',
+    );
     expect(formData.get('pickupAvailable')).toBe('true');
 
     const receivedLogo = formData.get('logo') as File;
@@ -380,7 +414,9 @@ describe('AuthService', () => {
     expect(receivedLogo.name).toBe('logo.png');
     expect(receivedLogo.type).toBe('image/png');
 
-    const receivedDocument = formData.get('registrationDocument') as File;
+    const receivedDocument = formData.get(
+      'registrationDocument',
+    ) as File;
 
     expect(receivedDocument).toBeTruthy();
     expect(receivedDocument.name).toBe('registration.pdf');
@@ -392,9 +428,11 @@ describe('AuthService', () => {
   });
 
   it('should create a merchant profile without a logo', async () => {
-    const registrationDocument = new File(['registration-content'], 'registration.pdf', {
-      type: 'application/pdf',
-    });
+    const registrationDocument = new File(
+      ['registration-content'],
+      'registration.pdf',
+      { type: 'application/pdf' },
+    );
 
     const data: MerchantProfileData = {
       userId: 2,
@@ -413,7 +451,9 @@ describe('AuthService', () => {
 
     const promise = firstValueFrom(service.createMerchantProfile(data));
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/merchant/profile`,
+    );
 
     expect(req.request.method).toBe('POST');
 
@@ -426,7 +466,9 @@ describe('AuthService', () => {
     // No logo should be appended.
     expect(formData.get('logo')).toBeNull();
 
-    const receivedDocument = formData.get('registrationDocument') as File;
+    const receivedDocument = formData.get(
+      'registrationDocument',
+    ) as File;
 
     expect(receivedDocument).toBeTruthy();
     expect(receivedDocument.name).toBe('registration.pdf');
@@ -486,7 +528,9 @@ describe('AuthService', () => {
   });
 
   it('should return true when JWT has not expired', () => {
-    const token = createJwt(Math.floor(Date.now() / 1000) + 300);
+    const token = createJwt(
+      Math.floor(Date.now() / 1000) + 300,
+    );
 
     localStorage.setItem('token', token);
 
@@ -494,7 +538,9 @@ describe('AuthService', () => {
   });
 
   it('should return false and logout when JWT is expired', () => {
-    const token = createJwt(Math.floor(Date.now() / 1000) - 10);
+    const token = createJwt(
+      Math.floor(Date.now() / 1000) - 10,
+    );
 
     localStorage.setItem('token', token);
     localStorage.setItem('username', 'Junior');
@@ -520,7 +566,9 @@ describe('AuthService', () => {
   });
 
   it('should return false when JWT has no exp claim', () => {
-    const token = createJwt(Math.floor(Date.now() / 1000) + 300);
+    const token = createJwt(
+      Math.floor(Date.now() / 1000) + 300,
+    );
 
     const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
     const payload = btoa(JSON.stringify({ sub: '2' }));
@@ -576,7 +624,9 @@ describe('AuthService', () => {
     const now = Date.now();
     vi.setSystemTime(now);
 
-    const token = createJwt(Math.floor(now / 1000) + 5);
+    const token = createJwt(
+      Math.floor(now / 1000) + 5,
+    );
 
     localStorage.setItem('token', token);
     localStorage.setItem('username', 'Junior');
@@ -606,7 +656,9 @@ describe('AuthService', () => {
     const now = Date.now();
     vi.setSystemTime(now);
 
-    const token = createJwt(Math.floor(now / 1000) - 5);
+    const token = createJwt(
+      Math.floor(now / 1000) - 5,
+    );
 
     localStorage.setItem('token', token);
     localStorage.setItem('username', 'Junior');
@@ -636,7 +688,9 @@ describe('AuthService', () => {
     const now = Date.now();
     vi.setSystemTime(now);
 
-    const token = createJwt(Math.floor(now / 1000) + 5);
+    const token = createJwt(
+      Math.floor(now / 1000) + 5,
+    );
 
     const promise = firstValueFrom(
       service.login({
@@ -670,7 +724,9 @@ describe('AuthService', () => {
     const now = Date.now();
     vi.setSystemTime(now);
 
-    const token = createJwt(Math.floor(now / 1000) + 5);
+    const token = createJwt(
+      Math.floor(now / 1000) + 5,
+    );
 
     localStorage.setItem('token', token);
 
@@ -688,7 +744,9 @@ describe('AuthService', () => {
   // =========================================================
 
   it('should accept a URL-safe JWT payload when checking login status', () => {
-    const token = createUrlSafeJwt(Math.floor(Date.now() / 1000) + 300);
+    const token = createUrlSafeJwt(
+      Math.floor(Date.now() / 1000) + 300,
+    );
 
     localStorage.setItem('token', token);
 
