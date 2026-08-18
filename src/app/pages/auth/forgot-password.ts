@@ -75,7 +75,7 @@ export class ForgotPassword {
     // EMAIL FORMAT
     // ---------------------------------------------------------
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
     if (!emailPattern.test(email)) {
       this.error = 'Please enter a valid email address.';
@@ -208,7 +208,7 @@ export class ForgotPassword {
     // NUMBER
     // ---------------------------------------------------------
 
-    if (!/[0-9]/.test(this.newPassword)) {
+    if (!/\d/.test(this.newPassword)) {
       this.error = 'Password must contain at least one number.';
       return;
     }
