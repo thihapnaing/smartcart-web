@@ -48,7 +48,6 @@ export class OrdersList implements OnInit {
   // multi-word statuses).
   statusTabs: StatusTab[] = [
     { label: 'All orders', value: 'ALL' },
-    { label: 'Pending',    value: 'PENDING' },
     { label: 'Paid',       value: 'PAID' },
     { label: 'Packed',     value: 'PACKED' },
     { label: 'Picked up',  value: 'PICKED_UP' },
