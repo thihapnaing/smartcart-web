@@ -53,11 +53,7 @@ describe('customerGuard', () => {
 
     const result = TestBed.runInInjectionContext(() => customerGuard({} as never, {} as never));
 
-<<<<<<< HEAD
-    expect(authService.isLoggedIn).toHaveBeenCalled();
-=======
     expect(authService.isLoggedIn).toHaveBeenCalledTimes(1);
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/login']);
 
@@ -65,12 +61,6 @@ describe('customerGuard', () => {
   });
 
   // =========================================================
-<<<<<<< HEAD
-  // MERCHANT
-  // =========================================================
-
-  it('should redirect merchant to login', () => {
-=======
   // CUSTOMER
   // =========================================================
 
@@ -95,7 +85,6 @@ describe('customerGuard', () => {
   // =========================================================
 
   it('should redirect MERCHANT to login', () => {
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
     authService.isLoggedIn.mockReturnValue(true);
 
     authService.getRole.mockReturnValue('MERCHANT');
@@ -106,11 +95,7 @@ describe('customerGuard', () => {
 
     const result = TestBed.runInInjectionContext(() => customerGuard({} as never, {} as never));
 
-<<<<<<< HEAD
-    expect(authService.getRole).toHaveBeenCalled();
-=======
     expect(authService.getRole).toHaveBeenCalledTimes(1);
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/login'], {
       queryParams: {
@@ -125,26 +110,11 @@ describe('customerGuard', () => {
   // USER
   // =========================================================
 
-<<<<<<< HEAD
-  it('should allow USER to access the page', () => {
-=======
   it('should redirect USER to login', () => {
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
     authService.isLoggedIn.mockReturnValue(true);
 
     authService.getRole.mockReturnValue('USER');
 
-<<<<<<< HEAD
-    const result = TestBed.runInInjectionContext(() => customerGuard({} as never, {} as never));
-
-    expect(authService.isLoggedIn).toHaveBeenCalled();
-
-    expect(authService.getRole).toHaveBeenCalled();
-
-    expect(router.createUrlTree).not.toHaveBeenCalled();
-
-    expect(result).toBe(true);
-=======
     const urlTree = {} as UrlTree;
 
     router.createUrlTree.mockReturnValue(urlTree);
@@ -160,31 +130,17 @@ describe('customerGuard', () => {
     });
 
     expect(result).toBe(urlTree);
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
   });
 
   // =========================================================
   // ADMIN
   // =========================================================
 
-<<<<<<< HEAD
-  it('should allow ADMIN to access the page', () => {
-=======
   it('should redirect ADMIN to login', () => {
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
     authService.isLoggedIn.mockReturnValue(true);
 
     authService.getRole.mockReturnValue('ADMIN');
 
-<<<<<<< HEAD
-    const result = TestBed.runInInjectionContext(() => customerGuard({} as never, {} as never));
-
-    expect(authService.getRole).toHaveBeenCalled();
-
-    expect(router.createUrlTree).not.toHaveBeenCalled();
-
-    expect(result).toBe(true);
-=======
     const urlTree = {} as UrlTree;
 
     router.createUrlTree.mockReturnValue(urlTree);
@@ -226,7 +182,6 @@ describe('customerGuard', () => {
     });
 
     expect(result).toBe(urlTree);
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
   });
 
   // =========================================================
@@ -244,11 +199,8 @@ describe('customerGuard', () => {
 
     TestBed.runInInjectionContext(() => customerGuard({} as never, {} as never));
 
-<<<<<<< HEAD
-=======
     expect(router.createUrlTree).toHaveBeenCalledTimes(1);
 
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
     const call = router.createUrlTree.mock.calls[0];
 
     expect(call[0]).toEqual(['/login']);
@@ -259,8 +211,6 @@ describe('customerGuard', () => {
       },
     });
   });
-<<<<<<< HEAD
-=======
 
   // =========================================================
   // VERIFY CUSTOMER DOES NOT REDIRECT
@@ -295,5 +245,4 @@ describe('customerGuard', () => {
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/login']);
   });
->>>>>>> f55ccc2f809ba8dba61e0e0ee59fe6e6f8dc5ad7
 });
