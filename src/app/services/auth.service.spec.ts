@@ -1,17 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 
-import {
-  AuthService,
-  MerchantProfileData,
-} from './auth.service';
+import { AuthService, MerchantProfileData } from './auth.service';
 import { environment } from '../../environments/environment';
 
 describe('AuthService', () => {
@@ -23,13 +17,20 @@ describe('AuthService', () => {
   };
 
   const apiUrl = `${environment.apiUrl}/auth`;
+  const profileApiUrl = `${environment.apiUrl}/user-profile`;
+  const merchantProfileApiUrl = `${environment.apiUrl}/merchant/profile`;
 
-  // ---------------------------------------------------------
+  // =========================================================
   // JWT TEST HELPERS
-  // ---------------------------------------------------------
+  // =========================================================
 
   function createJwt(exp: number, extra: Record<string, unknown> = {}): string {
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const header = btoa(
+      JSON.stringify({
+        alg: 'HS256',
+        typ: 'JWT',
+      }),
+    );
 
     const payload = btoa(
       JSON.stringify({
@@ -42,21 +43,30 @@ describe('AuthService', () => {
     return `${header}.${payload}.signature`;
   }
 
-  function createUrlSafeJwt(
-    exp: number,
-    extra: Record<string, unknown> = {},
-  ): string {
-    const token = createJwt(exp, extra);
+  function createJwtWithoutExp(): string {
+    const header = btoa(
+      JSON.stringify({
+        alg: 'HS256',
+        typ: 'JWT',
+      }),
+    );
 
-    return token
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/g, '');
+    const payload = btoa(
+      JSON.stringify({
+        sub: '2',
+      }),
+    );
+
+    return `${header}.${payload}.signature`;
   }
 
-  // ---------------------------------------------------------
-  // TESTBED SETUP
-  // ---------------------------------------------------------
+  function createUrlSafeJwt(exp: number): string {
+    return createJwt(exp).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  }
+
+  // =========================================================
+  // TESTBED
+  // =========================================================
 
   function configureTestBed(): void {
     TestBed.configureTestingModule({
@@ -75,9 +85,9 @@ describe('AuthService', () => {
     httpMock = TestBed.inject(HttpTestingController);
   }
 
-  // ---------------------------------------------------------
-  // SETUP
-  // ---------------------------------------------------------
+  // =========================================================
+  // SETUP / CLEANUP
+  // =========================================================
 
   beforeEach(() => {
     localStorage.clear();
@@ -85,7 +95,7 @@ describe('AuthService', () => {
     vi.useRealTimers();
 
     routerMock = {
-      navigate: vi.fn(),
+      navigate: vi.fn().mockResolvedValue(true),
     };
 
     configureTestBed();
@@ -109,10 +119,10 @@ describe('AuthService', () => {
   // LOGIN
   // =========================================================
 
-  it('should login successfully and save JWT/user information', async () => {
-    const token = createJwt(
-      Math.floor(Date.now() / 1000) + 300,
-    );
+  it('should login successfully, save authentication data and start idle timer', async () => {
+    vi.useFakeTimers();
+
+    const token = createJwt(Math.floor(Date.now() / 1000) + 300);
 
     const request = {
       email: 'junior@example.com',
@@ -141,6 +151,12 @@ describe('AuthService', () => {
     expect(localStorage.getItem('username')).toBe('Junior');
     expect(localStorage.getItem('email')).toBe('junior@example.com');
     expect(localStorage.getItem('role')).toBe('USER');
+
+    // Five-minute idle timer should now be active.
+    vi.advanceTimersByTime(5 * 60 * 1000 - 1);
+
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
   });
 
   // =========================================================
@@ -178,11 +194,7 @@ describe('AuthService', () => {
   // =========================================================
 
   it('should create a user profile with an avatar', async () => {
-    const avatar = new File(
-      ['avatar-content'],
-      'avatar.png',
-      { type: 'image/png' },
-    );
+    const avatar = new File(['avatar-content'], 'avatar.png', { type: 'image/png' });
 
     const promise = firstValueFrom(
       service.createUserProfileWithAvatar(
@@ -196,9 +208,7 @@ describe('AuthService', () => {
       ),
     );
 
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/user-profile/with-avatar`,
-    );
+    const req = httpMock.expectOne(`${apiUrl.replace('/auth', '')}/user-profile/with-avatar`);
 
     expect(req.request.method).toBe('POST');
     expect(req.request.body instanceof FormData).toBe(true);
@@ -236,9 +246,9 @@ describe('AuthService', () => {
       ),
     );
 
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/user-profile/with-avatar`,
-    );
+    const req = httpMock.expectOne(`${apiUrl.replace('/auth', '')}/user-profile/with-avatar`);
+
+    expect(req.request.method).toBe('POST');
 
     const formData = req.request.body as FormData;
 
@@ -274,7 +284,7 @@ describe('AuthService', () => {
 
     const promise = firstValueFrom(service.createUserProfile(data));
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/user-profile`);
+    const req = httpMock.expectOne(profileApiUrl);
 
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(data);
@@ -285,13 +295,11 @@ describe('AuthService', () => {
   });
 
   // =========================================================
-  // FORGOT PASSWORD
+  // CHECK EMAIL
   // =========================================================
 
   it('should check whether an email exists', async () => {
-    const promise = firstValueFrom(
-      service.checkEmail('junior@example.com'),
-    );
+    const promise = firstValueFrom(service.checkEmail('junior@example.com'));
 
     const req = httpMock.expectOne(`${apiUrl}/check-email`);
 
@@ -304,6 +312,10 @@ describe('AuthService', () => {
 
     await expect(promise).resolves.toEqual({ exists: true });
   });
+
+  // =========================================================
+  // RESET PASSWORD
+  // =========================================================
 
   it('should reset the password', async () => {
     const data = {
@@ -319,7 +331,9 @@ describe('AuthService', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(data);
 
-    req.flush({ message: 'Password updated successfully.' });
+    req.flush({
+      message: 'Password updated successfully.',
+    });
 
     await expect(promise).resolves.toEqual({
       message: 'Password updated successfully.',
@@ -358,17 +372,11 @@ describe('AuthService', () => {
   // =========================================================
 
   it('should create a merchant profile with logo and registration document', async () => {
-    const logoFile = new File(
-      ['logo-content'],
-      'logo.png',
-      { type: 'image/png' },
-    );
+    const logoFile = new File(['logo-content'], 'logo.png', { type: 'image/png' });
 
-    const registrationDocument = new File(
-      ['registration-content'],
-      'registration.pdf',
-      { type: 'application/pdf' },
-    );
+    const registrationDocument = new File(['registration-content'], 'registration.pdf', {
+      type: 'application/pdf',
+    });
 
     const data: MerchantProfileData = {
       userId: 2,
@@ -387,9 +395,7 @@ describe('AuthService', () => {
 
     const promise = firstValueFrom(service.createMerchantProfile(data));
 
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/merchant/profile`,
-    );
+    const req = httpMock.expectOne(merchantProfileApiUrl);
 
     expect(req.request.method).toBe('POST');
     expect(req.request.body instanceof FormData).toBe(true);
@@ -404,19 +410,16 @@ describe('AuthService', () => {
     expect(formData.get('postalCode')).toBe('123456');
     expect(formData.get('contactNumber')).toBe('91234567');
     expect(formData.get('productCategory')).toBe('Fashion');
-    expect(formData.get('businessDescription')).toBe(
-      'Fashion retailer in Singapore.',
-    );
+    expect(formData.get('businessDescription')).toBe('Fashion retailer in Singapore.');
     expect(formData.get('pickupAvailable')).toBe('true');
 
     const receivedLogo = formData.get('logo') as File;
+
     expect(receivedLogo).toBeTruthy();
     expect(receivedLogo.name).toBe('logo.png');
     expect(receivedLogo.type).toBe('image/png');
 
-    const receivedDocument = formData.get(
-      'registrationDocument',
-    ) as File;
+    const receivedDocument = formData.get('registrationDocument') as File;
 
     expect(receivedDocument).toBeTruthy();
     expect(receivedDocument.name).toBe('registration.pdf');
@@ -428,11 +431,9 @@ describe('AuthService', () => {
   });
 
   it('should create a merchant profile without a logo', async () => {
-    const registrationDocument = new File(
-      ['registration-content'],
-      'registration.pdf',
-      { type: 'application/pdf' },
-    );
+    const registrationDocument = new File(['registration-content'], 'registration.pdf', {
+      type: 'application/pdf',
+    });
 
     const data: MerchantProfileData = {
       userId: 2,
@@ -451,9 +452,7 @@ describe('AuthService', () => {
 
     const promise = firstValueFrom(service.createMerchantProfile(data));
 
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/merchant/profile`,
-    );
+    const req = httpMock.expectOne(merchantProfileApiUrl);
 
     expect(req.request.method).toBe('POST');
 
@@ -463,12 +462,9 @@ describe('AuthService', () => {
     expect(formData.get('businessName')).toBe('SmartCart Fashion');
     expect(formData.get('pickupAvailable')).toBe('false');
 
-    // No logo should be appended.
     expect(formData.get('logo')).toBeNull();
 
-    const receivedDocument = formData.get(
-      'registrationDocument',
-    ) as File;
+    const receivedDocument = formData.get('registrationDocument') as File;
 
     expect(receivedDocument).toBeTruthy();
     expect(receivedDocument.name).toBe('registration.pdf');
@@ -483,7 +479,7 @@ describe('AuthService', () => {
   // LOGOUT
   // =========================================================
 
-  it('should clear authentication data when logout is called', () => {
+  it('should clear authentication data and navigate to login when logout is called', () => {
     localStorage.setItem('token', 'test-token');
     localStorage.setItem('user', 'test-user');
     localStorage.setItem('username', 'Junior');
@@ -499,6 +495,174 @@ describe('AuthService', () => {
     expect(localStorage.getItem('email')).toBeNull();
     expect(localStorage.getItem('role')).toBeNull();
     expect(localStorage.getItem('pendingSignupUserId')).toBeNull();
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
+    });
+  });
+
+  it('should pass logout message to the login page', () => {
+    localStorage.setItem('token', 'test-token');
+
+    service.logout('You are merchant, not allow to use it');
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: 'You are merchant, not allow to use it',
+      },
+    });
+  });
+
+  // =========================================================
+  // IDLE TIMER
+  // =========================================================
+
+  it('should logout and navigate to login after 5 minutes of inactivity', () => {
+    vi.useFakeTimers();
+
+    const token = createJwt(Math.floor(Date.now() / 1000) + 600);
+
+    localStorage.setItem('token', token);
+
+    // Recreate AuthService so the constructor starts the idle timer.
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(5 * 60 * 1000);
+
+    expect(localStorage.getItem('token')).toBeNull();
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
+    });
+  });
+
+  it('should cancel the idle timer when logout is called', () => {
+    vi.useFakeTimers();
+
+    const token = createJwt(Math.floor(Date.now() / 1000) + 600);
+
+    localStorage.setItem('token', token);
+
+    // Recreate AuthService so the idle timer is actually started.
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    expect(localStorage.getItem('token')).toBe(token);
+
+    service.logout();
+
+    vi.advanceTimersByTime(5 * 60 * 1000 + 1000);
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reset the idle timer when user activity occurs', () => {
+    vi.useFakeTimers();
+
+    const token = createJwt(Math.floor(Date.now() / 1000) + 600);
+
+    localStorage.setItem('token', token);
+
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    // 4 minutes pass.
+    vi.advanceTimersByTime(4 * 60 * 1000);
+
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    // User activity resets the 5-minute timer.
+    window.dispatchEvent(new Event('mousemove'));
+
+    // One more minute should not log out because the timer was reset.
+    vi.advanceTimersByTime(60 * 1000);
+
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    // Now the full 5 minutes after activity pass.
+    vi.advanceTimersByTime(5 * 60 * 1000);
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
+    });
+  });
+
+  it('should not reset the idle timer from activity after logout', () => {
+    vi.useFakeTimers();
+
+    const token = createJwt(Math.floor(Date.now() / 1000) + 600);
+
+    localStorage.setItem('token', token);
+
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    service.logout();
+
+    window.dispatchEvent(new Event('mousemove'));
+
+    vi.advanceTimersByTime(5 * 60 * 1000 + 1000);
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalledTimes(1);
+  });
+
+  // =========================================================
+  // LOGIN -> IDLE TIMER
+  // =========================================================
+
+  it('should start the idle timer after successful login', async () => {
+    vi.useFakeTimers();
+
+    const token = createJwt(Math.floor(Date.now() / 1000) + 600);
+
+    const promise = firstValueFrom(
+      service.login({
+        email: 'junior@example.com',
+        password: 'Password1',
+      }),
+    );
+
+    const req = httpMock.expectOne(`${apiUrl}/login`);
+
+    req.flush({
+      token,
+      username: 'Junior',
+      email: 'junior@example.com',
+      role: 'USER',
+    });
+
+    await promise;
+
+    expect(localStorage.getItem('token')).toBe(token);
+
+    vi.advanceTimersByTime(5 * 60 * 1000 - 1);
+
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+
+    expect(localStorage.getItem('token')).toBeNull();
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
+    });
   });
 
   // =========================================================
@@ -528,9 +692,7 @@ describe('AuthService', () => {
   });
 
   it('should return true when JWT has not expired', () => {
-    const token = createJwt(
-      Math.floor(Date.now() / 1000) + 300,
-    );
+    const token = createJwt(Math.floor(Date.now() / 1000) + 300);
 
     localStorage.setItem('token', token);
 
@@ -538,9 +700,7 @@ describe('AuthService', () => {
   });
 
   it('should return false and logout when JWT is expired', () => {
-    const token = createJwt(
-      Math.floor(Date.now() / 1000) - 10,
-    );
+    const token = createJwt(Math.floor(Date.now() / 1000) - 10);
 
     localStorage.setItem('token', token);
     localStorage.setItem('username', 'Junior');
@@ -553,6 +713,12 @@ describe('AuthService', () => {
     expect(localStorage.getItem('username')).toBeNull();
     expect(localStorage.getItem('email')).toBeNull();
     expect(localStorage.getItem('role')).toBeNull();
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
+    });
   });
 
   it('should return false for an invalid JWT and clear the session', () => {
@@ -563,21 +729,24 @@ describe('AuthService', () => {
 
     expect(localStorage.getItem('token')).toBeNull();
     expect(localStorage.getItem('username')).toBeNull();
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
+    });
   });
 
   it('should return false when JWT has no exp claim', () => {
-    const token = createJwt(
-      Math.floor(Date.now() / 1000) + 300,
-    );
-
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(JSON.stringify({ sub: '2' }));
-
-    const tokenWithoutExp = `${header}.${payload}.signature`;
-
-    localStorage.setItem('token', tokenWithoutExp);
+    localStorage.setItem('token', createJwtWithoutExp());
 
     expect(service.isLoggedIn()).toBe(false);
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
+    });
   });
 
   // =========================================================
@@ -615,194 +784,62 @@ describe('AuthService', () => {
   });
 
   // =========================================================
-  // IDLE TIMEOUT
+  // REFRESH / EXISTING JWT
   // =========================================================
 
-  it('should automatically logout after 5 minutes of inactivity', () => {
+  it('should start the idle timer when an existing valid JWT is found on refresh', () => {
     vi.useFakeTimers();
 
-    const now = Date.now();
-    vi.setSystemTime(now);
-
-    const token = createJwt(Math.floor(now / 1000) + 1800);
+    const token = createJwt(Math.floor(Date.now() / 1000) + 600);
 
     localStorage.setItem('token', token);
     localStorage.setItem('username', 'Junior');
-    localStorage.setItem('email', 'junior@example.com');
-    localStorage.setItem('role', 'USER');
 
     TestBed.resetTestingModule();
     configureTestBed();
 
     expect(localStorage.getItem('token')).toBe(token);
 
-    vi.advanceTimersByTime(5 * 60 * 1000 + 1);
+    vi.advanceTimersByTime(5 * 60 * 1000 - 1);
+
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
 
     expect(localStorage.getItem('token')).toBeNull();
-    expect(localStorage.getItem('username')).toBeNull();
-    expect(localStorage.getItem('email')).toBeNull();
-    expect(localStorage.getItem('role')).toBeNull();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
-  });
 
-  it('should remain logged in when the user is active before 5 minutes', () => {
-    vi.useFakeTimers();
-
-    const now = Date.now();
-    vi.setSystemTime(now);
-
-    const token = createJwt(Math.floor(now / 1000) + 1800);
-
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', 'Junior');
-    localStorage.setItem('email', 'junior@example.com');
-    localStorage.setItem('role', 'USER');
-
-    TestBed.resetTestingModule();
-    configureTestBed();
-
-    vi.advanceTimersByTime(4 * 60 * 1000);
-    expect(localStorage.getItem('token')).toBe(token);
-    expect(routerMock.navigate).not.toHaveBeenCalled();
-
-    window.dispatchEvent(new Event('mousemove'));
-
-    vi.advanceTimersByTime(4 * 60 * 1000);
-
-    expect(localStorage.getItem('token')).toBe(token);
-    expect(routerMock.navigate).not.toHaveBeenCalled();
-  });
-
-  it('should logout 5 minutes after the last user activity', () => {
-    vi.useFakeTimers();
-
-    const now = Date.now();
-    vi.setSystemTime(now);
-
-    const token = createJwt(Math.floor(now / 1000) + 1800);
-    localStorage.setItem('token', token);
-
-    TestBed.resetTestingModule();
-    configureTestBed();
-
-    vi.advanceTimersByTime(4 * 60 * 1000);
-    window.dispatchEvent(new Event('click'));
-
-    vi.advanceTimersByTime(4 * 60 * 1000);
-    expect(localStorage.getItem('token')).toBe(token);
-    expect(routerMock.navigate).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(60 * 1000 + 1);
-
-    expect(localStorage.getItem('token')).toBeNull();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
-  });
-
-  it('should reset the idle timer when keyboard activity occurs', () => {
-    vi.useFakeTimers();
-
-    const now = Date.now();
-    vi.setSystemTime(now);
-
-    const token = createJwt(Math.floor(now / 1000) + 1800);
-    localStorage.setItem('token', token);
-
-    TestBed.resetTestingModule();
-    configureTestBed();
-
-    vi.advanceTimersByTime(4 * 60 * 1000);
-    window.dispatchEvent(new Event('keydown'));
-    vi.advanceTimersByTime(4 * 60 * 1000);
-
-    expect(localStorage.getItem('token')).toBe(token);
-    expect(routerMock.navigate).not.toHaveBeenCalled();
-  });
-
-  it('should reset the idle timer when scrolling occurs', () => {
-    vi.useFakeTimers();
-
-    const now = Date.now();
-    vi.setSystemTime(now);
-
-    const token = createJwt(Math.floor(now / 1000) + 1800);
-    localStorage.setItem('token', token);
-
-    TestBed.resetTestingModule();
-    configureTestBed();
-
-    vi.advanceTimersByTime(4 * 60 * 1000);
-    window.dispatchEvent(new Event('scroll'));
-    vi.advanceTimersByTime(4 * 60 * 1000);
-
-    expect(localStorage.getItem('token')).toBe(token);
-    expect(routerMock.navigate).not.toHaveBeenCalled();
-  });
-
-  it('should start the 5-minute idle timer after successful login', async () => {
-    vi.useFakeTimers();
-
-    const now = Date.now();
-    vi.setSystemTime(now);
-
-    const token = createJwt(Math.floor(now / 1000) + 1800);
-
-    const promise = firstValueFrom(
-      service.login({
-        email: 'junior@example.com',
-        password: 'Password1',
-      }),
-    );
-
-    const req = httpMock.expectOne(`${apiUrl}/login`);
-
-    req.flush({
-      token,
-      username: 'Junior',
-      email: 'junior@example.com',
-      role: 'USER',
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
     });
-
-    await promise;
-
-    expect(localStorage.getItem('token')).toBe(token);
-
-    vi.advanceTimersByTime(4 * 60 * 1000);
-    expect(localStorage.getItem('token')).toBe(token);
-    expect(routerMock.navigate).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(60 * 1000 + 1);
-
-    expect(localStorage.getItem('token')).toBeNull();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
   });
 
-  it('should cancel the idle timer when logout is called', () => {
-    vi.useFakeTimers();
+  it('should logout immediately when an already expired JWT is found on refresh', () => {
+    const token = createJwt(Math.floor(Date.now() / 1000) - 5);
 
-    const now = Date.now();
-    vi.setSystemTime(now);
-
-    const token = createJwt(Math.floor(now / 1000) + 1800);
     localStorage.setItem('token', token);
+    localStorage.setItem('username', 'Junior');
 
     TestBed.resetTestingModule();
     configureTestBed();
 
-    service.logout();
-    vi.advanceTimersByTime(5 * 60 * 1000 + 1000);
-
     expect(localStorage.getItem('token')).toBeNull();
-    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+      state: {
+        message: '',
+      },
+    });
   });
 
   // =========================================================
   // URL-SAFE JWT
   // =========================================================
 
-  it('should accept a URL-safe JWT payload when checking login status', () => {
-    const token = createUrlSafeJwt(
-      Math.floor(Date.now() / 1000) + 300,
-    );
+  it('should accept a URL-safe JWT when checking login status', () => {
+    const token = createUrlSafeJwt(Math.floor(Date.now() / 1000) + 300);
 
     localStorage.setItem('token', token);
 
