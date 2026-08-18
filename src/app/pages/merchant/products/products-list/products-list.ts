@@ -2,6 +2,12 @@ import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MerchantProductService } from '../../../../services/merchant-product-service';
 import { ProductSearchResult } from '../../../../models/product-search-result';
+import { HttpErrorResponse } from '@angular/common/http';
+
+interface ApiErrorResponse {
+  code: string;
+  message: string;
+}
 
 @Component({
   selector: 'app-products-list',
@@ -10,6 +16,7 @@ import { ProductSearchResult } from '../../../../models/product-search-result';
   templateUrl: './products-list.html',
   styleUrl: './products-list.css',
 })
+
 export class ProductsList implements OnInit {
   private readonly productService = inject(MerchantProductService);
   protected readonly products = signal<ProductSearchResult[]>([]);
@@ -17,6 +24,7 @@ export class ProductsList implements OnInit {
   protected readonly searchKeyword = signal('');
   protected readonly selectedCategory = signal<string | null>(null);
   protected readonly selectedGender = signal<string | null>(null);
+  protected readonly activationErrors = signal<Record<number, string>>({});
 
   protected readonly filteredProducts = computed(() => {
     let result = this.products();
@@ -78,16 +86,47 @@ export class ProductsList implements OnInit {
   }
 
   protected onActivate(id: number): void {
-    this.productService.activateProduct(id).subscribe(() => {
-      this.refreshList();
+    this.clearActivationError(id);
+
+    this.productService.activateProduct(id).subscribe({
+      next: () => this.refreshList(),
+      error: (err) => {
+        const message = this.resolveActivationError(err);
+        this.activationErrors.update(map => ({ ...map, [id]: message }));
+      },
     });
   }
 
-  protected onDeactivate(id: number): void {
-    this.productService.deactivateProduct(id).subscribe(() => {
-      this.refreshList();
+  protected clearActivationError(id: number): void {
+    this.activationErrors.update(map => {
+      const {[id]: _, ...rest} = map;
+      return rest;
     });
   }
+
+  private resolveActivationError(err: any): string {
+    const code = (err.error as ApiErrorResponse)?.code;
+    if (code === 'ADMIN_LOCKED') {
+      return 'This listing is locked by an admin and cannot be activated.';
+    }
+    return 'Unable to activate this product. Please try again.';
+  }
+
+  protected onDeactivate(id: number): void {
+  this.clearActivationError(id);
+
+  this.productService.deactivateProduct(id).subscribe({
+    next: () => this.refreshList(),
+    error: (err: HttpErrorResponse) => {
+      const message = this.resolveDeactivationError(err);
+      this.activationErrors.update(map => ({ ...map, [id]: message }));
+    },
+  });
+}
+
+private resolveDeactivationError(err: HttpErrorResponse): string {
+  return 'Unable to deactivate this product. Please try again.';
+}
 
   private refreshList(): void {
     this.productService.getMyProducts().subscribe(result => {

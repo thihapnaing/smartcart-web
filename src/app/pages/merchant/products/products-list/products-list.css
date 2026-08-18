@@ -33,10 +33,12 @@
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border);
 }
+
 .product-table td {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border);
   font-size: 0.875rem;
+  vertical-align: top;
 }
 
 .product-cell {
@@ -71,8 +73,8 @@
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  background: rgba(220,38,38,0.1);
-  color: hsl(0, 100%, 99%);
+  background: rgba(255, 2, 2, 0.1);
+  color: hsl(0, 0%, 0%);
 }
 .status-pill--active {
   background: var(--admin-success-soft, rgba(21,128,61,0.12));
@@ -114,4 +116,11 @@
 
 .addProductBtn {
     margin-left: auto;
+}
+
+.action-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--admin-danger, #dc2626);
 }

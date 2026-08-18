@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { ProductsList } from './products-list';
 import { MerchantProductService } from '../../../../services/merchant-product-service';
@@ -289,5 +290,96 @@ describe('ProductsList', () => {
 
     expect(productServiceMock.getMyProducts)
       .toHaveBeenCalledTimes(2);
+  });
+
+  it('should show an admin-locked error when activation is forbidden', () => {
+    productServiceMock.getMyProducts.mockReturnValue(of(products));
+    productServiceMock.activateProduct.mockReturnValue(
+      throwError(() => new HttpErrorResponse({
+        error: { code: 'ADMIN_LOCKED', message: 'Product is locked by admin' },
+        status: 403,
+      }))
+    );
+
+    fixture = TestBed.createComponent(ProductsList);
+    component = fixture.componentInstance;
+
+    fixture.detectChanges();
+
+    const activateButton =
+      fixture.nativeElement.querySelector('[title="Activate"]');
+
+    activateButton.click();
+
+    fixture.detectChanges();
+
+    const errorSpan = fixture.nativeElement.querySelector('.action-error');
+
+    expect(errorSpan).toBeTruthy();
+    expect(errorSpan.textContent).toContain(
+      'This listing is locked by an admin and cannot be activated.'
+    );
+
+    // list should not have been refreshed after a failed activation
+    expect(productServiceMock.getMyProducts).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show a generic error when activation fails for a non-admin-locked reason', () => {
+    productServiceMock.getMyProducts.mockReturnValue(of(products));
+    productServiceMock.activateProduct.mockReturnValue(
+      throwError(() => new HttpErrorResponse({
+        error: { code: 'SOME_OTHER_ERROR', message: 'Something else went wrong' },
+        status: 500,
+      }))
+    );
+
+    fixture = TestBed.createComponent(ProductsList);
+    component = fixture.componentInstance;
+
+    fixture.detectChanges();
+
+    const activateButton =
+      fixture.nativeElement.querySelector('[title="Activate"]');
+
+    activateButton.click();
+
+    fixture.detectChanges();
+
+    const errorSpan = fixture.nativeElement.querySelector('.action-error');
+
+    expect(errorSpan).toBeTruthy();
+    expect(errorSpan.textContent).toContain(
+      'Unable to activate this product. Please try again.'
+    );
+  });
+
+  it('should clear a previous activation error on a new activation attempt', () => {
+    productServiceMock.getMyProducts.mockReturnValue(of(products));
+    productServiceMock.activateProduct
+      .mockReturnValueOnce(
+        throwError(() => new HttpErrorResponse({
+          error: { code: 'ADMIN_LOCKED', message: 'Product is locked by admin' },
+          status: 403,
+        }))
+      )
+      .mockReturnValueOnce(of(void 0));
+
+    fixture = TestBed.createComponent(ProductsList);
+    component = fixture.componentInstance;
+
+    fixture.detectChanges();
+
+    const activateButton =
+      fixture.nativeElement.querySelector('[title="Activate"]');
+
+    activateButton.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.action-error')).toBeTruthy();
+
+    activateButton.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.action-error')).toBeFalsy();
   });
 });
