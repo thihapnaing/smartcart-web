@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { adminAuthGuard } from './admin/guards/admin-auth-guard';
 import { AdminLayout } from './layout/admin-layout/admin-layout';
 import { authGuard } from './security/auth.guard';
+import { customerGuard } from './security/customer.guard';
 import { ForgotPassword } from './pages/auth/forgot-password';
 
 export const routes: Routes = [
@@ -30,7 +31,7 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./pages/home/home').then((m) => m.Home),
-        canActivate: [authGuard],
+        canActivate: [customerGuard],
       },
       {
         path: 'search',

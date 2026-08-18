@@ -615,82 +615,136 @@ describe('AuthService', () => {
   });
 
   // =========================================================
-  // AUTOMATIC JWT EXPIRATION
+  // IDLE TIMEOUT
   // =========================================================
 
-  it('should automatically logout and navigate to login when JWT expires', () => {
+  it('should automatically logout after 5 minutes of inactivity', () => {
     vi.useFakeTimers();
 
     const now = Date.now();
     vi.setSystemTime(now);
 
-    const token = createJwt(
-      Math.floor(now / 1000) + 5,
-    );
+    const token = createJwt(Math.floor(now / 1000) + 1800);
 
     localStorage.setItem('token', token);
     localStorage.setItem('username', 'Junior');
     localStorage.setItem('email', 'junior@example.com');
     localStorage.setItem('role', 'USER');
 
-    // AuthService is a singleton, so reset the TestBed to execute
-    // the constructor again and simulate a browser page refresh.
     TestBed.resetTestingModule();
     configureTestBed();
 
     expect(localStorage.getItem('token')).toBe(token);
 
-    vi.advanceTimersByTime(5001);
+    vi.advanceTimersByTime(5 * 60 * 1000 + 1);
 
     expect(localStorage.getItem('token')).toBeNull();
     expect(localStorage.getItem('username')).toBeNull();
     expect(localStorage.getItem('email')).toBeNull();
     expect(localStorage.getItem('role')).toBeNull();
-
     expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
   });
 
-  it('should immediately logout and navigate to login when an already-expired token is found on refresh', () => {
+  it('should remain logged in when the user is active before 5 minutes', () => {
     vi.useFakeTimers();
 
     const now = Date.now();
     vi.setSystemTime(now);
 
-    const token = createJwt(
-      Math.floor(now / 1000) - 5,
-    );
+    const token = createJwt(Math.floor(now / 1000) + 1800);
 
     localStorage.setItem('token', token);
     localStorage.setItem('username', 'Junior');
+    localStorage.setItem('email', 'junior@example.com');
+    localStorage.setItem('role', 'USER');
 
-    // Reset TestBed so the constructor sees the stored expired token.
     TestBed.resetTestingModule();
     configureTestBed();
 
-    expect(localStorage.getItem('token')).toBeNull();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+    vi.advanceTimersByTime(4 * 60 * 1000);
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    window.dispatchEvent(new Event('mousemove'));
+
+    vi.advanceTimersByTime(4 * 60 * 1000);
+
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
   });
 
-  it('should logout and navigate to login when the JWT is invalid during timer setup', () => {
-    localStorage.setItem('token', 'not-a-valid-jwt');
-
-    // Reset TestBed so the constructor sees the invalid token.
-    TestBed.resetTestingModule();
-    configureTestBed();
-
-    expect(localStorage.getItem('token')).toBeNull();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
-  });
-
-  it('should start the expiration timer after successful login', async () => {
+  it('should logout 5 minutes after the last user activity', () => {
     vi.useFakeTimers();
 
     const now = Date.now();
     vi.setSystemTime(now);
 
-    const token = createJwt(
-      Math.floor(now / 1000) + 5,
-    );
+    const token = createJwt(Math.floor(now / 1000) + 1800);
+    localStorage.setItem('token', token);
+
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    vi.advanceTimersByTime(4 * 60 * 1000);
+    window.dispatchEvent(new Event('click'));
+
+    vi.advanceTimersByTime(4 * 60 * 1000);
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(60 * 1000 + 1);
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should reset the idle timer when keyboard activity occurs', () => {
+    vi.useFakeTimers();
+
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    const token = createJwt(Math.floor(now / 1000) + 1800);
+    localStorage.setItem('token', token);
+
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    vi.advanceTimersByTime(4 * 60 * 1000);
+    window.dispatchEvent(new Event('keydown'));
+    vi.advanceTimersByTime(4 * 60 * 1000);
+
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+  });
+
+  it('should reset the idle timer when scrolling occurs', () => {
+    vi.useFakeTimers();
+
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    const token = createJwt(Math.floor(now / 1000) + 1800);
+    localStorage.setItem('token', token);
+
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    vi.advanceTimersByTime(4 * 60 * 1000);
+    window.dispatchEvent(new Event('scroll'));
+    vi.advanceTimersByTime(4 * 60 * 1000);
+
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+  });
+
+  it('should start the 5-minute idle timer after successful login', async () => {
+    vi.useFakeTimers();
+
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    const token = createJwt(Math.floor(now / 1000) + 1800);
 
     const promise = firstValueFrom(
       service.login({
@@ -712,30 +766,32 @@ describe('AuthService', () => {
 
     expect(localStorage.getItem('token')).toBe(token);
 
-    vi.advanceTimersByTime(5001);
+    vi.advanceTimersByTime(4 * 60 * 1000);
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(60 * 1000 + 1);
 
     expect(localStorage.getItem('token')).toBeNull();
     expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
   });
 
-  it('should cancel the previous expiration timer when logout is called', () => {
+  it('should cancel the idle timer when logout is called', () => {
     vi.useFakeTimers();
 
     const now = Date.now();
     vi.setSystemTime(now);
 
-    const token = createJwt(
-      Math.floor(now / 1000) + 5,
-    );
-
+    const token = createJwt(Math.floor(now / 1000) + 1800);
     localStorage.setItem('token', token);
 
-    service = TestBed.inject(AuthService);
+    TestBed.resetTestingModule();
+    configureTestBed();
 
     service.logout();
+    vi.advanceTimersByTime(5 * 60 * 1000 + 1000);
 
-    vi.advanceTimersByTime(6000);
-
+    expect(localStorage.getItem('token')).toBeNull();
     expect(routerMock.navigate).not.toHaveBeenCalled();
   });
 

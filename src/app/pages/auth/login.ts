@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
 
@@ -18,6 +18,7 @@ export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
 
   email = '';
   password = '';
@@ -25,6 +26,18 @@ export class Login {
   showPassword = false;
   loading = false;
   error = '';
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      const message = params['message'];
+
+      if (message) {
+        this.error = message;
+
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   login(): void {
     console.log('LOGIN BUTTON CLICKED');

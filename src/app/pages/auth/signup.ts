@@ -107,6 +107,12 @@ export class Signup {
       return;
     }
 
+    if (/\s/.test(username)) {
+      this.showError("Username shouldn't have space.");
+
+      return;
+    }
+
     // =======================================================
     // EMAIL
     // =======================================================
