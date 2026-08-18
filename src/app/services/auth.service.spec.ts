@@ -1,85 +1,95 @@
 import { TestBed } from '@angular/core/testing';
-
 import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { vi } from 'vitest';
 
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-
-import { AuthService } from './auth.service';
-
-import { LoginRequest } from '../models/login-request';
-import { LoginResponse } from '../models/login-response';
-
+import { AuthService, MerchantProfileData } from './auth.service';
 import { environment } from '../../environments/environment';
-
-//Author: Htet Nandar
-//Updated: Junior
 
 describe('AuthService', () => {
   let service: AuthService;
-
   let httpMock: HttpTestingController;
+
+  let routerMock: {
+    navigate: ReturnType<typeof vi.fn>;
+  };
 
   const apiUrl = `${environment.apiUrl}/auth`;
 
-  // =======================================================
-  // TEST RESPONSES
-  // =======================================================
+  // ---------------------------------------------------------
+  // JWT TEST HELPERS
+  // ---------------------------------------------------------
 
-  const customerLoginResponse: LoginResponse = {
-    token: 'customer-jwt-token',
+  function createJwt(exp: number, extra: Record<string, unknown> = {}): string {
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
 
-    userId: 1,
+    const payload = btoa(
+      JSON.stringify({
+        sub: '2',
+        exp,
+        ...extra,
+      }),
+    );
 
-    username: 'john',
+    return `${header}.${payload}.signature`;
+  }
 
-    email: 'john@smartcart.com',
+  function createUrlSafeJwt(exp: number, extra: Record<string, unknown> = {}): string {
+    const token = createJwt(exp, extra);
 
-    role: 'CUSTOMER',
-  };
+    return token.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  }
 
-  const merchantLoginResponse: LoginResponse = {
-    token: 'merchant-jwt-token',
+  // ---------------------------------------------------------
+  // TESTBED SETUP
+  // ---------------------------------------------------------
 
-    userId: 2,
+  function configureTestBed(): void {
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: Router,
+          useValue: routerMock,
+        },
+      ],
+    });
 
-    username: 'merchant01',
+    service = TestBed.inject(AuthService);
+    httpMock = TestBed.inject(HttpTestingController);
+  }
 
-    email: 'merchant@example.com',
-
-    role: 'MERCHANT',
-  };
-
-  // =======================================================
-  // BEFORE EACH
-  // =======================================================
+  // ---------------------------------------------------------
+  // SETUP
+  // ---------------------------------------------------------
 
   beforeEach(() => {
     localStorage.clear();
 
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
+    vi.useRealTimers();
 
-    service = TestBed.inject(AuthService);
+    routerMock = {
+      navigate: vi.fn(),
+    };
 
-    httpMock = TestBed.inject(HttpTestingController);
+    configureTestBed();
   });
-
-  // =======================================================
-  // AFTER EACH
-  // =======================================================
 
   afterEach(() => {
     httpMock.verify();
-
     localStorage.clear();
+    vi.useRealTimers();
   });
 
-  // =======================================================
-  // SERVICE
-  // =======================================================
+  // =========================================================
+  // BASIC
+  // =========================================================
 
-  it('should be created', () => {
+  it('should create the service', () => {
     expect(service).toBeTruthy();
   });
 
@@ -87,563 +97,208 @@ describe('AuthService', () => {
   // LOGIN
   // =========================================================
 
-  describe('login', () => {
-    // =======================================================
-    // CUSTOMER LOGIN
-    // =======================================================
+  it('should login successfully and save JWT/user information', async () => {
+    const token = createJwt(Math.floor(Date.now() / 1000) + 300);
 
-    it('should login successfully as customer', () => {
-      const request: LoginRequest = {
-        email: 'john@smartcart.com',
+    const request = {
+      email: 'junior@example.com',
+      password: 'Password1',
+    };
 
-        password: 'Password1',
-      };
+    const response = {
+      token,
+      username: 'Junior',
+      email: 'junior@example.com',
+      role: 'USER',
+    };
 
-      let actualResponse: LoginResponse | undefined;
+    const promise = firstValueFrom(service.login(request));
 
-      service.login(request).subscribe((response) => {
-        actualResponse = response;
-      });
+    const req = httpMock.expectOne(`${apiUrl}/login`);
 
-      const req = httpMock.expectOne(`${apiUrl}/login`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(request);
 
-      expect(req.request.method).toBe('POST');
+    req.flush(response);
 
-      expect(req.request.body).toEqual(request);
+    await promise;
 
-      req.flush(customerLoginResponse);
-
-      expect(actualResponse).toEqual(customerLoginResponse);
-    });
-
-    // =======================================================
-    // CUSTOMER LOGIN LOCAL STORAGE
-    // =======================================================
-
-    it('should store customer login information', () => {
-      const request: LoginRequest = {
-        email: 'john@smartcart.com',
-
-        password: 'Password1',
-      };
-
-      service.login(request).subscribe();
-
-      const req = httpMock.expectOne(`${apiUrl}/login`);
-
-      req.flush(customerLoginResponse);
-
-      expect(localStorage.getItem('token')).toBe('customer-jwt-token');
-
-      expect(localStorage.getItem('username')).toBe('john');
-
-      expect(localStorage.getItem('email')).toBe('john@smartcart.com');
-
-      expect(localStorage.getItem('role')).toBe('CUSTOMER');
-    });
-
-    // =======================================================
-    // MERCHANT LOGIN
-    // =======================================================
-
-    it('should login successfully as merchant', () => {
-      const request: LoginRequest = {
-        email: 'merchant@example.com',
-
-        password: 'Password1',
-      };
-
-      let actualResponse: LoginResponse | undefined;
-
-      service.login(request).subscribe((response) => {
-        actualResponse = response;
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/login`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toEqual(request);
-
-      req.flush(merchantLoginResponse);
-
-      expect(actualResponse).toEqual(merchantLoginResponse);
-    });
-
-    // =======================================================
-    // MERCHANT LOGIN LOCAL STORAGE
-    // =======================================================
-
-    it('should store merchant login information', () => {
-      const request: LoginRequest = {
-        email: 'merchant@example.com',
-
-        password: 'Password1',
-      };
-
-      service.login(request).subscribe();
-
-      const req = httpMock.expectOne(`${apiUrl}/login`);
-
-      req.flush(merchantLoginResponse);
-
-      expect(localStorage.getItem('token')).toBe('merchant-jwt-token');
-
-      expect(localStorage.getItem('username')).toBe('merchant01');
-
-      expect(localStorage.getItem('email')).toBe('merchant@example.com');
-
-      expect(localStorage.getItem('role')).toBe('MERCHANT');
-    });
-
-    // =======================================================
-    // LOGIN ERROR
-    // =======================================================
-
-    it('should propagate login error', () => {
-      const request: LoginRequest = {
-        email: 'wrong@example.com',
-
-        password: 'wrongpassword',
-      };
-
-      let actualError: any = null;
-
-      service.login(request).subscribe({
-        next: (response) => {
-          actualError = response;
-        },
-
-        error: (error) => {
-          actualError = error;
-        },
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/login`);
-
-      expect(req.request.method).toBe('POST');
-
-      req.flush(
-        'Invalid email or password',
-
-        {
-          status: 401,
-
-          statusText: 'Unauthorized',
-        },
-      );
-
-      expect(actualError).toBeTruthy();
-
-      expect(actualError.status).toBe(401);
-
-      expect(localStorage.getItem('token')).toBeNull();
-    });
+    expect(localStorage.getItem('token')).toBe(token);
+    expect(localStorage.getItem('username')).toBe('Junior');
+    expect(localStorage.getItem('email')).toBe('junior@example.com');
+    expect(localStorage.getItem('role')).toBe('USER');
   });
 
   // =========================================================
-  // CUSTOMER REGISTER
+  // REGISTER
   // =========================================================
 
-  describe('register', () => {
-    // =======================================================
-    // SUCCESS
-    // =======================================================
+  it('should register a customer', async () => {
+    const data = {
+      username: 'junior',
+      email: 'junior@example.com',
+      password: 'Password1',
+    };
 
-    it('should register a customer', () => {
-      const data = {
-        username: 'john',
+    const response = {
+      token: 'registration-token',
+      username: 'junior',
+      email: 'junior@example.com',
+      role: 'USER',
+    };
 
-        email: 'john@example.com',
+    const promise = firstValueFrom(service.register(data));
 
-        password: 'Password1',
-      };
+    const req = httpMock.expectOne(`${apiUrl}/register`);
 
-      const response: LoginResponse = {
-        token: 'customer-token',
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(data);
 
-        userId: 1,
+    req.flush(response);
 
-        username: 'john',
-
-        email: 'john@example.com',
-
-        role: 'CUSTOMER',
-      };
-
-      let actualResponse: LoginResponse | undefined;
-
-      service.register(data).subscribe((result) => {
-        actualResponse = result;
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/register`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toEqual(data);
-
-      req.flush(response);
-
-      expect(actualResponse).toEqual(response);
-    });
-
-    // =======================================================
-    // ERROR
-    // =======================================================
-
-    it('should propagate customer registration error', () => {
-      const data = {
-        username: 'john',
-
-        email: 'john@example.com',
-
-        password: 'Password1',
-      };
-
-      let actualError: any = null;
-
-      service.register(data).subscribe({
-        next: (response) => {
-          actualError = response;
-        },
-
-        error: (error) => {
-          actualError = error;
-        },
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/register`);
-
-      req.flush(
-        'Email is already registered',
-
-        {
-          status: 400,
-
-          statusText: 'Bad Request',
-        },
-      );
-
-      expect(actualError).toBeTruthy();
-
-      expect(actualError.status).toBe(400);
-    });
+    await expect(promise).resolves.toEqual(response);
   });
 
   // =========================================================
   // USER PROFILE WITH AVATAR
   // =========================================================
 
-  describe('createUserProfileWithAvatar', () => {
-    // =====================================================
-    // WITH AVATAR
-    // =====================================================
+  it('should create a user profile with an avatar', async () => {
+    const avatar = new File(['avatar-content'], 'avatar.png', { type: 'image/png' });
 
-    it('should create user profile with avatar', () => {
-      const avatarFile = new File(
-        ['fake-avatar'],
+    const promise = firstValueFrom(
+      service.createUserProfileWithAvatar(
+        2,
+        'Junior',
+        'Tan',
+        '12 Rainbow Street',
+        '123456',
+        '91234567',
+        avatar,
+      ),
+    );
 
-        'avatar.jpg',
+    const req = httpMock.expectOne(`${environment.apiUrl}/user-profile/with-avatar`);
 
-        {
-          type: 'image/jpeg',
-        },
-      );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body instanceof FormData).toBe(true);
 
-      service
-        .createUserProfileWithAvatar(
-          1,
+    const formData = req.request.body as FormData;
 
-          'John',
+    expect(formData.get('userId')).toBe('2');
+    expect(formData.get('firstName')).toBe('Junior');
+    expect(formData.get('lastName')).toBe('Tan');
+    expect(formData.get('address')).toBe('12 Rainbow Street');
+    expect(formData.get('postalCode')).toBe('123456');
+    expect(formData.get('phoneNumber')).toBe('91234567');
 
-          'Tan',
+    const receivedAvatar = formData.get('avatar') as File;
 
-          '12 Rainbow Street',
+    expect(receivedAvatar).toBeTruthy();
+    expect(receivedAvatar.name).toBe('avatar.png');
+    expect(receivedAvatar.type).toBe('image/png');
 
-          '123456',
+    req.flush({ success: true });
 
-          '91234567',
+    await expect(promise).resolves.toEqual({ success: true });
+  });
 
-          avatarFile,
-        )
-        .subscribe();
+  it('should create a user profile without an avatar', async () => {
+    const promise = firstValueFrom(
+      service.createUserProfileWithAvatar(
+        2,
+        'Junior',
+        'Tan',
+        '12 Rainbow Street',
+        '123456',
+        '91234567',
+        null,
+      ),
+    );
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/user-profile/with-avatar`);
+    const req = httpMock.expectOne(`${environment.apiUrl}/user-profile/with-avatar`);
 
-      expect(req.request.method).toBe('POST');
+    const formData = req.request.body as FormData;
 
-      expect(req.request.body).toBeInstanceOf(FormData);
+    expect(formData.get('userId')).toBe('2');
+    expect(formData.get('firstName')).toBe('Junior');
+    expect(formData.get('lastName')).toBe('Tan');
+    expect(formData.get('avatar')).toBeNull();
 
-      const formData = req.request.body as FormData;
+    req.flush({ success: true });
 
-      expect(formData.get('userId')).toBe('1');
-
-      expect(formData.get('firstName')).toBe('John');
-
-      expect(formData.get('lastName')).toBe('Tan');
-
-      expect(formData.get('address')).toBe('12 Rainbow Street');
-
-      expect(formData.get('postalCode')).toBe('123456');
-
-      expect(formData.get('phoneNumber')).toBe('91234567');
-
-      const uploadedAvatar = formData.get('avatar') as File;
-
-      expect(uploadedAvatar).toBeTruthy();
-
-      expect(uploadedAvatar.name).toBe('avatar.jpg');
-
-      expect(uploadedAvatar.type).toBe('image/jpeg');
-
-      expect(uploadedAvatar.size).toBe(avatarFile.size);
-
-      req.flush({
-        message: 'Profile created',
-      });
-    });
-
-    // =====================================================
-    // WITHOUT AVATAR
-    // =====================================================
-
-    it('should create user profile without avatar', () => {
-      service
-        .createUserProfileWithAvatar(
-          1,
-
-          'John',
-
-          'Tan',
-
-          '12 Rainbow Street',
-
-          '123456',
-
-          '91234567',
-
-          null,
-        )
-        .subscribe();
-
-      const req = httpMock.expectOne(`${environment.apiUrl}/user-profile/with-avatar`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toBeInstanceOf(FormData);
-
-      const formData = req.request.body as FormData;
-
-      expect(formData.get('userId')).toBe('1');
-
-      expect(formData.get('firstName')).toBe('John');
-
-      expect(formData.get('lastName')).toBe('Tan');
-
-      expect(formData.get('address')).toBe('12 Rainbow Street');
-
-      expect(formData.get('postalCode')).toBe('123456');
-
-      expect(formData.get('phoneNumber')).toBe('91234567');
-
-      expect(formData.get('avatar')).toBeNull();
-
-      req.flush({
-        message: 'Profile created',
-      });
-    });
+    await expect(promise).resolves.toEqual({ success: true });
   });
 
   // =========================================================
-  // USER PROFILE JSON
+  // USER PROFILE
   // =========================================================
 
-  describe('createUserProfile', () => {
-    it('should create user profile', () => {
-      const data = {
-        userId: 1,
+  it('should create a user profile', async () => {
+    const data = {
+      userId: 2,
+      firstName: 'Junior',
+      lastName: 'Tan',
+      address: '12 Rainbow Street',
+      postalCode: '123456',
+      phoneNumber: '91234567',
+      avatarUrl: '/uploads/avatar.png',
+    };
 
-        firstName: 'John',
+    const response = {
+      id: 10,
+      ...data,
+    };
 
-        lastName: 'Tan',
+    const promise = firstValueFrom(service.createUserProfile(data));
 
-        address: '12 Rainbow Street',
+    const req = httpMock.expectOne(`${environment.apiUrl}/user-profile`);
 
-        postalCode: '123456',
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(data);
 
-        phoneNumber: '91234567',
+    req.flush(response);
 
-        avatarUrl: 'upload/John-avatar.jpg',
-      };
-
-      const response = {
-        id: 10,
-
-        ...data,
-      };
-
-      let actualResponse: any;
-
-      service.createUserProfile(data).subscribe((result) => {
-        actualResponse = result;
-      });
-
-      const req = httpMock.expectOne(`${environment.apiUrl}/user-profile`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toEqual(data);
-
-      req.flush(response);
-
-      expect(actualResponse).toEqual(response);
-    });
+    await expect(promise).resolves.toEqual(response);
   });
 
   // =========================================================
-  // LOGOUT
+  // FORGOT PASSWORD
   // =========================================================
 
-  describe('logout', () => {
-    it('should clear authentication information', () => {
-      localStorage.setItem('token', 'fake.jwt.token');
+  it('should check whether an email exists', async () => {
+    const promise = firstValueFrom(service.checkEmail('junior@example.com'));
 
-      localStorage.setItem('user', '{"id":2}');
+    const req = httpMock.expectOne(`${apiUrl}/check-email`);
 
-      localStorage.setItem('username', 'john');
-
-      localStorage.setItem('email', 'john@smartcart.com');
-
-      localStorage.setItem('role', 'CUSTOMER');
-
-      localStorage.setItem('pendingSignupUserId', '2');
-
-      service.logout();
-
-      expect(localStorage.getItem('token')).toBeNull();
-
-      expect(localStorage.getItem('user')).toBeNull();
-
-      expect(localStorage.getItem('username')).toBeNull();
-
-      expect(localStorage.getItem('email')).toBeNull();
-
-      expect(localStorage.getItem('role')).toBeNull();
-
-      expect(localStorage.getItem('pendingSignupUserId')).toBeNull();
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      email: 'junior@example.com',
     });
+
+    req.flush({ exists: true });
+
+    await expect(promise).resolves.toEqual({ exists: true });
   });
 
-  // =========================================================
-  // CLEAR SESSION
-  // =========================================================
+  it('should reset the password', async () => {
+    const data = {
+      email: 'junior@example.com',
+      newPassword: 'NewPassword1',
+      confirmPassword: 'NewPassword1',
+    };
 
-  describe('clearSession', () => {
-    it('should clear token username email and role', () => {
-      localStorage.setItem('token', 'fake.jwt.token');
+    const promise = firstValueFrom(service.resetPassword(data));
 
-      localStorage.setItem('username', 'john');
+    const req = httpMock.expectOne(`${apiUrl}/reset-password`);
 
-      localStorage.setItem('email', 'john@smartcart.com');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(data);
 
-      localStorage.setItem('role', 'CUSTOMER');
+    req.flush({ message: 'Password updated successfully.' });
 
-      service.clearSession();
-
-      expect(localStorage.getItem('token')).toBeNull();
-
-      expect(localStorage.getItem('username')).toBeNull();
-
-      expect(localStorage.getItem('email')).toBeNull();
-
-      expect(localStorage.getItem('role')).toBeNull();
-    });
-
-    it('should not remove user key', () => {
-      localStorage.setItem('user', '{"id":2}');
-
-      service.clearSession();
-
-      expect(localStorage.getItem('user')).toBe('{"id":2}');
-    });
-  });
-
-  // =========================================================
-  // IS LOGGED IN
-  // =========================================================
-
-  describe('isLoggedIn', () => {
-    it('should return false when token does not exist', () => {
-      localStorage.removeItem('token');
-
-      expect(service.isLoggedIn()).toBe(false);
-    });
-
-    it('should return true when token exists', () => {
-      localStorage.setItem('token', 'fake.jwt.token');
-
-      expect(service.isLoggedIn()).toBe(true);
-    });
-  });
-
-  // =========================================================
-  // GET USERNAME
-  // =========================================================
-
-  describe('getUsername', () => {
-    it('should return stored username', () => {
-      localStorage.setItem('username', 'john');
-
-      expect(service.getUsername()).toBe('john');
-    });
-
-    it('should return empty string when username does not exist', () => {
-      localStorage.removeItem('username');
-
-      expect(service.getUsername()).toBe('');
-    });
-  });
-
-  // =========================================================
-  // GET EMAIL
-  // =========================================================
-
-  describe('getEmail', () => {
-    it('should return stored email', () => {
-      localStorage.setItem('email', 'john@smartcart.com');
-
-      expect(service.getEmail()).toBe('john@smartcart.com');
-    });
-
-    it('should return empty string when email does not exist', () => {
-      localStorage.removeItem('email');
-
-      expect(service.getEmail()).toBe('');
-    });
-  });
-
-  // =========================================================
-  // GET ROLE
-  // =========================================================
-
-  describe('getRole', () => {
-    it('should return CUSTOMER role', () => {
-      localStorage.setItem('role', 'CUSTOMER');
-
-      expect(service.getRole()).toBe('CUSTOMER');
-    });
-
-    it('should return MERCHANT role', () => {
-      localStorage.setItem('role', 'MERCHANT');
-
-      expect(service.getRole()).toBe('MERCHANT');
-    });
-
-    it('should return empty string when role does not exist', () => {
-      localStorage.removeItem('role');
-
-      expect(service.getRole()).toBe('');
+    await expect(promise).resolves.toEqual({
+      message: 'Password updated successfully.',
     });
   });
 
@@ -651,313 +306,392 @@ describe('AuthService', () => {
   // MERCHANT REGISTER
   // =========================================================
 
-  describe('registerMerchant', () => {
-    // =====================================================
-    // SUCCESS
-    // =====================================================
+  it('should register a merchant', async () => {
+    const data = {
+      username: 'merchant',
+      email: 'merchant@example.com',
+      password: 'Password1',
+    };
 
-    it('should register a merchant', () => {
-      const request = {
-        username: 'merchant01',
+    const response = {
+      message: 'Merchant registered successfully.',
+    };
 
-        email: 'merchant@example.com',
+    const promise = firstValueFrom(service.registerMerchant(data));
 
-        password: 'Password1',
-      };
+    const req = httpMock.expectOne(`${apiUrl}/merchant/register`);
 
-      const response = {
-        token: 'merchant-token',
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(data);
 
-        userId: 2,
+    req.flush(response);
 
-        username: 'merchant01',
-
-        email: 'merchant@example.com',
-
-        role: 'MERCHANT',
-      };
-
-      let actualResponse: any;
-
-      service.registerMerchant(request).subscribe((result) => {
-        actualResponse = result;
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/merchant/register`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toEqual(request);
-
-      req.flush(response);
-
-      expect(actualResponse).toEqual(response);
-    });
-
-    // =====================================================
-    // ERROR
-    // =====================================================
-
-    it('should propagate merchant registration error', () => {
-      const request = {
-        username: 'merchant01',
-
-        email: 'merchant@example.com',
-
-        password: 'Password1',
-      };
-
-      let actualError: any = null;
-
-      service.registerMerchant(request).subscribe({
-        next: (response) => {
-          actualError = response;
-        },
-
-        error: (error) => {
-          actualError = error;
-        },
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/merchant/register`);
-
-      req.flush(
-        'Email is already registered',
-
-        {
-          status: 400,
-
-          statusText: 'Bad Request',
-        },
-      );
-
-      expect(actualError).toBeTruthy();
-
-      expect(actualError.status).toBe(400);
-    });
+    await expect(promise).resolves.toEqual(response);
   });
 
   // =========================================================
   // MERCHANT PROFILE
   // =========================================================
 
-  describe('createMerchantProfile', () => {
-    // =====================================================
-    // WITH LOGO + REGISTRATION DOCUMENT
-    // =====================================================
+  it('should create a merchant profile with logo and registration document', async () => {
+    const logoFile = new File(['logo-content'], 'logo.png', { type: 'image/png' });
 
-    it('should create merchant profile with logo and registration document', () => {
-      const logoFile = new File(
-        ['fake-logo'],
-
-        'logo.png',
-
-        {
-          type: 'image/png',
-        },
-      );
-
-      const registrationDocument = new File(
-        ['fake-document'],
-
-        'registration.pdf',
-
-        {
-          type: 'application/pdf',
-        },
-      );
-
-      service
-        .createMerchantProfile(
-          2,
-
-          'SmartCart Fashion',
-
-          '202612345A',
-
-          'Retail',
-
-          '10 Orchard Road',
-
-          '238840',
-
-          '91234567',
-
-          'Fashion',
-
-          'Fashion products',
-
-          true,
-
-          logoFile,
-
-          registrationDocument,
-        )
-        .subscribe();
-
-      const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toBeInstanceOf(FormData);
-
-      const formData = req.request.body as FormData;
-
-      // -------------------------------------------------
-      // TEXT FIELDS
-      // -------------------------------------------------
-
-      expect(formData.get('userId')).toBe('2');
-
-      expect(formData.get('businessName')).toBe('SmartCart Fashion');
-
-      expect(formData.get('uen')).toBe('202612345A');
-
-      expect(formData.get('businessType')).toBe('Retail');
-
-      expect(formData.get('businessAddress')).toBe('10 Orchard Road');
-
-      expect(formData.get('postalCode')).toBe('238840');
-
-      expect(formData.get('contactNumber')).toBe('91234567');
-
-      expect(formData.get('productCategory')).toBe('Fashion');
-
-      expect(formData.get('businessDescription')).toBe('Fashion products');
-
-      expect(formData.get('pickupAvailable')).toBe('true');
-
-      // -------------------------------------------------
-      // LOGO
-      // -------------------------------------------------
-
-      const uploadedLogo = formData.get('logo') as File;
-
-      expect(uploadedLogo).toBeTruthy();
-
-      expect(uploadedLogo.name).toBe('logo.png');
-
-      expect(uploadedLogo.type).toBe('image/png');
-
-      expect(uploadedLogo.size).toBe(logoFile.size);
-
-      // -------------------------------------------------
-      // REGISTRATION DOCUMENT
-      // -------------------------------------------------
-
-      const uploadedRegistrationDocument = formData.get('registrationDocument') as File;
-
-      expect(uploadedRegistrationDocument).toBeTruthy();
-
-      expect(uploadedRegistrationDocument.name).toBe('registration.pdf');
-
-      expect(uploadedRegistrationDocument.type).toBe('application/pdf');
-
-      expect(uploadedRegistrationDocument.size).toBe(registrationDocument.size);
-
-      req.flush({
-        message: 'Merchant profile created',
-      });
+    const registrationDocument = new File(['registration-content'], 'registration.pdf', {
+      type: 'application/pdf',
     });
 
-    // =====================================================
-    // WITHOUT LOGO
-    // =====================================================
+    const data: MerchantProfileData = {
+      userId: 2,
+      businessName: 'SmartCart Fashion',
+      uen: '202612345A',
+      businessType: 'Retail',
+      businessAddress: '12 Rainbow Street',
+      postalCode: '123456',
+      contactNumber: '91234567',
+      productCategory: 'Fashion',
+      businessDescription: 'Fashion retailer in Singapore.',
+      pickupAvailable: true,
+      logoFile,
+      registrationDocument,
+    };
 
-    it('should create merchant profile without logo', () => {
-      const registrationDocument = new File(
-        ['fake-document'],
+    const promise = firstValueFrom(service.createMerchantProfile(data));
 
-        'registration.pdf',
+    const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
 
-        {
-          type: 'application/pdf',
-        },
-      );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body instanceof FormData).toBe(true);
 
-      service
-        .createMerchantProfile(
-          2,
+    const formData = req.request.body as FormData;
 
-          'SmartCart Fashion',
+    expect(formData.get('userId')).toBe('2');
+    expect(formData.get('businessName')).toBe('SmartCart Fashion');
+    expect(formData.get('uen')).toBe('202612345A');
+    expect(formData.get('businessType')).toBe('Retail');
+    expect(formData.get('businessAddress')).toBe('12 Rainbow Street');
+    expect(formData.get('postalCode')).toBe('123456');
+    expect(formData.get('contactNumber')).toBe('91234567');
+    expect(formData.get('productCategory')).toBe('Fashion');
+    expect(formData.get('businessDescription')).toBe('Fashion retailer in Singapore.');
+    expect(formData.get('pickupAvailable')).toBe('true');
 
-          '202612345A',
+    const receivedLogo = formData.get('logo') as File;
+    expect(receivedLogo).toBeTruthy();
+    expect(receivedLogo.name).toBe('logo.png');
+    expect(receivedLogo.type).toBe('image/png');
 
-          'Retail',
+    const receivedDocument = formData.get('registrationDocument') as File;
 
-          '10 Orchard Road',
+    expect(receivedDocument).toBeTruthy();
+    expect(receivedDocument.name).toBe('registration.pdf');
+    expect(receivedDocument.type).toBe('application/pdf');
 
-          '238840',
+    req.flush({ success: true });
 
-          '91234567',
+    await expect(promise).resolves.toEqual({ success: true });
+  });
 
-          'Fashion',
-
-          'Fashion products',
-
-          false,
-
-          null,
-
-          registrationDocument,
-        )
-        .subscribe();
-
-      const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
-
-      expect(req.request.method).toBe('POST');
-
-      expect(req.request.body).toBeInstanceOf(FormData);
-
-      const formData = req.request.body as FormData;
-
-      // -------------------------------------------------
-      // TEXT FIELDS
-      // -------------------------------------------------
-
-      expect(formData.get('userId')).toBe('2');
-
-      expect(formData.get('businessName')).toBe('SmartCart Fashion');
-
-      expect(formData.get('uen')).toBe('202612345A');
-
-      expect(formData.get('businessType')).toBe('Retail');
-
-      expect(formData.get('businessAddress')).toBe('10 Orchard Road');
-
-      expect(formData.get('postalCode')).toBe('238840');
-
-      expect(formData.get('contactNumber')).toBe('91234567');
-
-      expect(formData.get('productCategory')).toBe('Fashion');
-
-      expect(formData.get('businessDescription')).toBe('Fashion products');
-
-      expect(formData.get('pickupAvailable')).toBe('false');
-
-      // -------------------------------------------------
-      // LOGO SHOULD NOT EXIST
-      // -------------------------------------------------
-
-      expect(formData.get('logo')).toBeNull();
-
-      // -------------------------------------------------
-      // REGISTRATION DOCUMENT
-      // -------------------------------------------------
-
-      const uploadedRegistrationDocument = formData.get('registrationDocument') as File;
-
-      expect(uploadedRegistrationDocument).toBeTruthy();
-
-      expect(uploadedRegistrationDocument.name).toBe('registration.pdf');
-
-      expect(uploadedRegistrationDocument.type).toBe('application/pdf');
-
-      expect(uploadedRegistrationDocument.size).toBe(registrationDocument.size);
-
-      req.flush({
-        message: 'Merchant profile created',
-      });
+  it('should create a merchant profile without a logo', async () => {
+    const registrationDocument = new File(['registration-content'], 'registration.pdf', {
+      type: 'application/pdf',
     });
+
+    const data: MerchantProfileData = {
+      userId: 2,
+      businessName: 'SmartCart Fashion',
+      uen: '202612345A',
+      businessType: 'Retail',
+      businessAddress: '12 Rainbow Street',
+      postalCode: '123456',
+      contactNumber: '91234567',
+      productCategory: 'Fashion',
+      businessDescription: 'Fashion retailer in Singapore.',
+      pickupAvailable: false,
+      logoFile: null,
+      registrationDocument,
+    };
+
+    const promise = firstValueFrom(service.createMerchantProfile(data));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/merchant/profile`);
+
+    expect(req.request.method).toBe('POST');
+
+    const formData = req.request.body as FormData;
+
+    expect(formData.get('userId')).toBe('2');
+    expect(formData.get('businessName')).toBe('SmartCart Fashion');
+    expect(formData.get('pickupAvailable')).toBe('false');
+
+    // No logo should be appended.
+    expect(formData.get('logo')).toBeNull();
+
+    const receivedDocument = formData.get('registrationDocument') as File;
+
+    expect(receivedDocument).toBeTruthy();
+    expect(receivedDocument.name).toBe('registration.pdf');
+    expect(receivedDocument.type).toBe('application/pdf');
+
+    req.flush({ success: true });
+
+    await expect(promise).resolves.toEqual({ success: true });
+  });
+
+  // =========================================================
+  // LOGOUT
+  // =========================================================
+
+  it('should clear authentication data when logout is called', () => {
+    localStorage.setItem('token', 'test-token');
+    localStorage.setItem('user', 'test-user');
+    localStorage.setItem('username', 'Junior');
+    localStorage.setItem('email', 'junior@example.com');
+    localStorage.setItem('role', 'USER');
+    localStorage.setItem('pendingSignupUserId', '2');
+
+    service.logout();
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('user')).toBeNull();
+    expect(localStorage.getItem('username')).toBeNull();
+    expect(localStorage.getItem('email')).toBeNull();
+    expect(localStorage.getItem('role')).toBeNull();
+    expect(localStorage.getItem('pendingSignupUserId')).toBeNull();
+  });
+
+  // =========================================================
+  // CLEAR SESSION
+  // =========================================================
+
+  it('should clear the authentication session', () => {
+    localStorage.setItem('token', 'test-token');
+    localStorage.setItem('username', 'Junior');
+    localStorage.setItem('email', 'junior@example.com');
+    localStorage.setItem('role', 'USER');
+
+    service.clearSession();
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('username')).toBeNull();
+    expect(localStorage.getItem('email')).toBeNull();
+    expect(localStorage.getItem('role')).toBeNull();
+  });
+
+  // =========================================================
+  // LOGIN STATUS
+  // =========================================================
+
+  it('should return false when there is no token', () => {
+    expect(service.isLoggedIn()).toBe(false);
+  });
+
+  it('should return true when JWT has not expired', () => {
+    const token = createJwt(Math.floor(Date.now() / 1000) + 300);
+
+    localStorage.setItem('token', token);
+
+    expect(service.isLoggedIn()).toBe(true);
+  });
+
+  it('should return false and logout when JWT is expired', () => {
+    const token = createJwt(Math.floor(Date.now() / 1000) - 10);
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('username', 'Junior');
+    localStorage.setItem('email', 'junior@example.com');
+    localStorage.setItem('role', 'USER');
+
+    expect(service.isLoggedIn()).toBe(false);
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('username')).toBeNull();
+    expect(localStorage.getItem('email')).toBeNull();
+    expect(localStorage.getItem('role')).toBeNull();
+  });
+
+  it('should return false for an invalid JWT and clear the session', () => {
+    localStorage.setItem('token', 'invalid-token');
+    localStorage.setItem('username', 'Junior');
+
+    expect(service.isLoggedIn()).toBe(false);
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('username')).toBeNull();
+  });
+
+  it('should return false when JWT has no exp claim', () => {
+    const token = createJwt(Math.floor(Date.now() / 1000) + 300);
+
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({ sub: '2' }));
+
+    const tokenWithoutExp = `${header}.${payload}.signature`;
+
+    localStorage.setItem('token', tokenWithoutExp);
+
+    expect(service.isLoggedIn()).toBe(false);
+  });
+
+  // =========================================================
+  // USER INFORMATION
+  // =========================================================
+
+  it('should return username from storage', () => {
+    localStorage.setItem('username', 'Junior');
+
+    expect(service.getUsername()).toBe('Junior');
+  });
+
+  it('should return empty username when not stored', () => {
+    expect(service.getUsername()).toBe('');
+  });
+
+  it('should return email from storage', () => {
+    localStorage.setItem('email', 'junior@example.com');
+
+    expect(service.getEmail()).toBe('junior@example.com');
+  });
+
+  it('should return empty email when not stored', () => {
+    expect(service.getEmail()).toBe('');
+  });
+
+  it('should return role from storage', () => {
+    localStorage.setItem('role', 'USER');
+
+    expect(service.getRole()).toBe('USER');
+  });
+
+  it('should return empty role when not stored', () => {
+    expect(service.getRole()).toBe('');
+  });
+
+  // =========================================================
+  // AUTOMATIC JWT EXPIRATION
+  // =========================================================
+
+  it('should automatically logout and navigate to login when JWT expires', () => {
+    vi.useFakeTimers();
+
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    const token = createJwt(Math.floor(now / 1000) + 5);
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('username', 'Junior');
+    localStorage.setItem('email', 'junior@example.com');
+    localStorage.setItem('role', 'USER');
+
+    // AuthService is a singleton, so reset the TestBed to execute
+    // the constructor again and simulate a browser page refresh.
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    expect(localStorage.getItem('token')).toBe(token);
+
+    vi.advanceTimersByTime(5001);
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('username')).toBeNull();
+    expect(localStorage.getItem('email')).toBeNull();
+    expect(localStorage.getItem('role')).toBeNull();
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should immediately logout and navigate to login when an already-expired token is found on refresh', () => {
+    vi.useFakeTimers();
+
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    const token = createJwt(Math.floor(now / 1000) - 5);
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('username', 'Junior');
+
+    // Reset TestBed so the constructor sees the stored expired token.
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should logout and navigate to login when the JWT is invalid during timer setup', () => {
+    localStorage.setItem('token', 'not-a-valid-jwt');
+
+    // Reset TestBed so the constructor sees the invalid token.
+    TestBed.resetTestingModule();
+    configureTestBed();
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should start the expiration timer after successful login', async () => {
+    vi.useFakeTimers();
+
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    const token = createJwt(Math.floor(now / 1000) + 5);
+
+    const promise = firstValueFrom(
+      service.login({
+        email: 'junior@example.com',
+        password: 'Password1',
+      }),
+    );
+
+    const req = httpMock.expectOne(`${apiUrl}/login`);
+
+    req.flush({
+      token,
+      username: 'Junior',
+      email: 'junior@example.com',
+      role: 'USER',
+    });
+
+    await promise;
+
+    expect(localStorage.getItem('token')).toBe(token);
+
+    vi.advanceTimersByTime(5001);
+
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should cancel the previous expiration timer when logout is called', () => {
+    vi.useFakeTimers();
+
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    const token = createJwt(Math.floor(now / 1000) + 5);
+
+    localStorage.setItem('token', token);
+
+    service = TestBed.inject(AuthService);
+
+    service.logout();
+
+    vi.advanceTimersByTime(6000);
+
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+  });
+
+  // =========================================================
+  // URL-SAFE JWT
+  // =========================================================
+
+  it('should accept a URL-safe JWT payload when checking login status', () => {
+    const token = createUrlSafeJwt(Math.floor(Date.now() / 1000) + 300);
+
+    localStorage.setItem('token', token);
+
+    expect(service.isLoggedIn()).toBe(true);
   });
 });

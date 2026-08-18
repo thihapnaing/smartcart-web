@@ -1,1138 +1,803 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MerchantSignup } from './merchant-signup';
-
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
-import { ChangeDetectorRef } from '@angular/core';
-
-//Author: Junior
 
 describe('MerchantSignup', () => {
   let component: MerchantSignup;
-
-  let authServiceMock: {
+  let authService: {
     registerMerchant: ReturnType<typeof vi.fn>;
     createMerchantProfile: ReturnType<typeof vi.fn>;
   };
-
   let routerMock: {
     navigate: ReturnType<typeof vi.fn>;
   };
+  let cdr: { detectChanges: ReturnType<typeof vi.fn> };
 
-  let cdrMock: {
-    detectChanges: ReturnType<typeof vi.fn>;
+  const validStep1 = {
+    username: 'merchant01',
+    email: 'merchant@example.com',
+    password: 'Password1',
   };
 
-  // =========================================================
-  // SETUP
-  // =========================================================
+  const validStep2 = {
+    businessName: 'SmartCart Fashion',
+    uen: '202612345A',
+    businessType: 'Retail',
+    businessAddress: '12 Rainbow Street',
+    postalCode: '123456',
+    contactNumber: '91234567',
+    productCategory: 'Fashion',
+    businessDescription: 'Fashion retailer in Singapore.',
+    pickupAvailable: true,
+  };
+
+  const makeDocument = () =>
+    new File(['registration'], 'registration.pdf', {
+      type: 'application/pdf',
+    });
+
+  const makeLogo = () =>
+    new File(['logo'], 'logo.png', {
+      type: 'image/png',
+    });
 
   beforeEach(() => {
-    authServiceMock = {
-      registerMerchant: vi.fn(),
-
-      createMerchantProfile: vi.fn(),
-    };
+    localStorage.clear();
 
     routerMock = {
       navigate: vi.fn(),
     };
 
-    cdrMock = {
-      detectChanges: vi.fn(),
+    authService = {
+      registerMerchant: vi.fn(),
+      createMerchantProfile: vi.fn(),
     };
 
+    cdr = { detectChanges: vi.fn() };
+
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+
     component = new MerchantSignup(
-      authServiceMock as unknown as AuthService,
+      authService as unknown as AuthService,
       routerMock as unknown as Router,
-      cdrMock as unknown as ChangeDetectorRef,
+      cdr as unknown as ChangeDetectorRef,
     );
-
-    localStorage.clear();
-
-    // jsdom does not implement scrollTo
-    vi.stubGlobal('scrollTo', vi.fn());
   });
 
   // =========================================================
-  // CLEANUP
+  // INITIAL STATE
   // =========================================================
 
-  afterEach(() => {
-    localStorage.clear();
-
-    vi.restoreAllMocks();
-  });
-
-  // =========================================================
-  // COMPONENT CREATION
-  // =========================================================
-
-  it('should be created', () => {
+  it('should create the component', () => {
     expect(component).toBeTruthy();
+    expect(component.signupStep).toBe(1);
   });
 
-  // =========================================================
-  // INITIAL VALUES
-  // =========================================================
-
-  describe('initial state', () => {
-    it('should start on step 1', () => {
-      expect(component.signupStep).toBe(1);
-    });
-
-    it('should start with empty error message', () => {
-      expect(component.errorMessage).toBe('');
-    });
-
-    it('should start with loading false', () => {
-      expect(component.loading).toBe(false);
-    });
-
-    it('should start with password hidden', () => {
-      expect(component.showPassword).toBe(false);
-    });
-
-    it('should start with no selected files', () => {
-      expect(component.logoFile).toBeNull();
-
-      expect(component.logoPreview).toBeNull();
-
-      expect(component.businessDocument).toBeNull();
-    });
+  it('should initialize fields correctly', () => {
+    expect(component.username).toBe('');
+    expect(component.email).toBe('');
+    expect(component.password).toBe('');
+    expect(component.businessName).toBe('');
+    expect(component.uen).toBe('');
+    expect(component.businessType).toBe('');
+    expect(component.businessAddress).toBe('');
+    expect(component.postalCode).toBe('');
+    expect(component.contactNumber).toBe('');
+    expect(component.productCategory).toBe('');
+    expect(component.businessDescription).toBe('');
+    expect(component.pickupAvailable).toBe(false);
+    expect(component.logoFile).toBeNull();
+    expect(component.logoPreview).toBeNull();
+    expect(component.businessDocument).toBeNull();
+    expect(component.loading).toBe(false);
+    expect(component.errorMessage).toBe('');
   });
 
   // =========================================================
   // PASSWORD
   // =========================================================
 
-  describe('togglePassword', () => {
-    it('should show password when toggled', () => {
-      expect(component.showPassword).toBe(false);
+  it('should toggle password visibility', () => {
+    expect(component.showPassword).toBe(false);
 
-      component.togglePassword();
+    component.togglePassword();
+    expect(component.showPassword).toBe(true);
 
-      expect(component.showPassword).toBe(true);
-    });
-
-    it('should hide password when toggled twice', () => {
-      component.togglePassword();
-
-      component.togglePassword();
-
-      expect(component.showPassword).toBe(false);
-    });
+    component.togglePassword();
+    expect(component.showPassword).toBe(false);
   });
 
   // =========================================================
-  // SIGNUP ENTRY POINT
+  // STEP 1 VALIDATION
   // =========================================================
 
-  describe('signup', () => {
-    it('should call step 1 registration when signupStep is 1', () => {
-      component.signupStep = 1;
+  it('should reject an empty username', () => {
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-      component.username = '';
-      component.email = '';
-      component.password = '';
+    component.signup();
 
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please enter your username.');
-    });
-
-    it('should call step 2 submission when signupStep is 2', () => {
-      component.signupStep = 2;
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please enter your business or shop name.');
-    });
+    expect(component.errorMessage).toBe('Please enter your username.');
+    expect(authService.registerMerchant).not.toHaveBeenCalled();
   });
 
-  // =========================================================
-  // STEP 1 - VALIDATION
-  // =========================================================
+  it('should reject a short username', () => {
+    component.username = 'ab';
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-  describe('merchant registration - step 1 validation', () => {
-    it('should reject empty username', () => {
-      component.username = '';
-      component.email = 'merchant@example.com';
-      component.password = 'Password1';
+    component.signup();
 
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please enter your username.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
-
-    it('should reject username shorter than 3 characters', () => {
-      component.username = 'ab';
-      component.email = 'merchant@example.com';
-      component.password = 'Password1';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Username must be at least 3 characters.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
-
-    it('should reject empty email', () => {
-      component.username = 'merchant01';
-      component.email = '';
-      component.password = 'Password1';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please enter your email.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
-
-    it('should reject invalid email', () => {
-      component.username = 'merchant01';
-      component.email = 'invalid-email';
-      component.password = 'Password1';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please enter a valid email address.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
-
-    it('should reject empty password', () => {
-      component.username = 'merchant01';
-      component.email = 'merchant@example.com';
-      component.password = '';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please enter your password.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
-
-    it('should reject password shorter than 6 characters', () => {
-      component.username = 'merchant01';
-      component.email = 'merchant@example.com';
-      component.password = 'Pass1';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Password must be at least 6 characters.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
-
-    it('should reject password without uppercase letter', () => {
-      component.username = 'merchant01';
-      component.email = 'merchant@example.com';
-      component.password = 'password1';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Password must contain at least one uppercase letter.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
-
-    it('should reject password without lowercase letter', () => {
-      component.username = 'merchant01';
-      component.email = 'merchant@example.com';
-      component.password = 'PASSWORD1';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Password must contain at least one lowercase letter.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
-
-    it('should reject password without number', () => {
-      component.username = 'merchant01';
-      component.email = 'merchant@example.com';
-      component.password = 'Password';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Password must contain at least one number.');
-
-      expect(authServiceMock.registerMerchant).not.toHaveBeenCalled();
-    });
+    expect(component.errorMessage).toBe('Username must be at least 3 characters.');
   });
 
-  // =========================================================
-  // STEP 1 - SUCCESS
-  // =========================================================
+  it('should reject an empty email', () => {
+    component.username = validStep1.username;
+    component.password = validStep1.password;
 
-  describe('merchant registration - step 1 success', () => {
-    it('should register merchant account successfully', () => {
-      component.username = '  merchant01  ';
+    component.signup();
 
-      component.email = '  merchant@example.com  ';
+    expect(component.errorMessage).toBe('Please enter your email.');
+  });
 
-      component.password = 'Password1';
+  it('should reject an invalid email', () => {
+    component.username = validStep1.username;
+    component.email = 'invalid-email';
+    component.password = validStep1.password;
 
-      authServiceMock.registerMerchant.mockReturnValue(
-        of({
-          token: 'merchant-jwt-token',
+    component.signup();
 
-          userId: 2,
+    expect(component.errorMessage).toBe('Please enter a valid email address.');
+  });
 
-          username: 'merchant01',
+  it('should reject an email containing spaces', () => {
+    component.username = validStep1.username;
+    component.email = 'merchant @example.com';
+    component.password = validStep1.password;
 
-          email: 'merchant@example.com',
+    component.signup();
 
-          role: 'MERCHANT',
-        }),
-      );
+    expect(component.errorMessage).toBe('Please enter a valid email address.');
+  });
 
-      component.signup();
+  it('should reject an empty password', () => {
+    component.username = validStep1.username;
+    component.email = validStep1.email;
 
-      expect(authServiceMock.registerMerchant).toHaveBeenCalledTimes(1);
+    component.signup();
 
-      expect(authServiceMock.registerMerchant).toHaveBeenCalledWith({
+    expect(component.errorMessage).toBe('Please enter your password.');
+  });
+
+  it('should reject a password shorter than 6 characters', () => {
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = 'Ab1';
+
+    component.signup();
+
+    expect(component.errorMessage).toBe('Password must be at least 6 characters.');
+  });
+
+  it('should reject a password without uppercase', () => {
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = 'password1';
+
+    component.signup();
+
+    expect(component.errorMessage).toBe('Password must contain at least one uppercase letter.');
+  });
+
+  it('should reject a password without lowercase', () => {
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = 'PASSWORD1';
+
+    component.signup();
+
+    expect(component.errorMessage).toBe('Password must contain at least one lowercase letter.');
+  });
+
+  it('should reject a password without a number', () => {
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = 'Password';
+
+    component.signup();
+
+    expect(component.errorMessage).toBe('Password must contain at least one number.');
+  });
+
+  it('should register a valid merchant account', () => {
+    authService.registerMerchant.mockReturnValue(
+      of({
+        userId: 2,
         username: 'merchant01',
-
         email: 'merchant@example.com',
+        role: 'MERCHANT',
+        token: 'jwt-token',
+      }),
+    );
 
-        password: 'Password1',
-      });
+    component.username = '  merchant01 ';
+    component.email = ' merchant@example.com ';
+    component.password = 'Password1';
 
-      expect(component.loading).toBe(false);
+    component.signup();
 
-      expect(component.signupStep).toBe(2);
+    expect(authService.registerMerchant).toHaveBeenCalledWith({
+      username: 'merchant01',
+      email: 'merchant@example.com',
+      password: 'Password1',
     });
 
-    it('should save merchant user ID to localStorage', () => {
-      component.username = 'merchant01';
+    expect(component.signupStep).toBe(2);
+    expect(component.loading).toBe(false);
+    expect(component.errorMessage).toBe('');
 
-      component.email = 'merchant@example.com';
+    expect(localStorage.getItem('pendingMerchantUserId')).toBe('2');
+    expect(localStorage.getItem('token')).toBe('jwt-token');
+    expect(localStorage.getItem('username')).toBe('merchant01');
+    expect(localStorage.getItem('email')).toBe('merchant@example.com');
+    expect(localStorage.getItem('role')).toBe('MERCHANT');
+  });
 
-      component.password = 'Password1';
+  it('should accept response.id when userId is missing', () => {
+    authService.registerMerchant.mockReturnValue(of({ id: 5 }));
 
-      authServiceMock.registerMerchant.mockReturnValue(
-        of({
-          token: 'merchant-jwt-token',
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-          userId: 2,
+    component.signup();
 
-          username: 'merchant01',
+    expect(component.signupStep).toBe(2);
+    expect(localStorage.getItem('pendingMerchantUserId')).toBe('5');
+  });
 
-          email: 'merchant@example.com',
+  it('should show an error when registration returns no user ID', () => {
+    authService.registerMerchant.mockReturnValue(of({ username: 'merchant01' }));
 
-          role: 'MERCHANT',
-        }),
-      );
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-      component.signup();
+    component.signup();
 
-      expect(localStorage.getItem('pendingMerchantUserId')).toBe('2');
-    });
-
-    it('should save token to localStorage', () => {
-      component.username = 'merchant01';
-
-      component.email = 'merchant@example.com';
-
-      component.password = 'Password1';
-
-      authServiceMock.registerMerchant.mockReturnValue(
-        of({
-          token: 'merchant-jwt-token',
-
-          userId: 2,
-
-          username: 'merchant01',
-
-          email: 'merchant@example.com',
-
-          role: 'MERCHANT',
-        }),
-      );
-
-      component.signup();
-
-      expect(localStorage.getItem('token')).toBe('merchant-jwt-token');
-    });
-
-    it('should save username, email and role to localStorage', () => {
-      component.username = 'merchant01';
-
-      component.email = 'merchant@example.com';
-
-      component.password = 'Password1';
-
-      authServiceMock.registerMerchant.mockReturnValue(
-        of({
-          token: 'merchant-jwt-token',
-
-          userId: 2,
-
-          username: 'merchant01',
-
-          email: 'merchant@example.com',
-
-          role: 'MERCHANT',
-        }),
-      );
-
-      component.signup();
-
-      expect(localStorage.getItem('username')).toBe('merchant01');
-
-      expect(localStorage.getItem('email')).toBe('merchant@example.com');
-
-      expect(localStorage.getItem('role')).toBe('MERCHANT');
-    });
-
-    it('should accept id instead of userId', () => {
-      component.username = 'merchant01';
-
-      component.email = 'merchant@example.com';
-
-      component.password = 'Password1';
-
-      authServiceMock.registerMerchant.mockReturnValue(
-        of({
-          token: 'merchant-jwt-token',
-
-          id: 5,
-
-          username: 'merchant01',
-
-          email: 'merchant@example.com',
-
-          role: 'MERCHANT',
-        }),
-      );
-
-      component.signup();
-
-      expect(localStorage.getItem('pendingMerchantUserId')).toBe('5');
-
-      expect(component.signupStep).toBe(2);
-    });
-
-    it('should display error when backend does not return user ID', () => {
-      component.username = 'merchant01';
-
-      component.email = 'merchant@example.com';
-
-      component.password = 'Password1';
-
-      authServiceMock.registerMerchant.mockReturnValue(
-        of({
-          token: 'merchant-jwt-token',
-
-          username: 'merchant01',
-
-          email: 'merchant@example.com',
-
-          role: 'MERCHANT',
-        }),
-      );
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Account was created, but the user ID was not returned.');
-
-      expect(component.signupStep).toBe(1);
-    });
-
-    it('should not save token when backend does not return token', () => {
-      component.username = 'merchant01';
-      component.email = 'merchant@example.com';
-      component.password = 'Password1';
-
-      authServiceMock.registerMerchant.mockReturnValue(
-        of({
-          userId: 2,
-          username: 'merchant01',
-          email: 'merchant@example.com',
-          role: 'MERCHANT',
-        }),
-      );
-
-      component.signup();
-
-      expect(localStorage.getItem('token')).toBeNull();
-      expect(component.signupStep).toBe(2);
-    });
+    expect(component.signupStep).toBe(1);
+    expect(component.loading).toBe(false);
+    expect(component.errorMessage).toBe('Account was created, but the user ID was not returned.');
   });
 
   // =========================================================
-  // STEP 1 - ERROR
+  // STEP 1 ERRORS
   // =========================================================
 
-  describe('merchant registration - step 1 error', () => {
-    it('should display backend error message', () => {
-      component.username = 'merchant01';
+  it('should handle a plain registration error', () => {
+    authService.registerMerchant.mockReturnValue(
+      throwError(() => ({ error: 'Registration failed.' })),
+    );
 
-      component.email = 'merchant@example.com';
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-      component.password = 'Password1';
+    component.signup();
 
-      authServiceMock.registerMerchant.mockReturnValue(
-        throwError(() => ({
-          error: 'Email is already registered',
-        })),
-      );
+    expect(component.loading).toBe(false);
+    expect(component.errorMessage).toBe('Registration failed.');
+  });
 
-      component.signup();
+  it('should handle error.message', () => {
+    authService.registerMerchant.mockReturnValue(
+      throwError(() => ({
+        error: { message: 'Email already exists.' },
+      })),
+    );
 
-      expect(component.loading).toBe(false);
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-      expect(component.errorMessage).toBe('Email is already registered');
-    });
+    component.signup();
 
-    it('should display message from error.message', () => {
-      component.username = 'merchant01';
+    expect(component.errorMessage).toBe('Email already exists.');
+  });
 
-      component.email = 'merchant@example.com';
+  it('should handle error.error', () => {
+    authService.registerMerchant.mockReturnValue(
+      throwError(() => ({
+        error: { error: 'Username already exists.' },
+      })),
+    );
 
-      component.password = 'Password1';
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-      authServiceMock.registerMerchant.mockReturnValue(
-        throwError(() => ({
-          error: {
-            message: 'Email already exists',
-          },
-        })),
-      );
+    component.signup();
 
-      component.signup();
+    expect(component.errorMessage).toBe('Username already exists.');
+  });
 
-      expect(component.errorMessage).toBe('Email already exists');
-    });
+  it('should handle error.detail', () => {
+    authService.registerMerchant.mockReturnValue(
+      throwError(() => ({
+        error: { detail: 'Invalid merchant data.' },
+      })),
+    );
 
-    it('should display duplicate message for HTTP 409', () => {
-      component.username = 'merchant01';
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-      component.email = 'merchant@example.com';
+    component.signup();
 
-      component.password = 'Password1';
+    expect(component.errorMessage).toBe('Invalid merchant data.');
+  });
 
-      authServiceMock.registerMerchant.mockReturnValue(
-        throwError(() => ({
-          status: 409,
-        })),
-      );
+  it('should handle HTTP 409', () => {
+    authService.registerMerchant.mockReturnValue(throwError(() => ({ status: 409 })));
 
-      component.signup();
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = validStep1.password;
 
-      expect(component.errorMessage).toBe('Username or email is already registered.');
-    });
+    component.signup();
+
+    expect(component.errorMessage).toBe('Username or email is already registered.');
+  });
+
+  it('should use the default registration error', () => {
+    authService.registerMerchant.mockReturnValue(throwError(() => ({ status: 500, error: {} })));
+
+    component.username = validStep1.username;
+    component.email = validStep1.email;
+    component.password = validStep1.password;
+
+    component.signup();
+
+    expect(component.errorMessage).toBe('Unable to create merchant account. Please try again.');
   });
 
   // =========================================================
-  // LOGO VALIDATION
+  // LOGO
   // =========================================================
 
-  describe('onLogoSelected', () => {
-    it('should do nothing when no file is selected', () => {
-      const input = document.createElement('input');
+  function fileInput(file: File | null): HTMLInputElement {
+    const input = document.createElement('input');
+    input.type = 'file';
 
-      input.type = 'file';
-
-      const event = {
-        target: input,
-      } as unknown as Event;
-
-      component.onLogoSelected(event);
-
-      expect(component.logoFile).toBeNull();
-    });
-
-    it('should reject a non-image file', () => {
-      const file = new File(['hello'], 'document.pdf', {
-        type: 'application/pdf',
-      });
-
-      const input = document.createElement('input');
-
-      input.type = 'file';
-
+    if (file) {
       Object.defineProperty(input, 'files', {
+        configurable: true,
         value: [file],
       });
+    }
 
-      const event = {
-        target: input,
-      } as unknown as Event;
+    return input;
+  }
 
-      component.onLogoSelected(event);
+  it('should do nothing when no logo is selected', () => {
+    component.onLogoSelected({
+      target: fileInput(null),
+    } as unknown as Event);
 
-      expect(component.errorMessage).toBe('Please select a valid image for your business logo.');
+    expect(component.logoFile).toBeNull();
+  });
 
-      expect(component.logoFile).toBeNull();
+  it('should reject a non-image logo', () => {
+    const input = fileInput(new File(['pdf'], 'logo.pdf', { type: 'application/pdf' }));
 
-      expect(component.logoPreview).toBeNull();
-    });
+    component.onLogoSelected({
+      target: input,
+    } as unknown as Event);
 
-    it('should reject logo larger than 2 MB', () => {
-      const largeFile = new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'logo.png', {
-        type: 'image/png',
-      });
+    expect(component.logoFile).toBeNull();
+    expect(component.logoPreview).toBeNull();
+    expect(component.errorMessage).toBe('Please select a valid image for your business logo.');
+  });
 
-      const input = document.createElement('input');
+  it('should reject a logo larger than 2 MB', () => {
+    const input = fileInput(
+      new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'logo.png', { type: 'image/png' }),
+    );
 
-      input.type = 'file';
+    component.onLogoSelected({
+      target: input,
+    } as unknown as Event);
 
-      Object.defineProperty(input, 'files', {
-        value: [largeFile],
-      });
+    expect(component.logoFile).toBeNull();
+    expect(component.errorMessage).toBe('Business logo must be smaller than 2 MB.');
+  });
 
-      const event = {
-        target: input,
-      } as unknown as Event;
+  it('should create a safe logo filename', () => {
+    const originalNow = Date.now;
+    Date.now = () => 123456;
 
-      component.onLogoSelected(event);
+    try {
+      component.onLogoSelected({
+        target: fileInput(
+          new File(['logo'], 'my-logo.png', {
+            type: 'image/png',
+          }),
+        ),
+      } as unknown as Event);
+    } finally {
+      Date.now = originalNow;
+    }
 
-      expect(component.errorMessage).toBe('Business logo must be smaller than 2 MB.');
-
-      expect(component.logoFile).toBeNull();
-    });
+    expect(component.logoFile).toBeInstanceOf(File);
+    expect(component.logoFile?.name).toBe('merchant-logo-123456.png');
+    expect(component.logoFile?.type).toBe('image/png');
+    expect(component.errorMessage).toBe('');
   });
 
   // =========================================================
-  // BUSINESS DOCUMENT VALIDATION
+  // DOCUMENT
   // =========================================================
 
-  describe('onDocumentSelected', () => {
-    it('should do nothing when no document is selected', () => {
-      const input = document.createElement('input');
+  it('should do nothing when no document is selected', () => {
+    component.onDocumentSelected({
+      target: fileInput(null),
+    } as unknown as Event);
 
-      input.type = 'file';
+    expect(component.businessDocument).toBeNull();
+  });
 
-      const event = {
-        target: input,
-      } as unknown as Event;
+  it('should accept a PDF document', () => {
+    const originalNow = Date.now;
+    Date.now = () => 123456;
 
-      component.onDocumentSelected(event);
+    try {
+      component.onDocumentSelected({
+        target: fileInput(makeDocument()),
+      } as unknown as Event);
+    } finally {
+      Date.now = originalNow;
+    }
 
-      expect(component.businessDocument).toBeNull();
-    });
+    expect(component.businessDocument).toBeInstanceOf(File);
+    expect(component.businessDocument?.name).toBe('merchant-document-123456.pdf');
+    expect(component.businessDocument?.type).toBe('application/pdf');
+  });
 
-    it('should reject unsupported document type', () => {
-      const file = new File(['hello'], 'document.txt', {
-        type: 'text/plain',
-      });
+  it('should accept a JPG document', () => {
+    const originalNow = Date.now;
+    Date.now = () => 222222;
 
-      const input = document.createElement('input');
+    try {
+      component.onDocumentSelected({
+        target: fileInput(
+          new File(['jpg'], 'registration.jpg', {
+            type: 'image/jpeg',
+          }),
+        ),
+      } as unknown as Event);
+    } finally {
+      Date.now = originalNow;
+    }
 
-      input.type = 'file';
+    expect(component.businessDocument?.name).toBe('merchant-document-222222.jpg');
+  });
 
-      Object.defineProperty(input, 'files', {
-        value: [file],
-      });
+  it('should accept a PNG document', () => {
+    const originalNow = Date.now;
+    Date.now = () => 333333;
 
-      const event = {
-        target: input,
-      } as unknown as Event;
+    try {
+      component.onDocumentSelected({
+        target: fileInput(
+          new File(['png'], 'registration.png', {
+            type: 'image/png',
+          }),
+        ),
+      } as unknown as Event);
+    } finally {
+      Date.now = originalNow;
+    }
 
-      component.onDocumentSelected(event);
+    expect(component.businessDocument?.name).toBe('merchant-document-333333.png');
+  });
 
-      expect(component.errorMessage).toBe('Please upload a PDF, JPG or PNG document.');
+  it('should reject an unsupported document type', () => {
+    component.onDocumentSelected({
+      target: fileInput(
+        new File(['text'], 'registration.txt', {
+          type: 'text/plain',
+        }),
+      ),
+    } as unknown as Event);
 
-      expect(component.businessDocument).toBeNull();
-    });
+    expect(component.businessDocument).toBeNull();
+    expect(component.errorMessage).toBe('Please upload a PDF, JPG or PNG document.');
+  });
 
-    it('should reject document larger than 5 MB', () => {
-      const largeFile = new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'registration.pdf', {
-        type: 'application/pdf',
-      });
+  it('should reject a document larger than 5 MB', () => {
+    component.onDocumentSelected({
+      target: fileInput(
+        new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'registration.pdf', {
+          type: 'application/pdf',
+        }),
+      ),
+    } as unknown as Event);
 
-      const input = document.createElement('input');
-
-      input.type = 'file';
-
-      Object.defineProperty(input, 'files', {
-        value: [largeFile],
-      });
-
-      const event = {
-        target: input,
-      } as unknown as Event;
-
-      component.onDocumentSelected(event);
-
-      expect(component.errorMessage).toBe(
-        'Business registration document must be smaller than 5 MB.',
-      );
-
-      expect(component.businessDocument).toBeNull();
-    });
+    expect(component.businessDocument).toBeNull();
+    expect(component.errorMessage).toBe(
+      'Business registration document must be smaller than 5 MB.',
+    );
   });
 
   // =========================================================
   // STEP 2 VALIDATION
   // =========================================================
 
-  describe('step 2 validation', () => {
-    beforeEach(() => {
-      component.signupStep = 2;
+  function prepareStep2(): void {
+    component.signupStep = 2;
 
-      localStorage.setItem('pendingMerchantUserId', '2');
-    });
+    component.businessName = validStep2.businessName;
+    component.uen = validStep2.uen;
+    component.businessType = validStep2.businessType;
+    component.businessAddress = validStep2.businessAddress;
+    component.postalCode = validStep2.postalCode;
+    component.contactNumber = validStep2.contactNumber;
+    component.productCategory = validStep2.productCategory;
+    component.businessDescription = validStep2.businessDescription;
+    component.pickupAvailable = validStep2.pickupAvailable;
+    component.businessDocument = makeDocument();
 
-    it('should require business name', () => {
-      component.businessName = '';
+    localStorage.setItem('pendingMerchantUserId', '2');
+  }
 
-      component.signup();
+  it('should reject an empty business name', () => {
+    prepareStep2();
+    component.businessName = '';
 
-      expect(component.errorMessage).toBe('Please enter your business or shop name.');
+    component.signup();
 
-      expect(authServiceMock.createMerchantProfile).not.toHaveBeenCalled();
-    });
+    expect(component.errorMessage).toBe('Please enter your business or shop name.');
+    expect(authService.createMerchantProfile).not.toHaveBeenCalled();
+  });
 
-    it('should require UEN', () => {
-      component.businessName = 'SmartCart Fashion';
+  it('should reject an empty UEN', () => {
+    prepareStep2();
+    component.uen = '';
 
-      component.uen = '';
+    component.signup();
 
-      component.signup();
+    expect(component.errorMessage).toBe('Please enter your UEN or business registration number.');
+  });
 
-      expect(component.errorMessage).toBe('Please enter your UEN or business registration number.');
+  it('should reject an empty business type', () => {
+    prepareStep2();
+    component.businessType = '';
 
-      expect(authServiceMock.createMerchantProfile).not.toHaveBeenCalled();
-    });
+    component.signup();
 
-    it('should require business type', () => {
-      component.businessName = 'SmartCart Fashion';
+    expect(component.errorMessage).toBe('Please select your business type.');
+  });
 
-      component.uen = '202612345A';
+  it('should reject an empty business address', () => {
+    prepareStep2();
+    component.businessAddress = '';
 
-      component.businessType = '';
+    component.signup();
 
-      component.signup();
+    expect(component.errorMessage).toBe('Please enter your business address.');
+  });
 
-      expect(component.errorMessage).toBe('Please select your business type.');
-    });
+  it('should reject an empty postal code', () => {
+    prepareStep2();
+    component.postalCode = '';
 
-    it('should require business address', () => {
-      component.businessName = 'SmartCart Fashion';
+    component.signup();
 
-      component.uen = '202612345A';
+    expect(component.errorMessage).toBe('Please enter your postal code.');
+  });
 
-      component.businessType = 'Retail';
+  it('should reject an empty contact number', () => {
+    prepareStep2();
+    component.contactNumber = '';
 
-      component.businessAddress = '';
+    component.signup();
 
-      component.signup();
+    expect(component.errorMessage).toBe('Please enter your contact number.');
+  });
 
-      expect(component.errorMessage).toBe('Please enter your business address.');
-    });
+  it('should reject an empty product category', () => {
+    prepareStep2();
+    component.productCategory = '';
 
-    it('should require postal code', () => {
-      component.businessName = 'SmartCart Fashion';
+    component.signup();
 
-      component.uen = '202612345A';
+    expect(component.errorMessage).toBe('Please select your product category.');
+  });
 
-      component.businessType = 'Retail';
+  it('should reject an empty business description', () => {
+    prepareStep2();
+    component.businessDescription = '';
 
-      component.businessAddress = '12 Rainbow Street';
+    component.signup();
 
-      component.postalCode = '';
+    expect(component.errorMessage).toBe('Please enter a description of your business.');
+  });
 
-      component.signup();
+  it('should reject a missing registration document', () => {
+    prepareStep2();
+    component.businessDocument = null;
 
-      expect(component.errorMessage).toBe('Please enter your postal code.');
-    });
+    component.signup();
 
-    it('should require contact number', () => {
-      component.businessName = 'SmartCart Fashion';
+    expect(component.errorMessage).toBe('Please upload your business registration document.');
+  });
 
-      component.uen = '202612345A';
+  it('should reject a missing pending user ID', () => {
+    prepareStep2();
+    localStorage.removeItem('pendingMerchantUserId');
 
-      component.businessType = 'Retail';
+    component.signup();
 
-      component.businessAddress = '12 Rainbow Street';
+    expect(component.errorMessage).toBe(
+      'Your registration session has expired. Please start again.',
+    );
+    expect(authService.createMerchantProfile).not.toHaveBeenCalled();
+  });
 
-      component.postalCode = '123456';
+  it('should reject a non-numeric pending user ID', () => {
+    prepareStep2();
+    localStorage.setItem('pendingMerchantUserId', 'abc');
 
-      component.contactNumber = '';
+    component.signup();
 
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please enter your contact number.');
-    });
-
-    it('should require product category', () => {
-      component.businessName = 'SmartCart Fashion';
-
-      component.uen = '202612345A';
-
-      component.businessType = 'Retail';
-
-      component.businessAddress = '12 Rainbow Street';
-
-      component.postalCode = '123456';
-
-      component.contactNumber = '91234567';
-
-      component.productCategory = '';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please select your product category.');
-    });
-
-    it('should require business description', () => {
-      component.businessName = 'SmartCart Fashion';
-
-      component.uen = '202612345A';
-
-      component.businessType = 'Retail';
-
-      component.businessAddress = '12 Rainbow Street';
-
-      component.postalCode = '123456';
-
-      component.contactNumber = '91234567';
-
-      component.productCategory = 'Fashion';
-
-      component.businessDescription = '';
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please enter a description of your business.');
-    });
-
-    it('should require business registration document', () => {
-      component.businessName = 'SmartCart Fashion';
-
-      component.uen = '202612345A';
-
-      component.businessType = 'Retail';
-
-      component.businessAddress = '12 Rainbow Street';
-
-      component.postalCode = '123456';
-
-      component.contactNumber = '91234567';
-
-      component.productCategory = 'Fashion';
-
-      component.businessDescription = 'Fashion retailer in Singapore.';
-
-      component.businessDocument = null;
-
-      component.signup();
-
-      expect(component.errorMessage).toBe('Please upload your business registration document.');
-
-      expect(authServiceMock.createMerchantProfile).not.toHaveBeenCalled();
-    });
-
-    it('should require valid pending merchant user ID', () => {
-      localStorage.removeItem('pendingMerchantUserId');
-
-      component.businessName = 'SmartCart Fashion';
-
-      component.uen = '202612345A';
-
-      component.businessType = 'Retail';
-
-      component.businessAddress = '12 Rainbow Street';
-
-      component.postalCode = '123456';
-
-      component.contactNumber = '91234567';
-
-      component.productCategory = 'Fashion';
-
-      component.businessDescription = 'Fashion retailer in Singapore.';
-
-      component.businessDocument = new File(['document'], 'registration.pdf', {
-        type: 'application/pdf',
-      });
-
-      component.signup();
-
-      expect(component.errorMessage).toBe(
-        'Your registration session has expired. Please start again.',
-      );
-
-      expect(authServiceMock.createMerchantProfile).not.toHaveBeenCalled();
-    });
+    expect(component.errorMessage).toBe(
+      'Your registration session has expired. Please start again.',
+    );
   });
 
   // =========================================================
   // STEP 2 SUCCESS
   // =========================================================
 
-  describe('step 2 submission', () => {
-    beforeEach(() => {
-      component.signupStep = 2;
+  it('should create merchant profile successfully', () => {
+    prepareStep2();
+    component.logoFile = makeLogo();
 
-      component.businessName = '  SmartCart Fashion  ';
+    authService.createMerchantProfile.mockReturnValue(of({ success: true }));
 
-      component.uen = ' 202612345A ';
+    component.signup();
 
-      component.businessType = 'Retail';
-
-      component.businessAddress = ' 12 Rainbow Street ';
-
-      component.postalCode = ' 123456 ';
-
-      component.contactNumber = ' 91234567 ';
-
-      component.productCategory = 'Fashion';
-
-      component.businessDescription = ' Fashion retailer in Singapore. ';
-
-      component.pickupAvailable = true;
-
-      component.businessDocument = new File(['registration document'], 'registration.pdf', {
-        type: 'application/pdf',
-      });
-
-      component.logoFile = new File(['logo'], 'logo.png', {
-        type: 'image/png',
-      });
-
-      localStorage.setItem('pendingMerchantUserId', '2');
+    expect(authService.createMerchantProfile).toHaveBeenCalledWith({
+      userId: 2,
+      businessName: 'SmartCart Fashion',
+      uen: '202612345A',
+      businessType: 'Retail',
+      businessAddress: '12 Rainbow Street',
+      postalCode: '123456',
+      contactNumber: '91234567',
+      productCategory: 'Fashion',
+      businessDescription: 'Fashion retailer in Singapore.',
+      pickupAvailable: true,
+      logoFile: component.logoFile,
+      registrationDocument: component.businessDocument,
     });
 
-    it('should create merchant profile successfully', () => {
-      authServiceMock.createMerchantProfile.mockReturnValue(
-        of({
-          id: 10,
+    expect(component.loading).toBe(false);
+    expect(component.errorMessage).toBe('');
+    expect(localStorage.getItem('pendingMerchantUserId')).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+  });
 
-          businessName: 'SmartCart Fashion',
-        }),
-      );
+  it('should create merchant profile without a logo', () => {
+    prepareStep2();
+    component.logoFile = null;
 
-      component.signup();
+    authService.createMerchantProfile.mockReturnValue(of({ success: true }));
 
-      expect(authServiceMock.createMerchantProfile).toHaveBeenCalledTimes(1);
+    component.signup();
 
-      expect(authServiceMock.createMerchantProfile).toHaveBeenCalledWith(
-        2,
-
-        'SmartCart Fashion',
-
-        '202612345A',
-
-        'Retail',
-
-        '12 Rainbow Street',
-
-        '123456',
-
-        '91234567',
-
-        'Fashion',
-
-        'Fashion retailer in Singapore.',
-
-        true,
-
-        component.logoFile,
-
-        component.businessDocument,
-      );
-
-      expect(component.loading).toBe(false);
-
-      expect(component.errorMessage).toBe('');
-
-      expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
-
-      expect(localStorage.getItem('pendingMerchantUserId')).toBeNull();
+    expect(authService.createMerchantProfile).toHaveBeenCalledWith({
+      userId: 2,
+      businessName: 'SmartCart Fashion',
+      uen: '202612345A',
+      businessType: 'Retail',
+      businessAddress: '12 Rainbow Street',
+      postalCode: '123456',
+      contactNumber: '91234567',
+      productCategory: 'Fashion',
+      businessDescription: 'Fashion retailer in Singapore.',
+      pickupAvailable: true,
+      logoFile: null,
+      registrationDocument: component.businessDocument,
     });
+  });
 
-    it('should create merchant profile successfully without logo', () => {
-      component.logoFile = null;
+  it('should trim business text fields before submission', () => {
+    prepareStep2();
 
-      authServiceMock.createMerchantProfile.mockReturnValue(
-        of({
-          id: 10,
+    component.businessName = ' SmartCart Fashion ';
+    component.uen = ' 202612345A ';
+    component.businessAddress = ' 12 Rainbow Street ';
+    component.postalCode = ' 123456 ';
+    component.contactNumber = ' 91234567 ';
+    component.businessDescription = ' Fashion retailer in Singapore. ';
 
-          businessName: 'SmartCart Fashion',
-        }),
-      );
+    authService.createMerchantProfile.mockReturnValue(of({ success: true }));
 
-      component.signup();
+    component.signup();
 
-      expect(authServiceMock.createMerchantProfile).toHaveBeenCalledWith(
-        2,
-
-        'SmartCart Fashion',
-
-        '202612345A',
-
-        'Retail',
-
-        '12 Rainbow Street',
-
-        '123456',
-
-        '91234567',
-
-        'Fashion',
-
-        'Fashion retailer in Singapore.',
-
-        true,
-
-        null,
-
-        component.businessDocument,
-      );
-
-      expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+    expect(authService.createMerchantProfile).toHaveBeenCalledWith({
+      userId: 2,
+      businessName: 'SmartCart Fashion',
+      uen: '202612345A',
+      businessType: 'Retail',
+      businessAddress: '12 Rainbow Street',
+      postalCode: '123456',
+      contactNumber: '91234567',
+      productCategory: 'Fashion',
+      businessDescription: 'Fashion retailer in Singapore.',
+      pickupAvailable: true,
+      logoFile: null,
+      registrationDocument: component.businessDocument,
     });
+  });
 
-    it('should display backend error when merchant profile creation fails', () => {
-      authServiceMock.createMerchantProfile.mockReturnValue(
-        throwError(() => ({
-          error: 'Invalid registration document',
-        })),
-      );
+  // =========================================================
+  // STEP 2 ERROR
+  // =========================================================
 
-      component.signup();
+  it('should handle merchant profile error', () => {
+    prepareStep2();
 
-      expect(component.loading).toBe(false);
+    authService.createMerchantProfile.mockReturnValue(
+      throwError(() => ({
+        error: { message: 'UEN is already registered.' },
+      })),
+    );
 
-      expect(component.errorMessage).toBe('Invalid registration document');
+    component.signup();
 
-      expect(routerMock.navigate).not.toHaveBeenCalled();
-    });
+    expect(component.loading).toBe(false);
+    expect(component.errorMessage).toBe('UEN is already registered.');
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+    expect(localStorage.getItem('pendingMerchantUserId')).toBe('2');
+  });
 
-    it('should handle merchant profile error with message object', () => {
-      authServiceMock.createMerchantProfile.mockReturnValue(
-        throwError(() => ({
-          error: {
-            message: 'Business document is invalid',
-          },
-        })),
-      );
+  it('should use the default merchant profile error', () => {
+    prepareStep2();
 
-      component.signup();
+    authService.createMerchantProfile.mockReturnValue(
+      throwError(() => ({
+        status: 500,
+        error: {},
+      })),
+    );
 
-      expect(component.errorMessage).toBe('Business document is invalid');
+    component.signup();
 
-      expect(routerMock.navigate).not.toHaveBeenCalled();
-    });
+    expect(component.errorMessage).toBe('Unable to submit merchant application. Please try again.');
   });
 
   // =========================================================
   // BACK TO STEP 1
   // =========================================================
 
-  describe('backToStep1', () => {
-    it('should return to step 1', () => {
-      component.signupStep = 2;
+  it('should return to step 1', () => {
+    component.signupStep = 2;
+    component.loading = true;
+    component.errorMessage = 'Some error';
 
-      component.errorMessage = 'Some error';
+    component.backToStep1();
 
-      component.loading = true;
-
-      component.backToStep1();
-
-      expect(component.signupStep).toBe(1);
-
-      expect(component.errorMessage).toBe('');
-
-      expect(component.loading).toBe(false);
-    });
-  });
-
-  // =========================================================
-  // DOCUMENT VALID TYPES
-  // =========================================================
-
-  describe('valid business documents', () => {
-    it('should accept PDF document', () => {
-      const file = new File(['pdf content'], 'registration.pdf', {
-        type: 'application/pdf',
-      });
-
-      const input = document.createElement('input');
-
-      input.type = 'file';
-
-      Object.defineProperty(input, 'files', {
-        value: [file],
-      });
-
-      const event = {
-        target: input,
-      } as unknown as Event;
-
-      component.onDocumentSelected(event);
-
-      expect(component.businessDocument).not.toBeNull();
-
-      expect(component.businessDocument?.type).toBe('application/pdf');
-
-      expect(component.businessDocument?.name).toMatch(/^merchant-document-\d+\.pdf$/);
-    });
-
-    it('should accept PNG document', () => {
-      const file = new File(['png content'], 'registration.png', {
-        type: 'image/png',
-      });
-
-      const input = document.createElement('input');
-
-      input.type = 'file';
-
-      Object.defineProperty(input, 'files', {
-        value: [file],
-      });
-
-      const event = {
-        target: input,
-      } as unknown as Event;
-
-      component.onDocumentSelected(event);
-
-      expect(component.businessDocument).not.toBeNull();
-
-      expect(component.businessDocument?.name).toMatch(/^merchant-document-\d+\.png$/);
-    });
-  });
-
-  // =========================================================
-  // VALID LOGO
-  // =========================================================
-
-  describe('valid logo', () => {
-    it('should accept PNG logo', () => {
-      const file = new File(['png content'], 'logo.png', {
-        type: 'image/png',
-      });
-
-      const input = document.createElement('input');
-
-      input.type = 'file';
-
-      Object.defineProperty(input, 'files', {
-        value: [file],
-      });
-
-      const event = {
-        target: input,
-      } as unknown as Event;
-
-      component.onLogoSelected(event);
-
-      expect(component.logoFile).not.toBeNull();
-
-      expect(component.logoFile?.type).toBe('image/png');
-
-      expect(component.logoFile?.name).toMatch(/^merchant-logo-\d+\.png$/);
-
-      expect(component.errorMessage).toBe('');
-    });
+    expect(component.signupStep).toBe(1);
+    expect(component.loading).toBe(false);
+    expect(component.errorMessage).toBe('');
+    expect(cdr.detectChanges).toHaveBeenCalled();
   });
 });

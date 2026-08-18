@@ -123,7 +123,7 @@ export class Signup {
     // EMAIL FORMAT
     // =======================================================
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
     if (!emailPattern.test(email)) {
       this.showError('Please enter a valid email address.');
@@ -175,7 +175,7 @@ export class Signup {
     // PASSWORD - NUMBER
     // =======================================================
 
-    if (!/[0-9]/.test(this.password)) {
+    if (!/\d/.test(this.password)) {
       this.showError('Password must contain at least one number.');
 
       return;

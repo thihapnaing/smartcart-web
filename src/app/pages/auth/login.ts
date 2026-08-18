@@ -15,9 +15,9 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.css',
 })
 export class Login {
-  private authService = inject(AuthService);
-  private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   email = '';
   password = '';
