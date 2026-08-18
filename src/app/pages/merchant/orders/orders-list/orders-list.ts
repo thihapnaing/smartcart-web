@@ -76,22 +76,4 @@ export class OrdersList implements OnInit {
   selectStatus(status: string): void {
     this.selectedStatus.set(status);
   }
-
-
-  markAsPacked(item: MerchantOrderItemResponse): void {
-    this.updatingOrderId.set(item.orderId);
-
-    this.merchantOrderService.updateOrderStatus(item.orderId, 'PACKED').subscribe({
-      next: () => {
-        this.orders.update(list =>
-          list.map(o => o.orderId === item.orderId ? {...o, orderStatus: 'PACKED'} : o)
-        );
-        this.updatingOrderId.set(null);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.errorMessage.set(err?.error?.message ?? 'Could not update the order. Please try again.');
-        this.updatingOrderId.set(null);
-      }
-    })
-  }
 }

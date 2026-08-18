@@ -18,14 +18,4 @@ export class MerchantOrderService {
   getMerchantOrders(): Observable<MerchantOrderItemResponse[]> {
     return this.http.get<MerchantOrderItemResponse[]>(`${this.apiBase}/merchant`);
   }
-
-// Asks the backend to change one order's status (for example, from "Paid" to "Packed").
-// Sends a PATCH request, since this is updating one field on an existing order
-// rather than creating something new or replacing the whole order.
-updateOrderStatus(orderId: number, newStatus: string): Observable<MerchantOrderItemResponse> {
-  return this.http.patch<MerchantOrderItemResponse>(
-    `${this.apiBase}/${orderId}/status`,
-    { status: newStatus }
-  );
-}
 }
