@@ -97,11 +97,12 @@
 
         <div class="field">
 
-          <label>
+          <label for="email">
             Email
           </label>
 
           <input
+            id="email"
             type="email"
             name="email"
             [(ngModel)]="email"
@@ -116,13 +117,14 @@
 
           <div class="password-label">
 
-            <label>
+            <label for="password">
               Password
             </label>
 
             <button
               type="button"
               class="forgot"
+              routerLink="/forgot-password"
             >
               Forgot password?
             </button>
@@ -132,6 +134,7 @@
           <div class="password-wrapper">
 
             <input
+              id="password"
               [type]="
                 showPassword
                   ? 'text'

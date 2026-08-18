@@ -1,5 +1,5 @@
 // Author: Htet Nandar (Grace)
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -20,7 +20,7 @@ import { ImageSearchResponse } from '../../../models/image-search-response'; //J
   templateUrl: './nav-bar.html',
   styleUrl: './nav-bar.css',
 })
-export class NavBar {
+export class NavBar implements OnInit {
   // Below 768px the links + search collapse behind a hamburger toggle.
   menuOpen = false;
 

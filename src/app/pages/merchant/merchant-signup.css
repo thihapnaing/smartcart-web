@@ -154,7 +154,7 @@
 
   background: #faf6f115;
 
-  color: #c9a47b;
+  color: #faf6f1;
 
   padding: 7px 12px;
 
@@ -533,8 +533,7 @@
 
 .error-text {
   flex: 1;
-
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 
@@ -710,35 +709,25 @@
 
 .upload-box {
   position: relative;
-
   width: 100%;
-
   min-height: 105px;
-
   box-sizing: border-box;
 
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   justify-content: center;
 
   gap: 5px;
-
   padding: 20px;
 
   border: 1.5px dashed #c9a47b;
-
   border-radius: 12px;
 
   background: #efe2d2;
-
-  color: #8b6a4f;
+  color: #4a3226;
 
   cursor: pointer;
-
   text-align: center;
 
   transition:

@@ -81,11 +81,14 @@
   font-size: 14px;
 }
 
-.brand-badges {
-  display: flex;
-  gap: 12px;
-  margin-top: 30px;
-  flex-wrap: wrap;
+.brand-badges span {
+  border: 1px solid #d8c0a3;
+  background: rgba(250, 246, 241, 0.12);
+  color: #f5e6d2;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .brand-badges span {

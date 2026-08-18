@@ -104,6 +104,9 @@
                     </button>
                 }
             </div>
+            @if (activationErrors()[product.id]; as error) {
+              <span class="action-error" role="alert">{{ error }}</span>
+            }
           </td>
         </tr>
       } @empty {

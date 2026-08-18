@@ -37,6 +37,7 @@ describe('MerchantOrderService', () => {
         subtotal: 89.99,
         orderStatus: 'DELIVERED',
         orderDate: '2026-08-07',
+        deliveredAt: '2026-08-10T14:30:00',
         buyerFirstName: 'Marcus',
         buyerLastName: 'Reid'
       }
@@ -50,29 +51,5 @@ describe('MerchantOrderService', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/orders/merchant`);
     expect(req.request.method).toBe('GET');
     req.flush(mockOrders); // Supplies the fake response data.
-  });
-
-  it('updateOrderStatus should send a PATCH request with the new status and return the response', () => {
-    const mockResponse: MerchantOrderItemResponse = {
-      orderId: 2,
-      productName: 'Classic Crew Tee',
-      size: 'M',
-      quantity: 1,
-      unitPrice: 29.99,
-      subtotal: 29.99,
-      orderStatus: 'PACKED',
-      orderDate: '2026-08-15',
-      buyerFirstName: 'ss',
-      buyerLastName: 'ss'
-    };
-
-    service.updateOrderStatus(2, 'PACKED').subscribe(response => {
-      expect(response).toEqual(mockResponse);
-    });
-
-    const req = httpMock.expectOne(`${environment.apiUrl}/orders/2/status`);
-    expect(req.request.method).toBe('PATCH');
-    expect(req.request.body).toEqual({ status: 'PACKED' });
-    req.flush(mockResponse);
   });
 });

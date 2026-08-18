@@ -44,16 +44,6 @@
             {{ item.orderStatus.replace('_', ' ') | titlecase }}
           </span>
         </td>
-        <td *ngIf="showActionColumn()">
-          <button
-            *ngIf="item.orderStatus === 'PAID'; else noAction"
-            class="mark-packed-button"
-            [disabled]="updatingOrderId() === item.orderId"
-            (click)="markAsPacked(item)">
-            {{ updatingOrderId() === item.orderId ? 'Updating...' : 'Mark as Packed' }}
-          </button>
-          <ng-template #noAction>&mdash;</ng-template>
-        </td>
       </tr>
     </tbody>
   </table>
