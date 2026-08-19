@@ -1,73 +1,61 @@
-import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { Login } from './login';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
-import { ChangeDetectorRef } from '@angular/core';
-
-//Author: Junior
 
 describe('Login', () => {
   let component: Login;
+  let fixture: ComponentFixture<Login>;
 
-  let authServiceMock: {
+  let authService: {
     login: ReturnType<typeof vi.fn>;
   };
 
-  let routerMock: {
+  let router: {
     navigate: ReturnType<typeof vi.fn>;
   };
 
-  let cdrMock: {
-    detectChanges: ReturnType<typeof vi.fn>;
-  };
-
-  beforeEach(() => {
-    authServiceMock = {
+  beforeEach(async () => {
+    authService = {
       login: vi.fn(),
     };
 
-    routerMock = {
+    router = {
       navigate: vi.fn().mockResolvedValue(true),
     };
 
-    cdrMock = {
-      detectChanges: vi.fn(),
-    };
-
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
+      imports: [Login],
       providers: [
         {
           provide: AuthService,
-          useValue: authServiceMock,
+          useValue: authService,
         },
-
         {
           provide: Router,
-          useValue: routerMock,
+          useValue: router,
         },
-
         {
-          provide: ChangeDetectorRef,
-          useValue: cdrMock,
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: of({}),
+          },
         },
       ],
-    });
+    }).compileComponents();
 
-    component = TestBed.runInInjectionContext(() => {
-      return new Login();
-    });
+    fixture = TestBed.createComponent(Login);
+    component = fixture.componentInstance;
+
+    fixture.detectChanges();
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  // =========================================================
-  // BASIC TESTS
-  // =========================================================
+  // ==========================================================
+  // COMPONENT INITIALIZATION
+  // ==========================================================
 
   it('should be created', () => {
     expect(component).toBeTruthy();
@@ -93,264 +81,249 @@ describe('Login', () => {
     expect(component.error).toBe('');
   });
 
-  // =========================================================
+  // ==========================================================
   // VALIDATION
-  // =========================================================
+  // ==========================================================
 
   it('should display error when email is empty', () => {
     component.email = '';
-    component.password = 'Password123';
+    component.password = 'Password1';
 
     component.login();
 
     expect(component.error).toBe('Please enter your email.');
-
-    expect(authServiceMock.login).not.toHaveBeenCalled();
+    expect(authService.login).not.toHaveBeenCalled();
   });
 
   it('should display error when email contains only spaces', () => {
     component.email = '   ';
-    component.password = 'Password123';
+    component.password = 'Password1';
 
     component.login();
 
     expect(component.error).toBe('Please enter your email.');
-
-    expect(authServiceMock.login).not.toHaveBeenCalled();
+    expect(authService.login).not.toHaveBeenCalled();
   });
 
   it('should display error when password is empty', () => {
-    component.email = 'john@smartcart.com';
+    component.email = 'junior@example.com';
     component.password = '';
 
     component.login();
 
     expect(component.error).toBe('Please enter your password.');
-
-    expect(authServiceMock.login).not.toHaveBeenCalled();
+    expect(authService.login).not.toHaveBeenCalled();
   });
 
-  // =========================================================
+  // ==========================================================
   // CUSTOMER LOGIN
-  // =========================================================
+  // ==========================================================
 
   it('should login successfully as CUSTOMER', () => {
     const response = {
-      token: 'customer-jwt-token',
-      userId: 1,
-      username: 'john',
-      email: 'john@smartcart.com',
+      token: 'customer-token',
+      username: 'Junior',
+      email: 'junior@example.com',
       role: 'CUSTOMER',
     };
 
-    authServiceMock.login.mockReturnValue(of(response));
+    authService.login.mockReturnValue(of(response));
 
-    component.email = 'john@smartcart.com';
-
-    component.password = 'Password123';
+    component.email = 'junior@example.com';
+    component.password = 'Password1';
 
     component.login();
 
-    expect(authServiceMock.login).toHaveBeenCalledWith({
-      email: 'john@smartcart.com',
-
-      password: 'Password123',
+    expect(authService.login).toHaveBeenCalledWith({
+      email: 'junior@example.com',
+      password: 'Password1',
     });
 
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/']);
+    expect(component.loading).toBe(false);
+    expect(component.error).toBe('');
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 
-  // =========================================================
+  // ==========================================================
   // TRIM EMAIL
-  // =========================================================
+  // ==========================================================
 
   it('should trim email before login', () => {
     const response = {
-      token: 'customer-jwt-token',
-      userId: 1,
-      username: 'john',
-      email: 'john@smartcart.com',
+      token: 'customer-token',
+      username: 'Junior',
+      email: 'junior@example.com',
       role: 'CUSTOMER',
     };
 
-    authServiceMock.login.mockReturnValue(of(response));
+    authService.login.mockReturnValue(of(response));
 
-    component.email = '   john@smartcart.com   ';
-
-    component.password = 'Password123';
+    component.email = '  junior@example.com  ';
+    component.password = 'Password1';
 
     component.login();
 
-    expect(authServiceMock.login).toHaveBeenCalledWith({
-      email: 'john@smartcart.com',
-
-      password: 'Password123',
+    expect(authService.login).toHaveBeenCalledWith({
+      email: 'junior@example.com',
+      password: 'Password1',
     });
+
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 
-  // =========================================================
+  // ==========================================================
   // MERCHANT LOGIN
-  // =========================================================
+  // ==========================================================
 
   it('should login successfully as MERCHANT', () => {
     const response = {
-      token: 'merchant-jwt-token',
-      userId: 2,
-      username: 'merchant01',
+      token: 'merchant-token',
+      username: 'Merchant',
       email: 'merchant@example.com',
       role: 'MERCHANT',
     };
 
-    authServiceMock.login.mockReturnValue(of(response));
+    authService.login.mockReturnValue(of(response));
 
     component.email = 'merchant@example.com';
-
-    component.password = 'Password123';
+    component.password = 'Password1';
 
     component.login();
 
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/merchant']);
+    expect(authService.login).toHaveBeenCalledWith({
+      email: 'merchant@example.com',
+      password: 'Password1',
+    });
+
+    expect(component.loading).toBe(false);
+    expect(component.error).toBe('');
+    expect(router.navigate).toHaveBeenCalledWith(['/merchant']);
   });
 
-  // =========================================================
-  // UNKNOWN ROLE
-  // =========================================================
+  // ==========================================================
+  // INVALID ROLE
+  // ==========================================================
 
   it('should display invalid user role error', () => {
     const response = {
       token: 'test-token',
-      userId: 3,
-      username: 'testuser',
-      email: 'test@example.com',
+      username: 'Junior',
+      email: 'junior@example.com',
       role: 'ADMIN',
     };
 
-    authServiceMock.login.mockReturnValue(of(response));
+    authService.login.mockReturnValue(of(response));
 
-    component.email = 'test@example.com';
-
-    component.password = 'Password123';
+    component.email = 'junior@example.com';
+    component.password = 'Password1';
 
     component.login();
 
+    expect(component.loading).toBe(false);
     expect(component.error).toBe('Invalid user role.');
-
-    expect(routerMock.navigate).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  // =========================================================
-  // 401 ERROR
-  // =========================================================
+  // ==========================================================
+  // LOGIN ERRORS
+  // ==========================================================
 
   it('should display invalid email or password for 401 error', () => {
-    authServiceMock.login.mockReturnValue(
+    authService.login.mockReturnValue(
       throwError(() => ({
         status: 401,
       })),
     );
 
-    component.email = 'wrong@smartcart.com';
-
+    component.email = 'junior@example.com';
     component.password = 'WrongPassword';
 
     component.login();
 
+    expect(component.loading).toBe(false);
     expect(component.error).toBe('Invalid email or password.');
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  // =========================================================
-  // BACKEND ERROR MESSAGE
-  // =========================================================
-
   it('should display backend error message', () => {
-    authServiceMock.login.mockReturnValue(
+    authService.login.mockReturnValue(
       throwError(() => ({
         status: 500,
-
         error: {
-          message: 'Account is inactive',
+          message: 'Account is inactive.',
         },
       })),
     );
 
-    component.email = 'john@smartcart.com';
-
-    component.password = 'Password123';
+    component.email = 'junior@example.com';
+    component.password = 'Password1';
 
     component.login();
 
-    expect(component.error).toBe('Account is inactive');
+    expect(component.loading).toBe(false);
+    expect(component.error).toBe('Account is inactive.');
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  // =========================================================
-  // GENERIC ERROR
-  // =========================================================
-
   it('should display generic error when backend does not provide a message', () => {
-    authServiceMock.login.mockReturnValue(
+    authService.login.mockReturnValue(
       throwError(() => ({
         status: 500,
-
         error: {},
       })),
     );
 
-    component.email = 'john@smartcart.com';
-
-    component.password = 'Password123';
+    component.email = 'junior@example.com';
+    component.password = 'Password1';
 
     component.login();
 
+    expect(component.loading).toBe(false);
     expect(component.error).toBe('Unable to login. Please try again.');
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  // =========================================================
-  // LOADING - SUCCESS
-  // =========================================================
+  // ==========================================================
+  // LOADING STATE
+  // ==========================================================
 
   it('should set loading to false after successful login', () => {
     const response = {
       token: 'customer-token',
-      userId: 1,
-      username: 'john',
-      email: 'john@smartcart.com',
+      username: 'Junior',
+      email: 'junior@example.com',
       role: 'CUSTOMER',
     };
 
-    authServiceMock.login.mockReturnValue(of(response));
+    authService.login.mockReturnValue(of(response));
 
-    component.email = 'john@smartcart.com';
-
-    component.password = 'Password123';
+    component.email = 'junior@example.com';
+    component.password = 'Password1';
 
     component.login();
 
     expect(component.loading).toBe(false);
   });
 
-  // =========================================================
-  // LOADING - ERROR
-  // =========================================================
-
   it('should set loading to false after login failure', () => {
-    authServiceMock.login.mockReturnValue(
+    authService.login.mockReturnValue(
       throwError(() => ({
-        status: 401,
+        status: 500,
+        error: {},
       })),
     );
 
-    component.email = 'wrong@smartcart.com';
-
-    component.password = 'WrongPassword';
+    component.email = 'junior@example.com';
+    component.password = 'Password1';
 
     component.login();
 
     expect(component.loading).toBe(false);
   });
 
-  // =========================================================
-  // PASSWORD TOGGLE
-  // =========================================================
+  // ==========================================================
+  // PASSWORD VISIBILITY
+  // ==========================================================
 
   it('should show password when toggled', () => {
     expect(component.showPassword).toBe(false);
@@ -361,10 +334,85 @@ describe('Login', () => {
   });
 
   it('should hide password when toggled twice', () => {
-    component.togglePassword();
+    expect(component.showPassword).toBe(false);
 
+    component.togglePassword();
     component.togglePassword();
 
     expect(component.showPassword).toBe(false);
+  });
+
+  // ==========================================================
+  // QUERY PARAMETER MESSAGE
+  // ==========================================================
+
+  it('should display message from query parameters', async () => {
+    TestBed.resetTestingModule();
+
+    authService = {
+      login: vi.fn(),
+    };
+
+    router = {
+      navigate: vi.fn().mockResolvedValue(true),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [Login],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: authService,
+        },
+        {
+          provide: Router,
+          useValue: router,
+        },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: of({
+              message: 'You are merchant, not allow to use it',
+            }),
+          },
+        },
+      ],
+    }).compileComponents();
+
+    const messageFixture = TestBed.createComponent(Login);
+
+    const messageComponent = messageFixture.componentInstance;
+
+    messageFixture.detectChanges();
+
+    expect(messageComponent.error).toBe('You are merchant, not allow to use it');
+  });
+
+  it('should not set error when query parameter message is missing', () => {
+    expect(component.error).toBe('');
+  });
+
+  // ==========================================================
+  // ERROR RESET
+  // ==========================================================
+
+  it('should clear previous error before starting a valid login', () => {
+    const response = {
+      token: 'customer-token',
+      username: 'Junior',
+      email: 'junior@example.com',
+      role: 'CUSTOMER',
+    };
+
+    authService.login.mockReturnValue(of(response));
+
+    component.error = 'Previous error';
+    component.email = 'junior@example.com';
+    component.password = 'Password1';
+
+    component.login();
+
+    expect(component.error).toBe('');
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 });
