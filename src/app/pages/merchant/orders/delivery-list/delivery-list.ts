@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../../../../src/environments/environment';
+import { environment } from '../../../../../environments/environment';
 
 interface DeliveryPerson {
   id: number;
