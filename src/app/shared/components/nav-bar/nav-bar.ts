@@ -151,20 +151,18 @@ export class NavBar implements OnInit {
 
     this.productService.detectImageSearchLabel(this.selectedImageFile).subscribe({
       next: (response: ImageSearchResponse) => {
-        console.log('========== IMAGE SEARCH RESPONSE ==========');
-
         console.log('Prediction:', response.prediction);
-
         console.log('Search label:', response.searchLabel);
-
         console.log('Gender:', response.gender);
 
-        console.log('Color:', response.color);
+        const detectedColor =
+          response.color ||
+          response.prediction?.split(' ')[1];
+
+        console.log('Color:', detectedColor);
 
         console.log('Category:', response.category);
-
         console.log('Products:', response.products);
-
         this.imageSearchLoading.set(false);
 
         if (!response.products || response.products.length === 0) {
