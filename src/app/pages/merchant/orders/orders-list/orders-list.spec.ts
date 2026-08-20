@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -18,6 +18,7 @@ function makeOrder(overrides: Partial<MerchantOrderItemResponse> = {}): Merchant
     quantity: 1,
     subtotal: 20,
     orderDate: new Date('2026-01-01'),
+    deliveredAt: null,
     orderStatus: 'PAID',
     ...overrides
   } as MerchantOrderItemResponse;
@@ -27,14 +28,12 @@ describe('OrdersList', () => {
   let component: OrdersList;
   let serviceMock: {
     getMerchantOrders: ReturnType<typeof vi.fn>;
-    updateOrderStatus: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     // Fresh mock per test so call history / return values never leak across tests.
     serviceMock = {
-      getMerchantOrders: vi.fn(),
-      updateOrderStatus: vi.fn()
+      getMerchantOrders: vi.fn()
     };
 
     TestBed.configureTestingModule({
@@ -93,7 +92,7 @@ describe('OrdersList', () => {
     });
   });
 
-  // --- selectStatus / filteredOrders / showActionColumn ---
+  // --- selectStatus / filteredOrders / showActionColumn / showDateColumn ---
 
   describe('selectStatus and filteredOrders', () => {
     beforeEach(() => {
@@ -138,73 +137,109 @@ describe('OrdersList', () => {
       component.selectStatus('DELIVERED');
       expect(component.showActionColumn()).toBe(false);
     });
+
+    it('hides the date column only on the PACKED and PICKED_UP tabs', () => {
+      component.selectStatus('ALL');
+      expect(component.showDateColumn()).toBe(true);
+
+      component.selectStatus('PAID');
+      expect(component.showDateColumn()).toBe(true);
+
+      component.selectStatus('PACKED');
+      expect(component.showDateColumn()).toBe(false);
+
+      component.selectStatus('PICKED_UP');
+      expect(component.showDateColumn()).toBe(false);
+
+      component.selectStatus('DELIVERED');
+      expect(component.showDateColumn()).toBe(true);
+    });
   });
 
-  // --- markAsPacked ---
+  // --- getDisplayDate ---
 
-  describe('markAsPacked', () => {
-    let order: MerchantOrderItemResponse;
+  describe('getDisplayDate', () => {
+    beforeEach(() => {
+      // No orders need to be loaded here — the method only reads the
+      // single order object passed directly into it.
+      component = TestBed.inject(OrdersList);
+    });
+
+    it('returns orderDate for a PAID order', () => {
+      const order = makeOrder({ orderStatus: 'PAID', orderDate: new Date('2026-01-05') as any });
+      expect(component.getDisplayDate(order)).toEqual(order.orderDate);
+    });
+
+    it('returns deliveredAt for a DELIVERED order', () => {
+      const deliveredAt = new Date('2026-01-10') as any;
+      const order = makeOrder({ orderStatus: 'DELIVERED', deliveredAt });
+      expect(component.getDisplayDate(order)).toEqual(deliveredAt);
+    });
+
+    it('falls back to orderDate when a DELIVERED order has no deliveredAt yet', () => {
+      const order = makeOrder({ orderStatus: 'DELIVERED', orderDate: new Date('2026-01-05') as any, deliveredAt: null });
+      expect(component.getDisplayDate(order)).toEqual(order.orderDate);
+    });
+
+    it('returns orderDate for statuses other than PAID and DELIVERED', () => {
+      const order = makeOrder({ orderStatus: 'PENDING', orderDate: new Date('2026-01-05') as any });
+      expect(component.getDisplayDate(order)).toEqual(order.orderDate);
+    });
+  });
+
+  // --- rendering (actually draws the template, unlike the tests above) ---
+
+  describe('rendering', () => {
+    let fixture: ComponentFixture<OrdersList>;
 
     beforeEach(() => {
-      order = makeOrder({ orderId: 5, orderStatus: 'PAID' });
-      serviceMock.getMerchantOrders.mockReturnValue(of([order]));
-      component = TestBed.inject(OrdersList);
-      component.ngOnInit();
+      const orders = [
+        makeOrder({ orderId: 1, orderStatus: 'PAID' }),
+        makeOrder({ orderId: 2, orderStatus: 'DELIVERED', deliveredAt: new Date('2026-02-01') as any })
+      ];
+      serviceMock.getMerchantOrders.mockReturnValue(of(orders));
+
+      // createComponent (instead of inject) builds a real, drawable copy of
+      // the component. detectChanges() then runs ngOnInit and paints the
+      // template, the same way a real browser tab would on page load.
+      fixture = TestBed.createComponent(OrdersList);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
     });
 
-    it('sets updatingOrderId while the request is pending', () => {
-      // Never resolves, so we can inspect the "in flight" state.
-      serviceMock.updateOrderStatus.mockReturnValue(of().pipe()); // no emission
-      component.markAsPacked(order);
-      expect(component.updatingOrderId()).toBe(5);
+it('renders one table row per loaded order', () => {
+  const rows = fixture.nativeElement.querySelectorAll('tbody tr');
+  expect(rows).toHaveLength(2);
+});
+
+it('renders a tab button for every entry in statusTabs', () => {
+  const buttons = fixture.nativeElement.querySelectorAll('.tab-button');
+  expect(buttons).toHaveLength(component.statusTabs.length);
+});
+
+    it('shows the Date column header on the Paid tab', () => {
+      component.selectStatus('PAID');
+      fixture.detectChanges(); // re-paint the template after the state change
+
+      const headers = Array.from(fixture.nativeElement.querySelectorAll('thead th'))
+        .map((th: any) => th.textContent.trim());
+      expect(headers).toContain('Date');
     });
 
-    it('updates the matching order status immutably on success', () => {
-      serviceMock.updateOrderStatus.mockReturnValue(of(undefined));
+    it('hides the Date column header on the Packed tab', () => {
+      component.selectStatus('PACKED');
+      fixture.detectChanges();
 
-      component.markAsPacked(order);
-
-      expect(serviceMock.updateOrderStatus).toHaveBeenCalledWith(5, 'PACKED');
-      expect(component.updatingOrderId()).toBeNull();
-
-      const updated = component.orders().find(o => o.orderId === 5);
-      expect(updated?.orderStatus).toBe('PACKED');
-
-      // The original object passed in must be untouched — proves we replaced,
-      // not mutated, the array/item (important for computed() to re-fire).
-      expect(order.orderStatus).toBe('PAID');
+      const headers = Array.from(fixture.nativeElement.querySelectorAll('thead th'))
+        .map((th: any) => th.textContent.trim());
+      expect(headers).not.toContain('Date');
     });
 
-    it('does not affect other orders in the list', () => {
-      const other = makeOrder({ orderId: 6, orderStatus: 'PAID' });
-      serviceMock.getMerchantOrders.mockReturnValue(of([order, other]));
-      component.ngOnInit();
-      serviceMock.updateOrderStatus.mockReturnValue(of(undefined));
+    it('shows a "No orders match this filter" message when a tab has no matches', () => {
+      component.selectStatus('CANCELLED');
+      fixture.detectChanges();
 
-      component.markAsPacked(order);
-
-      const untouched = component.orders().find(o => o.orderId === 6);
-      expect(untouched?.orderStatus).toBe('PAID');
-    });
-
-    it('sets errorMessage and clears updatingOrderId on failure', () => {
-      const httpError = new HttpErrorResponse({ error: { message: 'Pack failed' } });
-      serviceMock.updateOrderStatus.mockReturnValue(throwError(() => httpError));
-
-      component.markAsPacked(order);
-
-      expect(component.errorMessage()).toBe('Pack failed');
-      expect(component.updatingOrderId()).toBeNull();
-      // Status should remain unchanged since the update failed.
-      expect(component.orders().find(o => o.orderId === 5)?.orderStatus).toBe('PAID');
-    });
-
-    it('falls back to a generic error message on failure without one', () => {
-      serviceMock.updateOrderStatus.mockReturnValue(throwError(() => new HttpErrorResponse({})));
-
-      component.markAsPacked(order);
-
-      expect(component.errorMessage()).toBe('Could not update the order. Please try again.');
+      expect(fixture.nativeElement.textContent).toContain('No orders match this filter.');
     });
   });
 });

@@ -38,12 +38,16 @@ export class OrdersList implements OnInit {
 
   showActionColumn = computed(() => this.selectedStatus() === 'ALL' || this.selectedStatus() === 'PAID');
 
+  // Date column is hidden on the Packed and Picked up tabs, since the
+  // merchant is more interested in current status than the original
+  // order date once an order has reached that stage.
+  showDateColumn = computed(() => this.selectedStatus() !== 'PACKED' && this.selectedStatus() !== 'PICKED_UP');
+
   // Filter tabs shown at the top of the page. Each "value" matches the
   // backend's OrderStatus enum exactly (all capitals, underscore for
   // multi-word statuses).
   statusTabs: StatusTab[] = [
     { label: 'All orders', value: 'ALL' },
-    { label: 'Pending',    value: 'PENDING' },
     { label: 'Paid',       value: 'PAID' },
     { label: 'Packed',     value: 'PACKED' },
     { label: 'Picked up',  value: 'PICKED_UP' },
@@ -77,21 +81,15 @@ export class OrdersList implements OnInit {
     this.selectedStatus.set(status);
   }
 
-
-  markAsPacked(item: MerchantOrderItemResponse): void {
-    this.updatingOrderId.set(item.orderId);
-
-    this.merchantOrderService.updateOrderStatus(item.orderId, 'PACKED').subscribe({
-      next: () => {
-        this.orders.update(list =>
-          list.map(o => o.orderId === item.orderId ? {...o, orderStatus: 'PACKED'} : o)
-        );
-        this.updatingOrderId.set(null);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.errorMessage.set(err?.error?.message ?? 'Could not update the order. Please try again.');
-        this.updatingOrderId.set(null);
-      }
-    })
+  // Chooses which date belongs in the Date column for a single order row.
+  // PAID orders show the date the order was placed. DELIVERED orders show
+  // the date it actually arrived instead, since that becomes the more
+  // useful date once delivery has happened. Every other status falls back
+  // to the order date, since deliveredAt will not be set yet for those.
+  getDisplayDate(item: MerchantOrderItemResponse): string | null {
+    if (item.orderStatus === 'DELIVERED') {
+      return item.deliveredAt ?? item.orderDate;
+    }
+    return item.orderDate;
   }
 }
