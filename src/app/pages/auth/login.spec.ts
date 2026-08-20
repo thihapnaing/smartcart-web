@@ -197,7 +197,7 @@ describe('Login', () => {
 
     expect(component.loading).toBe(false);
     expect(component.error).toBe('');
-    expect(router.navigate).toHaveBeenCalledWith(['/merchant']);
+    expect(router.navigate).toHaveBeenCalledWith(['/merchant/products']);
   });
 
   // ==========================================================
