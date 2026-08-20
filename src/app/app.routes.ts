@@ -70,6 +70,12 @@ export const routes: Routes = [
       import('./layout/merchant-layout/merchant-layout').then((m) => m.MerchantLayout),
     children: [
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./pages/merchant/dashboard/dashboard').then((m) => m.MerchantDashboard),
+        canActivate: [authGuard],
+      },
+      {
         path: 'products',
         loadComponent: () =>
           import('./pages/merchant/products/products-list/products-list').then(
