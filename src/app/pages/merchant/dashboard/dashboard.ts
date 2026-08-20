@@ -20,31 +20,31 @@ export class MerchantDashboard implements OnInit {
   private readonly orderService = inject(MerchantOrderService);
   private readonly productService = inject(MerchantProductService);
 
-  protected readonly orders = signal<MerchantOrderItemResponse[]>([]);
-  protected readonly products = signal<ProductSearchResult[]>([]);
-  protected readonly isLoading = signal(true);
-  protected readonly errorMessage = signal<string | null>(null);
+  readonly orders = signal<MerchantOrderItemResponse[]>([]);
+  readonly products = signal<ProductSearchResult[]>([]);
+  readonly isLoading = signal(true);
+  readonly errorMessage = signal<string | null>(null);
 
-  protected readonly totalRevenue = computed(() =>
+  readonly totalRevenue = computed(() =>
     this.orders()
       .filter((o) => o.orderStatus !== 'CANCELLED')
       .reduce((sum, o) => sum + o.subtotal, 0),
   );
 
-  protected readonly totalOrders = computed(
+  readonly totalOrders = computed(
     () => new Set(this.orders().map((o) => o.orderId)).size,
   );
 
-  protected readonly pendingOrders = computed(
+  readonly pendingOrders = computed(
     () => new Set(this.orders().filter((o) => o.orderStatus === 'PAID').map((o) => o.orderId)).size,
   );
 
-  protected readonly activeProducts = computed(
+  readonly activeProducts = computed(
     () => this.products().filter((p) => p.status === 'ACTIVE').length,
   );
 
   // Latest 5 order items, most recent first.
-  protected readonly recentOrders = computed(() =>
+  readonly recentOrders = computed(() =>
     [...this.orders()]
       .sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
       .slice(0, 5),
