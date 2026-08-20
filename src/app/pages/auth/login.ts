@@ -71,12 +71,12 @@ export class Login {
         password: this.password,
       })
       .subscribe({
+
         // LOGIN SUCCESS
         next: (response) => {
           this.loading = false;
 
           console.log('Login response:', response);
-
           console.log('User role:', response.role);
 
           // CUSTOMER
@@ -90,7 +90,7 @@ export class Login {
           else if (response.role === 'MERCHANT') {
             console.log('Merchant login → Merchant Dashboard');
 
-            this.router.navigate(['/merchant']);
+            this.router.navigate(['/merchant/products']);
           }
 
           // UNKNOWN ROLE
