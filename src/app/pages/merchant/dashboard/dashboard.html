@@ -1,0 +1,51 @@
+<div class="merchant-dashboard-page">
+  <h1>Dashboard</h1>
+  <p class="page-subtitle">A quick look at how your shop is doing.</p>
+
+  <p *ngIf="isLoading()">Loading dashboard...</p>
+  <p *ngIf="errorMessage()" class="error-message">{{ errorMessage() }}</p>
+
+  <ng-container *ngIf="!isLoading() && !errorMessage()">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Total Revenue</span>
+        <span class="kpi-value">{{ totalRevenue() | currency }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Total Orders</span>
+        <span class="kpi-value">{{ totalOrders() }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Pending Orders</span>
+        <span class="kpi-value">{{ pendingOrders() }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Active Products</span>
+        <span class="kpi-value">{{ activeProducts() }}</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">Recent Orders</h2>
+    <table class="recent-orders-table" *ngIf="recentOrders().length > 0">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Product</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of recentOrders()">
+          <td>ORD-{{ item.orderId }}</td>
+          <td>{{ item.buyerFirstName }} {{ item.buyerLastName }}</td>
+          <td>{{ item.productName }}</td>
+          <td>{{ item.subtotal | currency }}</td>
+          <td>{{ item.orderStatus.replace('_', ' ') | titlecase }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="recentOrders().length === 0">No orders yet.</p>
+  </ng-container>
+</div>

@@ -1,0 +1,104 @@
+@if (product(); as p) {
+  <div class="page">
+
+    <!-- Back link to the search page -->
+    <button class="back-link" (click)="goBack()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+      </svg>
+      Back to {{ p.categoryName }}
+    </button>
+
+    <div class="layout">
+
+      <!-- Left column: product photo -->
+      <div class="img-box">
+        <img [src]="p.imageUrl" [alt]="p.name" />
+      </div>
+
+      <!-- Right column: product details -->
+      <div class="info">
+        <div class="eyebrow">{{ genderLabel() }} · {{ p.categoryName }}</div>
+        <h1 class="title">{{ p.name }}</h1>
+        <div class="shop">Sold by {{ p.shopName }}</div>
+
+        <div class="price">S${{ p.price.toFixed(2) }}</div>
+        <p class="desc">{{ p.description }}</p>
+
+        <!-- Size picker built from the product's variants, smallest size first -->
+        <div class="section">
+          <div class="section-label">Size</div>
+          @if (hasVariants()) {
+            <div class="size-row">
+              @for (variant of sortedVariants(); track variant.productVariantId) {
+                <button
+                  class="size-btn"
+                  [class.active]="selectedVariant()?.productVariantId === variant.productVariantId"
+                  [disabled]="variant.stock === 0"
+                  (click)="selectVariant(variant)"
+                >
+                  {{ variant.size }}
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="stock-note">Currently unavailable</p>
+          }
+        </div>
+
+        <!-- Quantity stepper, shown once a size is chosen -->
+        @if (selectedVariant(); as variant) {
+          <div class="section">
+            <div class="section-label">Quantity</div>
+            <div class="qty-row">
+              <button class="qty-step-btn" [disabled]="quantity() <= 1" (click)="decreaseQuantity()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              </button>
+              <span class="qty-value">{{ quantity() }}</span>
+              <button class="qty-step-btn" [disabled]="quantity() >= maxQuantity()" (click)="increaseQuantity()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              </button>
+            </div>
+            <div class="stock-note">{{ variant.stock }} in stock</div>
+          </div>
+        }
+
+        <!-- Add to cart / Buy now -->
+        <div class="action-row">
+          <button class="btn-primary" (click)="addToCart()">
+            {{ justAdded() ? 'Added to cart!' : 'Add to cart' }}
+          </button>
+          <button class="btn-secondary" (click)="buyNow()">
+            Buy now
+          </button>
+        </div>
+
+        <!-- Price alert: lets a shopper ask to be notified about a price drop -->
+        <button
+          class="btn-alert"
+          [class.active]="priceAlertSet()"
+          (click)="togglePriceAlert()"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+          {{ priceAlertSet() ? 'Price alert set' : 'Set price alert' }}
+        </button>
+
+        @if (addedMessage()) {
+          <p class="message">{{ addedMessage() }}</p>
+        }
+
+        <div class="shipping-note">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/>
+          </svg>
+          Free shipping on orders above S$60
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <p class="loading">Loading product...</p>
+}

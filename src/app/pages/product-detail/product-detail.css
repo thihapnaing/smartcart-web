@@ -1,0 +1,267 @@
+/* ── Page frame ─────────────────────────────────────────── */
+
+.page {
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: #2C1A10;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: #8B6A4F;
+  margin: 1.5rem 0 1.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  font-family: inherit;
+}
+.back-link:hover { opacity: 0.7; }
+
+/* Two columns on wide screens, stacked on narrow screens */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+/* ── Left column: photo ─────────────────────────────────── */
+
+.img-box {
+  border-radius: 18px;
+  overflow: hidden;
+  background: #E8D5C0;
+  min-height: 460px;
+}
+.img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Right column: details ──────────────────────────────── */
+
+.eyebrow {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8B6A4F;
+  margin-bottom: 0.4rem;
+}
+
+.title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #2C1A10;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.shop {
+  font-size: 0.8125rem;
+  color: #7A5C44;
+  margin-top: 0.35rem;
+}
+
+.price {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #2C1A10;
+  margin-top: 1rem;
+}
+
+.desc {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #7A5C44;
+  margin: 1rem 0 1.5rem;
+}
+
+/* ── Size + quantity sections ───────────────────────────── */
+
+.section { margin-bottom: 1.25rem; }
+
+.section-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8B6A4F;
+  margin-bottom: 0.6rem;
+}
+
+.size-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.size-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(201, 164, 123, 0.4);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2C1A10;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+.size-btn.active {
+  background: #4A3226;
+  border-color: #4A3226;
+  color: #FAF6F1;
+}
+.size-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* The quantity box: a fixed-width pill with the minus button on the
+   far left, the plus button on the far right, and the number centered. */
+.qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 152px;
+  height: 52px;
+  border: 1px solid rgba(201, 164, 123, 0.4);
+  border-radius: 16px;
+  padding: 0 0.5rem;
+}
+
+.qty-step-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  color: #6B4E3A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.qty-step-btn:hover { background: rgba(201, 164, 123, 0.15); }
+.qty-step-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: none;
+}
+
+.qty-value {
+  flex: 1;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #2C1A10;
+}
+
+.stock-note {
+  font-size: 0.8125rem;
+  color: #8B6A4F;
+  margin-top: 0.75rem;
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+
+.action-row {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  font-family: inherit;
+}
+.btn-primary:hover,
+.btn-secondary:hover { opacity: 0.88; }
+
+.btn-primary {
+  background: #4A3226;
+  color: #FAF6F1;
+}
+
+.btn-secondary {
+  background: #C9A47B;
+  color: #2C1A10;
+}
+
+/* Price alert: an outlined button spanning the full width,
+   sitting directly under the Add to cart / Buy now row. */
+.btn-alert {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 164, 123, 0.45);
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4A3226;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+.btn-alert:hover {
+  border-color: rgba(201, 164, 123, 0.8);
+  background: rgba(201, 164, 123, 0.08);
+}
+
+/* The turned-on state, shown after the alert has been set. */
+.btn-alert.active {
+  border-color: #C9A47B;
+  background: rgba(201, 164, 123, 0.18);
+  color: #2C1A10;
+}
+
+.message {
+  font-size: 0.8125rem;
+  color: #b94040;
+  margin-top: 0.25rem;
+}
+
+.shipping-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: #8B6A4F;
+  margin-top: 1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem 0;
+  color: #7A5C44;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}

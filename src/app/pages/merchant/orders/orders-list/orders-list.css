@@ -1,0 +1,113 @@
+.merchant-orders-page {
+  padding: 32px;
+  font-family: sans-serif;
+  color: #2a1e15;
+}
+
+.merchant-orders-page h1 {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.page-subtitle {
+  color: #8a7a68;
+  margin-bottom: 24px;
+}
+
+.status-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #f3ede3;
+  color: #5c4a3a;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tab-button.active {
+  background-color: #2a1e15;
+  color: #ffffff;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+}
+
+.orders-table th {
+  text-align: left;
+  padding: 12px 16px;
+  color: #8a7a68;
+  font-size: 12px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #eee0d0;
+}
+
+.orders-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f3ede3;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-badge.delivered {
+  background-color: #e3f3e5;
+  color: #266842;
+}
+
+.status-badge.paid {
+  background-color: #e5eefc;
+  color: #2e5cad;
+}
+
+.status-badge.packed {
+  background-color: #f0e6da;
+  color: #7a5c3e;
+}
+
+.status-badge.pending {
+  background-color: #fdf1d6;
+  color: #8c660d;
+}
+
+.status-badge.cancelled {
+  background-color: #fbe4e4;
+  color: #b23c3c;
+}
+
+.error-message {
+  color: #b23c3c;
+}
+
+.mark-packed-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #2a1e15;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mark-packed-button:hover {
+  background-color: #4a3826;
+}
+
+.mark-packed-button:disabled {
+  background-color: #cfc3b4;
+  color: #4a3826;
+  cursor: not-allowed;
+}

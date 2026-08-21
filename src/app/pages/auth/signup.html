@@ -1,0 +1,632 @@
+<div class="signup-page">
+
+  <!-- =====================================================
+       LEFT SIDE - BRANDING
+       ===================================================== -->
+
+  <section class="brand-panel">
+
+    <div class="brand-overlay"></div>
+
+    <!-- LOGO -->
+
+    <div class="brand-logo">
+
+      <div class="brand-logo-icon">
+        🛍
+      </div>
+
+      <span>
+        SmartCart
+      </span>
+
+    </div>
+
+
+    <!-- BRAND CONTENT -->
+
+    <div class="brand-content">
+
+      <h2>
+        Dressed for<br>
+        Singapore's sky.
+      </h2>
+
+      <p>
+        Climate-intelligent fashion for everyday warmth.
+      </p>
+
+      <p>
+        Free shipping above S$60 · 14-day returns.
+      </p>
+
+
+      <div class="brand-badges">
+
+        <span>
+          10K+ Members
+        </span>
+
+        <span>
+          4.9★ Rated
+        </span>
+
+        <span>
+          SG-Exclusive Drops
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       RIGHT SIDE
+       ===================================================== -->
+
+  <section class="form-panel">
+
+    <div class="form-container">
+
+
+      <!-- =================================================
+           HEADER
+           ================================================= -->
+
+      <div class="heading">
+
+        <h1>
+          {{ signupStep === 'credentials'
+          ? 'Create account.'
+          : 'Your profile.' }}
+        </h1>
+
+        <p>
+          {{ signupStep === 'credentials'
+          ? 'Join SmartCart for exclusive access.'
+          : 'Just a few more details to set up your account.' }}
+        </p>
+
+      </div>
+
+
+      <!-- =================================================
+           SIGN IN / SIGN UP
+           ONLY STEP 1
+           ================================================= -->
+
+      <div
+        class="auth-tabs"
+        *ngIf="signupStep === 'credentials'"
+      >
+
+        <button
+          type="button"
+          class="auth-tab"
+          routerLink="/login"
+        >
+          Sign in
+        </button>
+
+        <button
+          type="button"
+          class="auth-tab active"
+        >
+          Sign up
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           MERCHANT LINK
+           ONLY STEP 1
+           ================================================= -->
+
+      <div
+        class="merchant-link"
+        *ngIf="signupStep === 'credentials'"
+      >
+
+        <span>
+          Want to sell on SmartCart?
+        </span>
+
+        <a routerLink="/merchant/signup">
+          Go to Merchant →
+        </a>
+
+      </div>
+
+
+      <!-- =================================================
+           STEP 1
+           ================================================= -->
+
+      <form
+        *ngIf="signupStep === 'credentials'"
+        class="signup-form"
+        (ngSubmit)="signup()"
+        novalidate
+      >
+
+        <!-- USERNAME -->
+
+        <div class="field">
+
+          <label for="fullName">
+            USERNAME
+          </label>
+
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            [(ngModel)]="fullName"
+            placeholder="Mei Tan"
+            autocomplete="username"
+            [disabled]="loading"
+          />
+
+        </div>
+
+
+        <!-- EMAIL -->
+
+        <div class="field">
+
+          <label for="email">
+            EMAIL
+          </label>
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            [(ngModel)]="email"
+            placeholder="mei@example.com"
+            autocomplete="email"
+            [disabled]="loading"
+          />
+
+        </div>
+
+
+        <!-- PASSWORD -->
+
+        <div class="field">
+
+          <label for="password">
+            PASSWORD
+          </label>
+
+          <div class="password-wrapper">
+
+            <input
+              id="password"
+              name="password"
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              [disabled]="loading"
+            />
+
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePassword()"
+              [disabled]="loading"
+              aria-label="Toggle password visibility"
+            >
+
+              <!-- EYE -->
+
+              <svg
+                *ngIf="!showPassword"
+                width="21"
+                height="21"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+
+                <path
+                  d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+                />
+
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="2.5"
+                />
+
+              </svg>
+
+
+              <!-- EYE OFF -->
+
+              <svg
+                *ngIf="showPassword"
+                width="21"
+                height="21"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+
+                <path
+                  d="M3 3l18 18"
+                />
+
+                <path
+                  d="M10.6 6.2A10.8 10.8 0 0 1 12 6c6.5 0 10 6 10 6a17.7 17.7 0 0 1-4.1 4.4"
+                />
+
+                <path
+                  d="M6.2 6.7C3.5 8.5 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"
+                />
+
+              </svg>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- PASSWORD REQUIREMENTS -->
+
+        <div class="password-help">
+
+          <p>
+            Minimum 6 characters with uppercase, lowercase and number.
+          </p>
+
+        </div>
+
+
+        <!-- TERMS -->
+
+        <p class="terms-text">
+
+          By creating an account you agree to our
+
+          <a href="javascript:void(0)">
+            Terms of Service
+          </a>
+
+          and
+
+          <a href="javascript:void(0)">
+            Privacy Policy
+          </a>.
+
+        </p>
+
+
+        <!-- ERROR -->
+
+        <div
+          class="error-message"
+          *ngIf="errorMessage"
+        >
+          {{ errorMessage }}
+        </div>
+
+
+        <!-- NEXT STEP -->
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="loading"
+        >
+
+          <span *ngIf="!loading">
+            Next step →
+          </span>
+
+          <span *ngIf="loading">
+            Creating account...
+          </span>
+
+        </button>
+
+      </form>
+
+
+      <!-- =================================================
+           STEP 2
+           PROFILE
+           ================================================= -->
+
+      <form
+        *ngIf="signupStep === 'profile'"
+        class="profile-form"
+        (ngSubmit)="signup()"
+        novalidate
+      >
+
+
+        <!-- =================================================
+             AVATAR
+             ================================================= -->
+
+        <div class="avatar-area">
+
+          <label
+            for="avatar"
+            class="avatar-circle"
+          >
+
+            <!-- IMAGE PREVIEW -->
+
+            <img
+              *ngIf="avatarPreview"
+              [src]="avatarPreview"
+              alt="User Profile"
+            />
+
+
+            <!-- DEFAULT AVATAR -->
+
+            <div
+              *ngIf="!avatarPreview"
+              class="avatar-placeholder"
+            >
+
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+
+                <circle
+                  cx="12"
+                  cy="8"
+                  r="4"
+                />
+
+                <path
+                  d="M4 21c0-4 3.5-7 8-7s8 3 8 7"
+                />
+
+              </svg>
+
+
+              <span>
+                Add photo
+              </span>
+
+            </div>
+
+          </label>
+
+
+          <!-- HIDDEN FILE INPUT -->
+
+          <input
+            id="avatar"
+            name="avatar"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onAvatarSelected($event)"
+            [disabled]="loading"
+            hidden
+          />
+
+
+          <p class="avatar-label">
+            Avatar photo <span>(optional)</span>
+          </p>
+
+        </div>
+
+
+        <!-- =================================================
+             FIRST NAME + LAST NAME
+             ================================================= -->
+
+        <div class="two-column-fields">
+
+
+          <!-- FIRST NAME -->
+
+          <div class="field">
+
+            <label for="firstName">
+              FIRST NAME
+            </label>
+
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              [(ngModel)]="firstName"
+              placeholder="Mei"
+              autocomplete="given-name"
+              [disabled]="loading"
+            />
+
+          </div>
+
+
+          <!-- LAST NAME -->
+
+          <div class="field">
+
+            <label for="lastName">
+              LAST NAME
+            </label>
+
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              [(ngModel)]="lastName"
+              placeholder="Tan"
+              autocomplete="family-name"
+              [disabled]="loading"
+            />
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ADDRESS
+             ================================================= -->
+
+        <div class="field">
+
+          <label for="address">
+            ADDRESS
+          </label>
+
+          <input
+            id="address"
+            name="address"
+            type="text"
+            [(ngModel)]="address"
+            placeholder="23 Emerald Hill Road, #04-12"
+            autocomplete="address-line1"
+            [disabled]="loading"
+          />
+
+        </div>
+
+
+        <!-- =================================================
+             POSTAL CODE
+             ================================================= -->
+
+        <div class="field">
+
+          <label for="postalCode">
+            POSTAL CODE
+          </label>
+
+          <input
+            id="postalCode"
+            name="postalCode"
+            type="text"
+            [(ngModel)]="postalCode"
+            placeholder="229293"
+            autocomplete="postal-code"
+            [disabled]="loading"
+          />
+
+        </div>
+
+
+        <!-- =================================================
+             PHONE NUMBER
+             ================================================= -->
+
+        <div class="field">
+
+          <label for="phoneNumber">
+            PHONE NUMBER
+          </label>
+
+          <input
+            id="phoneNumber"
+            name="phoneNumber"
+            type="tel"
+            [(ngModel)]="phoneNumber"
+            placeholder="+65 9123 4567"
+            autocomplete="tel"
+            [disabled]="loading"
+          />
+
+        </div>
+
+
+        <!-- =================================================
+             ERROR
+             ================================================= -->
+
+        <div
+          class="error-message"
+          *ngIf="errorMessage"
+        >
+          {{ errorMessage }}
+        </div>
+
+
+        <!-- =================================================
+             CREATE ACCOUNT BUTTON
+             ================================================= -->
+
+        <button
+          type="submit"
+          class="primary-button profile-button"
+          [disabled]="loading"
+        >
+
+          <span *ngIf="!loading">
+            ✓ &nbsp; Create my account
+          </span>
+
+          <span *ngIf="loading">
+            Creating account...
+          </span>
+
+        </button>
+
+
+        <!-- =================================================
+             BACK
+             ================================================= -->
+
+        <button
+          type="button"
+          class="back-button"
+          (click)="backToCredentials()"
+          [disabled]="loading"
+        >
+          ← &nbsp; Back
+        </button>
+
+      </form>
+
+
+      <!-- =================================================
+           LOGIN LINK
+           ================================================= -->
+
+      <div class="login-link">
+
+        <span>
+          Already have an account?
+        </span>
+
+        <a routerLink="/login">
+          Sign in
+        </a>
+
+      </div>
+
+
+    </div>
+
+  </section>
+
+</div>

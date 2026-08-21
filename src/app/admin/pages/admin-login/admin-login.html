@@ -1,0 +1,89 @@
+<div class="admin-login">
+  <section class="login-panel login-panel--intro">
+    <div class="brand-row">
+      <span class="brand-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">SmartCart</span>
+        <span class="brand-tag">COMMERCE ADMIN</span>
+      </span>
+    </div>
+
+    <h1>Manage the SmartCart<br />catalog.</h1>
+    <p class="intro-copy">
+      Sign in to review listings, moderate merchant products, and keep the storefront clean.
+    </p>
+
+    <div class="intro-stats">
+      <div>
+        <span class="stat-value">{{ stats()?.activeListings ?? '—' }}</span>
+        <span class="stat-label">Active Listings</span>
+      </div>
+      <div>
+        <span class="stat-value">{{ stats()?.activeMerchants ?? '—' }}</span>
+        <span class="stat-label">Merchants</span>
+      </div>
+      <div>
+        <span class="stat-value">{{ formattedRevenue() }}</span>
+        <span class="stat-label">Total Revenue</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-panel login-panel--form">
+    <div class="brand-row brand-row--mobile-only">
+      <span class="brand-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">SmartCart</span>
+        <span class="brand-tag">COMMERCE ADMIN</span>
+      </span>
+    </div>
+
+    <form class="login-form" (ngSubmit)="onSubmit()">
+      <span class="eyebrow">ADMIN PORTAL</span>
+      <h2>Welcome back</h2>
+      <p class="form-subtitle">Sign in to your admin account</p>
+
+      @if (error()) {
+        <p class="form-error">{{ error() }}</p>
+      }
+
+      <label class="field-label" for="admin-email">Email address</label>
+      <input
+        id="admin-email"
+        type="email"
+        placeholder="admin@smartcart.com"
+        [(ngModel)]="email"
+        name="email"
+        autocomplete="username" />
+
+      <label class="field-label" for="admin-password">Password</label>
+      <input
+        id="admin-password"
+        type="password"
+        placeholder="••••••••"
+        [(ngModel)]="password"
+        name="password"
+        autocomplete="current-password" />
+
+      <button type="submit" class="sign-in-btn" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in…' : 'Sign in' }}
+      </button>
+
+      <p class="form-footnote">Admin access only</p>
+    </form>
+  </section>
+</div>

@@ -1,0 +1,173 @@
+<div class="admin-merchants">
+  <span class="eyebrow">ACCOUNTS</span>
+  <h1>Merchants</h1>
+  <p class="subtitle">Suspend or reinstate merchant accounts</p>
+
+  <div class="filters-panel">
+    <div class="filter-field filter-field--search">
+      <label for="merchant-search">Search</label>
+      <div class="search-box">
+        <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          id="merchant-search"
+          type="text"
+          placeholder="Username or email…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)" />
+      </div>
+    </div>
+
+    <div class="filter-field">
+      <label for="merchant-status">Status</label>
+      <select id="merchant-status" [ngModel]="selectedStatus()" (ngModelChange)="onStatusFilterChange($event)">
+        <option value="All">All</option>
+        <option value="ACTIVE">Active</option>
+        <option value="SUSPENDED">Suspended</option>
+        <option value="INACTIVE">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="result-count">
+    {{ filteredMerchants().length }} merchant{{ filteredMerchants().length === 1 ? '' : 's' }}
+  </p>
+
+  @if (loading()) {
+    <p class="status-text">Loading merchants…</p>
+  } @else if (filteredMerchants().length === 0) {
+    <p class="status-text">No merchants match your filters.</p>
+  } @else {
+    <div class="merchants-table">
+      <div class="table-row table-row--head">
+        <span class="col-merchant">Merchant</span>
+        <span class="col-listings">Products</span>
+        <span class="col-joined">Joined</span>
+        <span class="col-status">Status</span>
+        <span class="col-modified">Modified By</span>
+        <span class="col-actions">Actions</span>
+      </div>
+
+      @for (m of pagedMerchants(); track m.id) {
+        <div class="table-row">
+          <button type="button" class="row-open-btn" [attr.aria-label]="'View details for ' + m.username"
+            (click)="openDetail(m)"></button>
+          <span class="col-merchant merchant-cell" data-label="Merchant">
+            <span class="merchant-username">{{ m.username }}</span>
+            <span class="merchant-email">{{ m.email }}</span>
+          </span>
+          <span class="col-listings" data-label="Listings">{{ m.listingCount }}</span>
+          <span class="col-joined" data-label="Joined">{{ m.createdAt | date:'yyyy-MM-dd' }}</span>
+          <span class="col-status" data-label="Status">
+            <span class="status-badge" [class]="'status-' + m.status.toLowerCase()">
+              {{ m.status | titlecase }}
+            </span>
+          </span>
+          <span class="col-modified" data-label="Modified By">{{ m.lastModifiedByAdminUsername || '—' }}</span>
+          <span class="col-actions">
+            @for (action of nextActions(m.status); track action.status) {
+              <button
+                type="button"
+                class="action-btn"
+                [class.negative]="action.tone === 'negative'"
+                [disabled]="updatingId() === m.id"
+                (click)="$event.stopPropagation(); setStatus(m, action.status)">
+                {{ updatingId() === m.id ? 'Saving…' : action.label }}
+              </button>
+            }
+          </span>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">Prev</button>
+        @for (page of pageNumbers(); track page) {
+          <button
+            class="page-btn"
+            [class.active]="currentPage() === page"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        }
+        <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">Next</button>
+      </div>
+    }
+  }
+
+  @if (selectedMerchant(); as m) {
+    <div class="modal-backdrop" (click)="closeDetail()" (keydown.escape)="closeDetail()">
+      <div class="modal-panel" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+        <button type="button" class="modal-close-btn" (click)="closeDetail()" aria-label="Close">
+          &times;
+        </button>
+
+        <span class="status-badge" [class]="'status-' + m.status.toLowerCase()">
+          {{ m.status | titlecase }}
+        </span>
+        @if (m.lastModifiedByAdminUsername) {
+          <span class="last-modified-by">by {{ m.lastModifiedByAdminUsername }}</span>
+        }
+        <h2 class="modal-username">{{ m.username }}</h2>
+        <p class="modal-email">{{ m.email }}</p>
+
+        <div class="modal-stats">
+          <div class="modal-stat">
+            <span class="modal-stat-label">Joined</span>
+            <span class="modal-stat-value">{{ m.createdAt | date:'yyyy-MM-dd' }}</span>
+          </div>
+          <div class="modal-stat">
+            <span class="modal-stat-label">Product Listings</span>
+            <button
+              type="button"
+              class="modal-stat-value modal-stat-link"
+              (click)="viewListings(m)"
+              title="View {{ m.username }}'s product listings">
+              {{ m.listingCount }}
+              <svg class="modal-stat-link-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <div class="modal-stat">
+            <span class="modal-stat-label">Orders</span>
+            <span class="modal-stat-value">
+              {{ detailLoading() ? '…' : (merchantDetail()?.orderCount ?? '—') }}
+            </span>
+          </div>
+          <div class="modal-stat">
+            <span class="modal-stat-label">Revenue</span>
+            <span class="modal-stat-value">
+              @if (detailLoading()) {
+                …
+              } @else if (merchantDetail(); as d) {
+                {{ d.revenue | currency:'USD':'symbol':'1.2-2' }}
+              } @else {
+                —
+              }
+            </span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          @for (action of nextActions(m.status); track action.status) {
+            <button
+              type="button"
+              class="action-btn"
+              [class.negative]="action.tone === 'negative'"
+              [disabled]="updatingId() === m.id"
+              (click)="setStatus(m, action.status)">
+              {{ updatingId() === m.id ? 'Saving…' : action.label }}
+            </button>
+          }
+          @if (nextActions(m.status).length === 0) {
+            <p class="status-text">No actions available for this status.</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

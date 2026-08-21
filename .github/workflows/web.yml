@@ -11,22 +11,59 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for SonarCloud to analyze git history properly
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24' # Standard stable version for modern Angular
-        cache: 'npm'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24' # Standard stable version for modern Angular
+          cache: 'npm'
 
-    - name: Install Dependencies
-      # 'npm ci' is strictly for CI/CD environments. It installs exactly what is in package-lock.json
-      run: npm ci
+      - name: Install Dependencies
+        # 'npm ci' is strictly for CI/CD environments. It installs exactly what is in package-lock.json
+        run: npm ci
 
-    - name: Build Angular Project for Production
-      run: npm run build --configuration=production
-      
-    # Note: If team decides to write unit tests later, can uncomment the line below!
-    # - name: Run Unit Tests
-    #   run: npm run test -- --watch=false --browsers=ChromeHeadless
+      - name: Build Angular Project for Production
+        run: npm run build --configuration=production
+
+      - name: Run Unit Tests and Generate Coverage
+        run: npm run test -- --watch=false --coverage
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v8.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  scan-frontend-image:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build frontend image
+        run: docker build -t smartcart-backend-frontend:${{ github.sha }} .
+
+      - name: Scan frontend image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: smartcart-backend-frontend:${{ github.sha }}
+          format: sarif
+          output: trivy-frontend-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '1' # Fail the job if any CRITICAL/HIGH finding shows up
+
+      - name: Upload results to GitHub Security tab
+        if: always() # Upload even if the scan step above failed the job
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-frontend-results.sarif
+          category: trivy-frontend

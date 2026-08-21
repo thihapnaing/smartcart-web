@@ -1,0 +1,32 @@
+<!-- Author: Htet Nandar (Grace) -->
+<header class="admin-bar">
+  <a class="brand" routerLink="/admin/dashboard">
+    <span class="brand-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    </span>
+    <span class="brand-text">
+      <span class="brand-name">SmartCart</span>
+      <span class="brand-tag">ADMIN</span>
+    </span>
+  </a>
+
+  <nav class="admin-nav-links">
+    <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+    <a routerLink="/admin/products" routerLinkActive="active">Products</a>
+    <a routerLink="/admin/merchants" routerLinkActive="active">Merchants</a>
+    <a routerLink="/admin/admins" routerLinkActive="active">Admins</a>
+  </nav>
+
+  <div class="admin-bar-right">
+    <span class="admin-chip">
+      <span class="admin-chip-avatar">{{ (adminAuth.username() || 'A').charAt(0).toUpperCase() }}</span>
+      {{ adminAuth.username() || 'Admin' }}
+    </span>
+    <button type="button" class="sign-out-btn" (click)="signOut()">Sign out</button>
+  </div>
+</header>

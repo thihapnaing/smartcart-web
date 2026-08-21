@@ -1,0 +1,161 @@
+<div class="admin-products">
+  <span class="eyebrow">MODERATION</span>
+  <h1>Product Listings</h1>
+  <p class="subtitle">Review, approve, or deactivate merchant submissions</p>
+
+  <div class="filters-panel">
+    <div class="filter-field filter-field--search">
+      <label for="product-search">Search</label>
+      <div class="search-box">
+        <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          id="product-search"
+          type="text"
+          placeholder="Product or merchant name…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)" />
+      </div>
+    </div>
+
+    <div class="filter-field">
+      <label for="product-category">Category</label>
+      <select id="product-category" [ngModel]="selectedCategory()" (ngModelChange)="onCategoryChange($event)">
+        @for (c of categories(); track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="product-gender">Gender</label>
+      <select id="product-gender" [ngModel]="selectedGender()" (ngModelChange)="onGenderChange($event)">
+        <option value="All">All</option>
+        <option value="MEN">Men's</option>
+        <option value="WOMEN">Women's</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="product-status">Status</label>
+      <select id="product-status" [ngModel]="selectedStatus()" (ngModelChange)="onStatusChange($event)">
+        <option value="All">All</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="listed-from">From</label>
+      <input id="listed-from" type="date" [ngModel]="dateFrom()" (ngModelChange)="onDateFromChange($event)" />
+    </div>
+
+    <div class="filter-field">
+      <label for="listed-to">To</label>
+      <input id="listed-to" type="date" [ngModel]="dateTo()" (ngModelChange)="onDateToChange($event)" />
+    </div>
+
+    <button type="button" class="clear-filters-btn" (click)="clearFilters()">Clear</button>
+  </div>
+
+  @if (merchantIdFilter(); as mid) {
+    <div class="merchant-filter-banner">
+      <span>Showing products for <strong>{{ merchantNameFilter() || ('merchant #' + mid) }}</strong></span>
+      <button type="button" class="link-btn" (click)="clearMerchantFilter()">Clear</button>
+    </div>
+  }
+
+  <p class="result-count">{{ filteredProducts().length }} listing{{ filteredProducts().length === 1 ? '' : 's' }}</p>
+
+  @if (selectedCount() > 0) {
+    <div class="bulk-bar">
+      <span>{{ selectedCount() }} selected</span>
+      <div class="bulk-actions">
+        <button class="link-btn" (click)="clearSelection()">Clear</button>
+        @if (selectedHasActive()) {
+          <button class="bulk-deactivate-btn" [disabled]="bulkUpdating()" (click)="bulkDeactivate()">
+            {{ bulkUpdating() ? 'Deactivating…' : 'Deactivate selected' }}
+          </button>
+        } @else {
+          <button class="bulk-activate-btn" [disabled]="bulkUpdating()" (click)="bulkActivate()">
+            {{ bulkUpdating() ? 'Activating…' : 'Activate selected' }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="status-text">Loading products…</p>
+  } @else if (filteredProducts().length === 0) {
+    <p class="status-text">No products match your filters.</p>
+  } @else {
+    <div class="listings-table">
+      <div class="table-row table-row--head">
+        <label class="sr-only" for="select-all-products">Select all products on this page</label>
+        <input id="select-all-products" type="checkbox" [checked]="allOnPageSelected()" (change)="toggleSelectAllOnPage()" />
+        <span class="col-product">Product</span>
+        <span class="col-merchant">Merchant</span>
+        <span class="col-category">Category</span>
+        <span class="col-gender">Gender</span>
+        <span class="col-status">Status</span>
+        <span class="col-modified">Modified By</span>
+        <span class="col-listed">Listed</span>
+        <span class="col-actions">Actions</span>
+      </div>
+
+      @for (p of pagedProducts(); track p.id) {
+        <div class="table-row" [class.inactive]="p.status === 'INACTIVE'" [class.selected]="selectedIds().has(p.id)">
+          <label class="sr-only" for="select-product-{{ p.id }}">Select {{ p.name }}</label>
+          <input
+            [id]="'select-product-' + p.id"
+            type="checkbox"
+            [checked]="selectedIds().has(p.id)"
+            (change)="toggleSelect(p.id)" />
+          <span class="col-product product-cell">
+            <img [src]="p.imageUrl" [alt]="p.name" />
+            <span class="product-name">{{ p.name }}</span>
+          </span>
+          <span class="col-merchant" data-label="Merchant">{{ p.shopName }}</span>
+          <span class="col-category" data-label="Category">
+            <span class="pill">{{ p.categoryName }}</span>
+          </span>
+          <span class="col-gender" data-label="Gender">{{ p.gender === 'MEN' ? "Men's" : "Women's" }}</span>
+          <span class="col-status" data-label="Status">
+            <span class="status-badge" [class.active]="p.status === 'ACTIVE'" [class.inactive]="p.status === 'INACTIVE'">
+              {{ p.status === 'ACTIVE' ? 'Active' : 'Inactive' }}
+            </span>
+          </span>
+          <span class="col-modified" data-label="Modified By">{{ p.lastModifiedByAdminUsername || '—' }}</span>
+          <span class="col-listed" data-label="Listed">{{ p.createdAt | date:'yyyy-MM-dd' }}</span>
+          <span class="col-actions">
+            <button
+              class="toggle-btn"
+              [class.deactivate]="p.status === 'ACTIVE'"
+              [disabled]="updatingId() === p.id"
+              (click)="toggleStatus(p)">
+              {{ updatingId() === p.id ? 'Saving…' : (p.status === 'ACTIVE' ? 'Deactivate' : 'Activate') }}
+            </button>
+          </span>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">Prev</button>
+        @for (page of pageNumbers(); track page) {
+          <button
+            class="page-btn"
+            [class.active]="currentPage() === page"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        }
+        <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">Next</button>
+      </div>
+    }
+  }
+</div>
