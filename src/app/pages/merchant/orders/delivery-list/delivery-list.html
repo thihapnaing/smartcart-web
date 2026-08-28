@@ -60,12 +60,14 @@
               [(ngModel)]="order.status"
               [name]="'status-' + order.id"
               [disabled]="isDelivered(order)"
+              (ngModelChange)="onStatusChange(order, $event)"
             >
               <option *ngFor="let status of statuses" [value]="status">
                 {{ formatStatus(status) }}
               </option>
             </select>
           </td>
+          
 
           <!-- Editable tracking number -->
           <td>
@@ -76,8 +78,10 @@
               [name]="'tracking-' + order.id"
               placeholder="Enter tracking no."
               [disabled]="isDelivered(order)"
+              readonly
             />
           </td>
+          
 
           <!-- Editable delivery person -->
           <td>

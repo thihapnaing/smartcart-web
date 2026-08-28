@@ -54,6 +54,7 @@ export class DeliveryList implements OnInit {
   successMessage = "";
 
   selectedStatus = "";
+  nextTrackingNo = "";
 
   constructor(
     private http: HttpClient,
@@ -84,6 +85,11 @@ export class DeliveryList implements OnInit {
           this.orders = [...orders].sort((a, b) =>
             (b.status ?? "").localeCompare(a.status ?? ""),
           );
+
+          this.nextTrackingNo = this.findNextTrackingNo(orders);
+
+          console.log("Next tracking number:", this.nextTrackingNo);
+
           this.loading = false;
 
           // Force Angular to refresh the HTML
@@ -182,7 +188,10 @@ export class DeliveryList implements OnInit {
     };
 
     this.http
-      .patch<DeliveryOrder>(`${environment.apiUrl}/api/orders/${order.id}/delivery-details`, request)
+      .patch<DeliveryOrder>(
+        `${environment.apiUrl}/orders/${order.id}/delivery-details`,
+        request,
+      )
       .subscribe({
         next: (updatedOrder) => {
           Object.assign(order, updatedOrder);
@@ -206,6 +215,56 @@ export class DeliveryList implements OnInit {
           this.changeDetector.detectChanges();
         },
       });
+  }
+
+  private findNextTrackingNo(orders: DeliveryOrder[]): string {
+    const currentYear = new Date().getFullYear();
+    const prefix = `TRK-${currentYear}-`;
+
+    const largestNumber = orders.reduce((max, order) => {
+      if (!order.trackingNo?.startsWith(prefix)) {
+        return max;
+      }
+
+      const match = order.trackingNo.match(
+        new RegExp(`^TRK-${currentYear}-(\\d{4})$`),
+      );
+
+      if (!match) {
+        return max;
+      }
+
+      return Math.max(max, Number(match[1]));
+    }, 0);
+
+    const nextNumber = String(largestNumber + 1).padStart(4, "0");
+
+    return `${prefix}${nextNumber}`;
+  }
+
+  onStatusChange(order: DeliveryOrder, newStatus: string): void {
+    // Save the old value first
+    const previousStatus = order.status;
+
+    console.log("Previous status:", previousStatus);
+    console.log("New status:", newStatus);
+
+    // Check before updating order.status
+    if (newStatus === "PACKED" && !order.trackingNo) {
+      order.trackingNo = this.nextTrackingNo;
+      console.log("Assigned tracking number:", order.trackingNo);
+    }
+
+    if (newStatus === "PAID") {
+      order.trackingNo = '';
+      console.log("Assigned tracking number:", order.trackingNo);
+    }
+    // Update the status only after checking
+    order.status = newStatus;
+
+    if (previousStatus === "PAID" && newStatus === "PACKED") {
+      this.nextTrackingNo = this.findNextTrackingNo(this.orders);
+    }
   }
 
   formatStatus(status: string): string {
