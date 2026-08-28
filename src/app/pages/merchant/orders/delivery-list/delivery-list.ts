@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { environment } from '../../../../../environments/environment';
+import { CommonModule } from "@angular/common";
+import { HttpClient } from "@angular/common/http";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { environment } from "../../../../../environments/environment";
 
 interface DeliveryPerson {
   id: number;
@@ -27,27 +27,33 @@ interface ViewUrlResponse {
 }
 
 @Component({
-  selector: 'app-delivery-list',
+  selector: "app-delivery-list",
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './delivery-list.html',
-  styleUrl: './delivery-list.css',
+  templateUrl: "./delivery-list.html",
+  styleUrl: "./delivery-list.css",
 })
 export class DeliveryList implements OnInit {
-  private readonly ordersUrl = '/api/orders/orders';
-  private readonly deliveryPersonelUrl = '/api/orders/delivery-men';
+  private readonly ordersUrl = `${environment.apiUrl}/orders/orders`;
+  private readonly deliveryPersonelUrl = `${environment.apiUrl}/orders/delivery-men`;
   private readonly proofViewApi = environment.proofViewApi;
 
-  readonly statuses: string[] = ['PAID', 'PACKED', 'PICKED_UP', 'DELIVERED', 'CANCELLED'];
+  readonly statuses: string[] = [
+    "PAID",
+    "PACKED",
+    "PICKED_UP",
+    "DELIVERED",
+    "CANCELLED",
+  ];
 
   orders: DeliveryOrder[] = [];
   deliveryPersonel: DeliveryPerson[] = [];
 
   loading = false;
-  errorMessage = '';
-  successMessage = '';
+  errorMessage = "";
+  successMessage = "";
 
-  selectedStatus = '';
+  selectedStatus = "";
 
   constructor(
     private http: HttpClient,
@@ -60,30 +66,31 @@ export class DeliveryList implements OnInit {
   }
 
   isDelivered(order: DeliveryOrder): boolean {
-    return order.status?.toUpperCase() === 'DELIVERED';
+    return order.status?.toUpperCase() === "DELIVERED";
   }
 
   loadOrders(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = "";
 
     this.http
       .get<DeliveryOrder[]>(this.ordersUrl, {
         headers: {
-          Accept: 'application/json',
+          Accept: "application/json",
         },
       })
       .subscribe({
         next: (orders) => {
-
-          this.orders = [...orders].sort((a, b) => (b.status ?? '').localeCompare(a.status ?? ''));
+          this.orders = [...orders].sort((a, b) =>
+            (b.status ?? "").localeCompare(a.status ?? ""),
+          );
           this.loading = false;
 
           // Force Angular to refresh the HTML
           this.changeDetector.detectChanges();
         },
         error: (error) => {
-          console.error('Unable to load delivery orders', error);
+          console.error("Unable to load delivery orders", error);
 
           this.orders = [];
           this.loading = false;
@@ -98,7 +105,7 @@ export class DeliveryList implements OnInit {
     this.http
       .get<DeliveryPerson[]>(this.deliveryPersonelUrl, {
         headers: {
-          Accept: 'application/json',
+          Accept: "application/json",
         },
       })
       .subscribe({
@@ -107,7 +114,7 @@ export class DeliveryList implements OnInit {
           this.changeDetector.detectChanges();
         },
         error: (error) => {
-          console.error('Unable to load delivery people', error);
+          console.error("Unable to load delivery people", error);
         },
       });
   }
@@ -122,11 +129,11 @@ export class DeliveryList implements OnInit {
 
   viewProof(order: DeliveryOrder): void {
     if (!order.deliveryProofKey) {
-      this.errorMessage = 'No delivery proof available.';
+      this.errorMessage = "No delivery proof available.";
       return;
     }
 
-    const photoWindow = window.open('', '_blank');
+    const photoWindow = window.open("", "_blank");
 
     this.http
       .post<ViewUrlResponse>(this.proofViewApi, {
@@ -138,11 +145,11 @@ export class DeliveryList implements OnInit {
             if (photoWindow) {
               photoWindow.location.href = response.viewUrl;
             } else {
-              window.open(response.viewUrl, '_blank', 'noopener,noreferrer');
+              window.open(response.viewUrl, "_blank", "noopener,noreferrer");
             }
           } else {
             photoWindow?.close();
-            this.errorMessage = 'No photo URL was returned.';
+            this.errorMessage = "No photo URL was returned.";
           }
 
           this.changeDetector.detectChanges();
@@ -150,9 +157,9 @@ export class DeliveryList implements OnInit {
         error: (error) => {
           photoWindow?.close();
 
-          console.error('Unable to obtain view URL', error);
+          console.error("Unable to obtain view URL", error);
 
-          this.errorMessage = 'Unable to view delivery proof.';
+          this.errorMessage = "Unable to view delivery proof.";
 
           this.changeDetector.detectChanges();
         },
@@ -165,8 +172,8 @@ export class DeliveryList implements OnInit {
     }
 
     order.saving = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage = "";
+    this.successMessage = "";
 
     const request = {
       status: order.status,
@@ -174,35 +181,37 @@ export class DeliveryList implements OnInit {
       deliveryPersonId: order.deliveryPersonId,
     };
 
-    this.http.patch<DeliveryOrder>(`/api/orders/${order.id}/delivery-details`, request).subscribe({
-      next: (updatedOrder) => {
-        Object.assign(order, updatedOrder);
+    this.http
+      .patch<DeliveryOrder>(`${environment.apiUrl}/api/orders/${order.id}/delivery-details`, request)
+      .subscribe({
+        next: (updatedOrder) => {
+          Object.assign(order, updatedOrder);
 
-        order.saving = false;
-        this.successMessage = `Order ${order.id} updated successfully.`;
+          order.saving = false;
+          this.successMessage = `Order ${order.id} updated successfully.`;
 
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        console.error('Unable to update delivery details', error);
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          console.error("Unable to update delivery details", error);
 
-        order.saving = false;
+          order.saving = false;
 
-        if (error.status === 409) {
-          this.errorMessage = 'The tracking number is already in use.';
-        } else {
-          this.errorMessage = `Unable to update order ${order.id}.`;
-        }
+          if (error.status === 409) {
+            this.errorMessage = "The tracking number is already in use.";
+          } else {
+            this.errorMessage = `Unable to update order ${order.id}.`;
+          }
 
-        this.changeDetector.detectChanges();
-      },
-    });
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   formatStatus(status: string): string {
     return status
       .toLowerCase()
-      .replace(/_/g, ' ')
+      .replace(/_/g, " ")
       .replace(/\b\w/g, (character) => character.toUpperCase());
   }
 }
